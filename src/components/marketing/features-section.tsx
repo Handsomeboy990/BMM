@@ -1,5 +1,6 @@
 import { Container } from "@/components/layout/container";
 import { features } from "@/components/marketing/content";
+import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/shared/reveal";
 import {
   Card,
@@ -10,24 +11,24 @@ import {
 
 export function FeaturesSection() {
   return (
-    <section id="donneurs" className="py-24">
-      <Container className="flex flex-col gap-12">
-        <Reveal className="flex max-w-2xl flex-col gap-4">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Tout ce qu'il faut pour mobiliser les donneurs
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Une plateforme pensée pour la rapidité, la confiance et la
-            traçabilité, de l'inscription jusqu'au don.
-          </p>
-        </Reveal>
+    <section id="donneurs" className="relative py-24">
+      <Container className="flex flex-col gap-14">
+        <SectionHeading
+          eyebrow="Fonctionnalités"
+          title="Tout ce qu'il faut pour mobiliser les donneurs"
+          description="Une plateforme pensée pour la rapidité, la confiance et la traçabilité, de l'inscription jusqu'au don."
+        />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <Reveal key={feature.title} delay={index * 70}>
-              <Card className="h-full transition-shadow duration-300 hover:shadow-md">
+            <Reveal
+              key={feature.title}
+              delay={(index % 3) * 90}
+              direction={index % 2 === 0 ? "up" : "scale"}
+            >
+              <Card className="group hover:border-primary/40 h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <CardHeader>
-                  <span className="bg-primary/10 text-primary flex size-11 items-center justify-center rounded-lg">
+                  <span className="from-primary/15 to-primary/5 text-primary ring-primary/10 flex size-12 items-center justify-center rounded-xl bg-linear-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                     <feature.icon className="size-5" />
                   </span>
                   <CardTitle>{feature.title}</CardTitle>

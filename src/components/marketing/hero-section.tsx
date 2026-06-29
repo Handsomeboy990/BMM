@@ -1,15 +1,46 @@
-import { ArrowRight, Droplet } from "lucide-react";
+import { ArrowRight, BellRing, Droplet, HeartPulse } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { HeroIllustration } from "@/components/marketing/hero-illustration";
 import { StatCounter } from "@/components/marketing/stat-counter";
+import { GridPattern } from "@/components/shared/grid-pattern";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { landingStats } from "@/lib/mock/landing";
 
+function FloatingCard({
+  className,
+  icon,
+  title,
+  subtitle,
+  delay,
+}: {
+  className: string;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  delay: string;
+}) {
+  return (
+    <div
+      className={`animate-float bg-card/90 absolute flex items-center gap-2 rounded-xl border px-3 py-2 shadow-lg backdrop-blur ${className}`}
+      style={{ animationDelay: delay }}
+    >
+      <span className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-lg">
+        {icon}
+      </span>
+      <span className="flex flex-col">
+        <span className="text-xs font-semibold">{title}</span>
+        <span className="text-muted-foreground text-[11px]">{subtitle}</span>
+      </span>
+    </div>
+  );
+}
+
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden">
+      <GridPattern />
       <div
         aria-hidden
         className="animate-pulse-glow bg-primary/15 pointer-events-none absolute -top-40 left-1/2 -z-10 h-140 w-140 -translate-x-1/2 rounded-full blur-3xl"
@@ -25,8 +56,9 @@ export function HeroSection() {
             className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl"
             style={{ animationDelay: "80ms" }}
           >
-            Chaque goutte compte. Connectons les donneurs à ceux qui en ont
-            besoin.
+            Chaque goutte compte.{" "}
+            <span className="text-gradient">Connectons les donneurs</span> à
+            ceux qui en ont besoin.
           </h1>
 
           <p
@@ -56,7 +88,21 @@ export function HeroSection() {
           className="animate-rise-in relative"
           style={{ animationDelay: "200ms" }}
         >
-          <HeroIllustration className="animate-float mx-auto max-w-md" />
+          <HeroIllustration className="mx-auto max-w-md" />
+          <FloatingCard
+            className="top-6 -left-2 sm:left-6"
+            icon={<BellRing className="size-4" />}
+            title="Alerte envoyée"
+            subtitle="O- recherché, 2 km"
+            delay="0.6s"
+          />
+          <FloatingCard
+            className="-right-1 bottom-10 sm:right-4"
+            icon={<HeartPulse className="size-4" />}
+            title="Donneur trouvé"
+            subtitle="Compatible, disponible"
+            delay="1.4s"
+          />
         </div>
       </Container>
 
