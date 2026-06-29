@@ -63,9 +63,3 @@ export const steps = [
       "Rendez-vous au point de collecte et confirmez votre don en toute simplicité.",
   },
 ] as const;
-
-export const stats = [
-  { value: "1 don", label: "peut sauver jusqu'à 3 vies" },
-  { value: "< 60 s", label: "pour diffuser une alerte d'urgence" },
-  { value: "54", label: "pays africains visés à terme" },
-] as const;

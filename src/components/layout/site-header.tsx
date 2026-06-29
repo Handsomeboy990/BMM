@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { primaryNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,8 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
             Se connecter
           </Button>

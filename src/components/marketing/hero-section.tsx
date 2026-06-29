@@ -1,69 +1,74 @@
 import { ArrowRight, Droplet } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { Reveal } from "@/components/shared/reveal";
+import { HeroIllustration } from "@/components/marketing/hero-illustration";
+import { StatCounter } from "@/components/marketing/stat-counter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { stats } from "@/components/marketing/content";
+import { landingStats } from "@/lib/mock/landing";
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-40 -z-10 h-[480px] bg-[radial-gradient(60%_60%_at_50%_0%,var(--color-primary)/12%,transparent)]"
+        className="animate-pulse-glow bg-primary/15 pointer-events-none absolute -top-40 left-1/2 -z-10 h-140 w-140 -translate-x-1/2 rounded-full blur-3xl"
       />
-      <Container className="flex flex-col items-center gap-8 py-24 text-center sm:py-32">
-        <Reveal>
-          <Badge variant="primary">
+      <Container className="grid items-center gap-12 py-20 lg:grid-cols-2 lg:py-28">
+        <div className="flex flex-col items-start gap-6">
+          <Badge variant="primary" className="animate-rise-in">
             <Droplet className="size-3.5" />
             Plateforme panafricaine de don de sang
           </Badge>
-        </Reveal>
 
-        <Reveal delay={80} className="max-w-3xl">
-          <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+          <h1
+            className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl"
+            style={{ animationDelay: "80ms" }}
+          >
             Chaque goutte compte. Connectons les donneurs à ceux qui en ont
             besoin.
           </h1>
-        </Reveal>
 
-        <Reveal delay={160} className="max-w-2xl">
-          <p className="text-muted-foreground text-lg text-pretty">
+          <p
+            className="animate-rise-in text-muted-foreground max-w-xl text-lg text-pretty"
+            style={{ animationDelay: "160ms" }}
+          >
             Bitcoin Blood enregistre les donneurs volontaires, retrouve des
             profils compatibles en quelques secondes et déclenche des alertes
             ciblées en cas d'urgence.
           </p>
-        </Reveal>
 
-        <Reveal
-          delay={240}
-          className="flex flex-wrap items-center justify-center gap-3"
-        >
-          <Button size="lg">
-            Devenir donneur
-            <ArrowRight />
-          </Button>
-          <Button size="lg" variant="outline">
-            Découvrir le fonctionnement
-          </Button>
-        </Reveal>
+          <div
+            className="animate-rise-in flex flex-wrap items-center gap-3"
+            style={{ animationDelay: "240ms" }}
+          >
+            <Button size="lg" className="group">
+              Devenir donneur
+              <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+            </Button>
+            <Button size="lg" variant="outline">
+              Découvrir le fonctionnement
+            </Button>
+          </div>
+        </div>
 
-        <Reveal
-          delay={320}
-          className="mt-8 grid w-full max-w-2xl grid-cols-1 gap-6 sm:grid-cols-3"
+        <div
+          className="animate-rise-in relative"
+          style={{ animationDelay: "200ms" }}
         >
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center gap-1">
-              <span className="text-primary text-3xl font-semibold">
-                {stat.value}
-              </span>
-              <span className="text-muted-foreground text-sm">
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </Reveal>
+          <HeroIllustration className="animate-float mx-auto max-w-md" />
+        </div>
+      </Container>
+
+      <Container className="grid grid-cols-2 gap-8 border-t py-10 lg:grid-cols-4">
+        {landingStats.map((stat) => (
+          <StatCounter
+            key={stat.label}
+            value={stat.value}
+            suffix={stat.suffix}
+            label={stat.label}
+          />
+        ))}
       </Container>
     </section>
   );
