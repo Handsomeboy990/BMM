@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { env } from "@/lib/env";
+import { serverEnv } from "@/lib/env/server";
 
 import * as schema from "./schema";
 
@@ -14,9 +14,9 @@ const globalForDb = globalThis as unknown as {
 };
 
 const client =
-  globalForDb.client ?? postgres(env.DATABASE_URL, { prepare: false });
+  globalForDb.client ?? postgres(serverEnv.DATABASE_URL, { prepare: false });
 
-if (env.NODE_ENV !== "production") {
+if (serverEnv.NODE_ENV !== "production") {
   globalForDb.client = client;
 }
 

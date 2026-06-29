@@ -16,7 +16,7 @@ divulguer publiquement avant correction. Décrivez le problème, son impact et l
 - **Moindre privilège**: la clé de service Supabase n'est jamais exposée au
   client; seules les variables `NEXT_PUBLIC_*` le sont.
 - **Variables d'environnement validées**: le démarrage échoue si une variable
-  requise est absente ou invalide (`src/lib/env.ts`).
+  requise est absente ou invalide (`src/lib/env/`).
 - **Erreurs non divulguées**: les réponses d'erreur de l'API ne révèlent jamais
   de détail technique interne au client.
 - **Surface API contrôlée**: toutes les routes passent par `/api/v1/` et une
