@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
 import { siteConfig } from "@/config/site";
 import { QueryProvider } from "@/providers/query-provider";
 
@@ -31,7 +33,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="flex min-h-dvh flex-col">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </QueryProvider>
       </body>
     </html>
   );
