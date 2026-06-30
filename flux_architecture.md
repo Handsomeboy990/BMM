@@ -239,9 +239,11 @@ Toutes les tables ont des politiques RLS activées en base. C'est une **deuxièm
 
 **Service** : `donor.service.ts`
 
-| Méthode | Endpoint         | Auth      | Description                                |
-| ------- | ---------------- | --------- | ------------------------------------------ |
-| `POST`  | `/api/v1/donors` | 🌐 Public | Inscrit un nouveau donneur (Auth + profil) |
+| Méthode | Endpoint                      | Auth         | Description                                                                 |
+| ------- | ----------------------------- | ------------ | --------------------------------------------------------------------------- |
+| `POST`  | `/api/v1/donors`              | 🌐 Public    | Inscrit un nouveau donneur (Auth + profil)                                  |
+| `GET`   | `/api/v1/donors`              | 🔒 Session   | Récupère tous les donneurs validés                                          |
+| `PATCH` | `/api/v1/donors/:id/validate` | 🔒 org_admin | Valide un donneur (effectué par l'administrateur d'un hôpital après un don) |
 
 #### `POST /api/v1/donors`
 
@@ -271,6 +273,7 @@ Toutes les tables ont des politiques RLS activées en base. C'est une **deuxièm
     "firstName": "Kofi",
     "bloodType": "O-",
     "profileHash": "sha256...",
+    "validated": false,
     "createdAt": "2026-06-30T..."
   }
 }
@@ -282,6 +285,44 @@ Toutes les tables ont des politiques RLS activées en base. C'est une **deuxièm
 > 2. Horodatage du `profileHash` sur Bitcoin (OpenTimestamps)
 > 3. Inscription dans `auth.users` Supabase
 > 4. Insertion du profil dans la table `donors` (avec rollback Auth si échec)
+
+#### `GET /api/v1/donors`
+
+```json
+// Réponse 200
+{
+  "data": [
+    {
+      "id": "uuid",
+      "firstName": "Kofi",
+      "lastName": "Mensah",
+      "email": "kofi@example.com",
+      "bloodType": "O-",
+      "city": "Cotonou",
+      "validated": true,
+      "createdAt": "2026-06-30T..."
+    }
+  ]
+}
+```
+
+#### `PATCH /api/v1/donors/:id/validate`
+
+```json
+// Réponse 200
+{
+  "data": {
+    "message": "Donneur validé avec succès.",
+    "donor": {
+      "id": "uuid",
+      "firstName": "Kofi",
+      "lastName": "Mensah",
+      "validated": true,
+      ...
+    }
+  }
+}
+```
 
 ---
 

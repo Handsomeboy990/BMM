@@ -1,12 +1,14 @@
 import { vi, describe, it, expect } from "vitest";
-import { POST } from "./route";
+import { POST, GET } from "./route";
 import { donorService } from "@/modules/donors/services/donor.service";
 import { walletService, otsService } from "@/modules/bitcoin";
+import { authService } from "@/modules/auth";
 
 vi.mock("@/modules/donors/services/donor.service", () => {
   return {
     donorService: {
       createDonor: vi.fn(),
+      getValidatedDonors: vi.fn(),
     },
   };
 });
@@ -30,6 +32,14 @@ vi.mock("@/modules/bitcoin", () => {
     },
     otsService: {
       stampHash: vi.fn(),
+    },
+  };
+});
+
+vi.mock("@/modules/auth", () => {
+  return {
+    authService: {
+      getCurrentUser: vi.fn(),
     },
   };
 });
@@ -132,5 +142,45 @@ describe("POST /api/v1/donors", () => {
 
     const json = await response.json();
     expect(json.error.code).toBe("bad_request");
+  });
+});
+
+describe("GET /api/v1/donors", () => {
+  it("should return 401 if unauthorized", async () => {
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(null);
+
+    const response = await GET();
+    expect(response.status).toBe(401);
+    const json = await response.json();
+    expect(json.error.code).toBe("unauthorized");
+  });
+
+  it("should return 200 and list of validated donors if authorized", async () => {
+    vi.mocked(authService.getCurrentUser).mockResolvedValue({
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1",
+    });
+
+    const mockValidatedDonors = [
+      {
+        id: "d1",
+        firstName: "Jane",
+        lastName: "Doe",
+        bloodType: "A+",
+        validated: true,
+      },
+    ];
+    vi.mocked(donorService.getValidatedDonors).mockResolvedValue(
+      mockValidatedDonors as unknown as Awaited<
+        ReturnType<typeof donorService.getValidatedDonors>
+      >,
+    );
+
+    const response = await GET();
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    expect(json.data).toEqual(mockValidatedDonors);
   });
 });
