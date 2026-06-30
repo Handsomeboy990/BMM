@@ -1,10 +1,10 @@
 import {
-  BadgeCheck,
   Bell,
   CalendarHeart,
   LayoutDashboard,
   Search,
   Users,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,7 +26,7 @@ export const appNav: AppNavGroup[] = [
     title: "Pilotage",
     items: [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
-      { label: "Alertes", href: "/alerts", icon: Bell, badge: "2" },
+      { label: "Alertes", href: "/alerts", icon: Bell },
     ],
   },
   {
@@ -40,7 +40,7 @@ export const appNav: AppNavGroup[] = [
     title: "Mobilisation",
     items: [
       { label: "Campagnes", href: "/campaigns", icon: CalendarHeart },
-      { label: "Carte & preuves", href: "/cards", icon: BadgeCheck },
+      { label: "Récompenses", href: "/cards", icon: Zap },
     ],
   },
 ];

@@ -1,6 +1,16 @@
 "use client";
 
-import { Clock, MapPin, Plus, Users, X } from "lucide-react";
+import {
+  AlertCircle,
+  Check,
+  Clock,
+  Droplet,
+  MapPin,
+  Navigation,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,48 +18,89 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
+import { useGeolocation } from "@/hooks/use-geolocation";
 import {
-  alertStateBadge,
-  alertStateLabel,
-  emergencyAlerts,
-  urgencyBadge,
-  urgencyLabel,
-  type AlertUrgency,
-  type EmergencyAlert,
-} from "@/lib/mock/alerts";
-import { bloodGroups, type BloodGroup } from "@/lib/mock/blood";
+  useCreateEmergency,
+  useDeleteEmergency,
+  useEmergencies,
+  useUpdateEmergencyStatus,
+} from "@/lib/api/hooks";
+import {
+  BLOOD_TYPES,
+  type BloodType,
+  type EmergencyStatus,
+} from "@/lib/api/resources";
+import { useAuth } from "@/providers/auth-provider";
 
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.round(diff / 60000);
-  if (min < 60) return `il y a ${min} min`;
-  const h = Math.round(min / 60);
-  if (h < 24) return `il y a ${h} h`;
-  return `il y a ${Math.round(h / 24)} j`;
-}
+const statusBadge: Record<EmergencyStatus, "danger" | "success" | "neutral"> = {
+  active: "danger",
+  resolved: "success",
+  cancelled: "neutral",
+};
+
+const statusLabel: Record<EmergencyStatus, string> = {
+  active: "Active",
+  resolved: "Résolue",
+  cancelled: "Annulée",
+};
+
+const dateFmt = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 export function AlertsBoard() {
-  const [alerts, setAlerts] = useState<EmergencyAlert[]>(emergencyAlerts);
-  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const hospitalId = user?.organizationId ?? undefined;
 
-  function handleCreate(form: FormData) {
-    const newAlert: EmergencyAlert = {
-      id: `alt_${Math.floor(Math.random() * 9000) + 1000}`,
-      group: form.get("group") as BloodGroup,
-      unitsNeeded: Number(form.get("units")) || 1,
-      unitsCollected: 0,
-      hospital: String(form.get("hospital") || "Structure de santé"),
-      city: String(form.get("city") || ""),
-      country: String(form.get("country") || ""),
-      urgency: form.get("urgency") as AlertUrgency,
-      state: "ouverte",
-      createdAt: new Date().toISOString(),
-      responders: 0,
-    };
-    setAlerts((prev) => [newAlert, ...prev]);
-    setOpen(false);
+  const {
+    data: emergencies,
+    isLoading,
+    isError,
+    error,
+  } = useEmergencies(hospitalId);
+  const createEmergency = useCreateEmergency();
+  const updateStatus = useUpdateEmergencyStatus();
+  const deleteEmergency = useDeleteEmergency();
+
+  const [open, setOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const {
+    coords,
+    status: geoStatus,
+    request: requestLocation,
+  } = useGeolocation(
+    user?.organization
+      ? {
+          latitude: user.organization.latitude,
+          longitude: user.organization.longitude,
+        }
+      : undefined,
+  );
+
+  async function onCreate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFormError(null);
+    if (!coords) {
+      setFormError("Localisation requise pour cibler les donneurs proches.");
+      return;
+    }
+    const form = new FormData(event.currentTarget);
+    try {
+      await createEmergency.mutateAsync({
+        bloodType: String(form.get("bloodType")) as BloodType,
+        quantityNeeded: Number(form.get("quantityNeeded")) || 1,
+        city: String(form.get("city")),
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+      setOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Création impossible.");
+    }
   }
 
   return (
@@ -57,7 +108,7 @@ export function AlertsBoard() {
       {open ? (
         <Card>
           <CardContent className="p-6">
-            <form action={handleCreate} className="space-y-5">
+            <form onSubmit={onCreate} className="space-y-5">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold">Nouvelle alerte d'urgence</h2>
                 <Button
@@ -70,11 +121,19 @@ export function AlertsBoard() {
                   <X className="size-4" />
                 </Button>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+              {formError ? (
+                <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                  <AlertCircle className="size-4 shrink-0" />
+                  {formError}
+                </p>
+              ) : null}
+
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="group">Groupe recherché</Label>
-                  <Select id="group" name="group" defaultValue="O-">
-                    {bloodGroups.map((g) => (
+                  <Label htmlFor="bloodType">Groupe recherché</Label>
+                  <Select id="bloodType" name="bloodType" defaultValue="O-">
+                    {BLOOD_TYPES.map((g) => (
                       <option key={g} value={g}>
                         {g}
                       </option>
@@ -82,46 +141,37 @@ export function AlertsBoard() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="units">Poches nécessaires</Label>
+                  <Label htmlFor="quantityNeeded">Poches nécessaires</Label>
                   <Input
-                    id="units"
-                    name="units"
+                    id="quantityNeeded"
+                    name="quantityNeeded"
                     type="number"
                     min={1}
+                    max={100}
                     defaultValue={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="urgency">Niveau d'urgence</Label>
-                  <Select id="urgency" name="urgency" defaultValue="haute">
-                    <option value="vitale">Vitale</option>
-                    <option value="haute">Haute</option>
-                    <option value="moderee">Modérée</option>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="hospital">Structure de santé</Label>
-                  <Input
-                    id="hospital"
-                    name="hospital"
-                    required
-                    placeholder="Hôpital Principal"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Ville</Label>
                   <Input id="city" name="city" required placeholder="Dakar" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="country">Pays</Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    required
-                    placeholder="Sénégal"
-                  />
-                </div>
               </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={requestLocation}
+                disabled={geoStatus === "loading"}
+              >
+                <Navigation className="size-4" />
+                {coords
+                  ? `Position : ${coords.latitude}, ${coords.longitude}`
+                  : geoStatus === "loading"
+                    ? "Localisation…"
+                    : "Définir la localisation"}
+              </Button>
+
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
@@ -130,7 +180,11 @@ export function AlertsBoard() {
                 >
                   Annuler
                 </Button>
-                <Button type="submit">Diffuser l'alerte</Button>
+                <Button type="submit" disabled={createEmergency.isPending}>
+                  {createEmergency.isPending
+                    ? "Diffusion…"
+                    : "Diffuser l'alerte"}
+                </Button>
               </div>
             </form>
           </CardContent>
@@ -144,64 +198,105 @@ export function AlertsBoard() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {alerts.map((alert) => {
-          const progress = Math.round(
-            (alert.unitsCollected / alert.unitsNeeded) * 100,
-          );
-          return (
+      {isLoading ? (
+        <p className="text-muted-foreground py-12 text-center text-sm">
+          Chargement des alertes…
+        </p>
+      ) : isError ? (
+        <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center gap-2 rounded-lg border px-4 py-8 text-sm">
+          <AlertCircle className="size-4" />
+          {error instanceof Error ? error.message : "Chargement impossible."}
+        </p>
+      ) : !emergencies || emergencies.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
+            <Droplet className="text-muted-foreground size-8" />
+            <p className="font-medium">Aucune alerte en cours</p>
+            <p className="text-muted-foreground text-sm">
+              Déclenchez une alerte pour mobiliser les donneurs compatibles.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {emergencies.map((alert) => (
             <Card key={alert.id}>
-              <CardContent className="space-y-4 p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-base font-semibold">
-                      {alert.group}
-                    </span>
-                    <div>
-                      <p className="font-medium">{alert.hospital}</p>
-                      <p className="text-muted-foreground flex items-center gap-1 text-sm">
+              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-base font-semibold">
+                    {alert.bloodType}
+                  </span>
+                  <div>
+                    <p className="font-medium">
+                      {alert.quantityNeeded} poche
+                      {alert.quantityNeeded > 1 ? "s" : ""} recherchée
+                      {alert.quantityNeeded > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-muted-foreground flex items-center gap-3 text-sm">
+                      <span className="flex items-center gap-1">
                         <MapPin className="size-3.5" />
-                        {alert.city}, {alert.country}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={urgencyBadge[alert.urgency]}>
-                      {urgencyLabel[alert.urgency]}
-                    </Badge>
-                    <Badge variant={alertStateBadge[alert.state]}>
-                      {alertStateLabel[alert.state]}
-                    </Badge>
+                        {alert.city}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="size-3.5" />
+                        {dateFmt.format(new Date(alert.createdAt))}
+                      </span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {alert.unitsCollected} / {alert.unitsNeeded} poches
-                      collectées
-                    </span>
-                    <span className="font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} />
-                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={statusBadge[alert.status]}>
+                    {statusLabel[alert.status]}
+                  </Badge>
 
-                <div className="text-muted-foreground flex items-center gap-4 text-sm">
-                  <span className="flex items-center gap-1">
-                    <Users className="size-3.5" />
-                    {alert.responders} réponses
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="size-3.5" />
-                    {timeAgo(alert.createdAt)}
-                  </span>
-                  <span className="ml-auto font-mono text-xs">{alert.id}</span>
+                  {alert.status === "active" ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          updateStatus.mutate({
+                            id: alert.id,
+                            status: "resolved",
+                          })
+                        }
+                        disabled={updateStatus.isPending}
+                      >
+                        <Check className="size-4" />
+                        Résolue
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          updateStatus.mutate({
+                            id: alert.id,
+                            status: "cancelled",
+                          })
+                        }
+                        disabled={updateStatus.isPending}
+                      >
+                        Annuler
+                      </Button>
+                    </>
+                  ) : null}
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Supprimer l'alerte"
+                    onClick={() => deleteEmergency.mutate(alert.id)}
+                    disabled={deleteEmergency.isPending}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

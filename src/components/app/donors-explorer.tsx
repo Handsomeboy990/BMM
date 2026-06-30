@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { useDonors } from "@/lib/api/hooks";
 import { bloodGroups } from "@/lib/mock/blood";
 import {
   donorStatusBadge,
   donorStatusLabel,
-  donors,
   type DonorStatus,
 } from "@/lib/mock/donors";
 
@@ -25,6 +25,7 @@ const statuses: Array<DonorStatus | "tous"> = [
 ];
 
 export function DonorsExplorer() {
+  const { data: donors = [], isLoading } = useDonors();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("tous");
   const [status, setStatus] = useState("tous");
@@ -41,7 +42,7 @@ export function DonorsExplorer() {
       const matchesStatus = status === "tous" || d.status === status;
       return matchesQuery && matchesGroup && matchesStatus;
     });
-  }, [query, group, status]);
+  }, [donors, query, group, status]);
 
   return (
     <div className="space-y-4">
@@ -85,8 +86,11 @@ export function DonorsExplorer() {
       </Card>
 
       <p className="text-muted-foreground text-sm">
-        {results.length} donneur{results.length > 1 ? "s" : ""} trouvé
-        {results.length > 1 ? "s" : ""}
+        {isLoading
+          ? "Chargement…"
+          : `${results.length} donneur${results.length > 1 ? "s" : ""} trouvé${
+              results.length > 1 ? "s" : ""
+            }`}
       </p>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

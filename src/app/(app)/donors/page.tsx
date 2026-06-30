@@ -13,12 +13,12 @@ export default function DonorsPage() {
     <>
       <PageHeader
         title="Annuaire des donneurs"
-        description="Recherchez et filtrez les donneurs volontaires du réseau."
+        description="Aperçu des donneurs volontaires du réseau. Données provisoires en attendant l'endpoint de liste."
         actions={
-          <Button asChild>
-            <Link href="/donors/new">
+          <Button asChild variant="outline">
+            <Link href="/donate">
               <UserPlus className="size-4" />
-              Enregistrer un donneur
+              Lien d'inscription donneur
             </Link>
           </Button>
         }

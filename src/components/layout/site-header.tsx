@@ -59,7 +59,7 @@ export function SiteHeader() {
             <Link href="/login">Se connecter</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/register">Devenir donneur</Link>
+            <Link href="/donate">Devenir donneur</Link>
           </Button>
         </div>
       </Container>

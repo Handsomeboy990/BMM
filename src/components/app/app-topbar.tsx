@@ -1,20 +1,42 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { LogOut, Plus } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { appNav } from "@/config/app-navigation";
-import { currentUser } from "@/lib/mock/account";
+import { useLogout } from "@/lib/api/hooks";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 
 const flatNav = appNav.flatMap((group) => group.items);
 
+function initialsOf(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "BB"
+  );
+}
+
 export function AppTopbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
+  const logout = useLogout();
+
+  const orgName = user?.organization?.name ?? user?.email ?? "Mon organisation";
+
+  async function handleLogout() {
+    await logout.mutateAsync().catch(() => {});
+    router.replace("/login");
+  }
 
   return (
     <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
@@ -53,15 +75,22 @@ export function AppTopbar() {
             </Link>
           </Button>
           <ThemeToggle />
-          <Link
-            href="/cards"
-            className="flex items-center gap-2 rounded-full pl-1 transition-opacity hover:opacity-80"
-          >
-            <Avatar initials={currentUser.initials} className="size-9" />
-            <span className="hidden text-sm font-medium md:inline">
-              {currentUser.name}
+          <div className="flex items-center gap-2 pl-1">
+            <Avatar initials={initialsOf(orgName)} className="size-9" />
+            <span className="hidden max-w-40 truncate text-sm font-medium md:inline">
+              {orgName}
             </span>
-          </Link>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            disabled={logout.isPending}
+            aria-label="Se déconnecter"
+            title="Se déconnecter"
+          >
+            <LogOut className="size-4" />
+          </Button>
         </div>
       </div>
     </header>
