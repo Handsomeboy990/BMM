@@ -320,6 +320,122 @@ export const demoRewardTotalSats = demoRewards
   .filter((r) => r.status === "Envoyée")
   .reduce((sum, r) => sum + r.sats, 0);
 
+/* ------------------ Réseau inter-centres (démo) -------------------- */
+
+export type BloodComponent = "CGR" | "Plasma" | "Plaquettes";
+export type StockStatus = "critique" | "faible" | "stable";
+
+export type StockItem = {
+  component: BloodComponent;
+  bloodType: string;
+  units: number;
+  /** Poches arrivant à péremption sous 7 jours. */
+  expiringSoon: number;
+};
+
+export type TransferUrgency = "vitale" | "haute" | "moderee";
+export type TransferStatus =
+  "ouverte" | "acceptée" | "en_transit" | "reçue" | "annulée";
+
+export type TransferRequest = {
+  id: string;
+  component: BloodComponent;
+  bloodType: string;
+  quantity: number;
+  urgency: TransferUrgency;
+  requesterId: string;
+  requesterName: string;
+  requesterCity: string;
+  responderId?: string;
+  responderName?: string;
+  status: TransferStatus;
+  createdAt: string;
+};
+
+export function stockStatusOf(units: number): StockStatus {
+  if (units < 5) return "critique";
+  if (units < 12) return "faible";
+  return "stable";
+}
+
+const stockSeed: Record<BloodComponent, number[]> = {
+  // O-, O+, A-, A+, B-, B+, AB-, AB+
+  CGR: [3, 24, 9, 31, 6, 18, 2, 11],
+  Plasma: [14, 40, 16, 28, 10, 22, 7, 19],
+  Plaquettes: [4, 12, 6, 15, 3, 9, 2, 8],
+};
+
+const bloodOrder = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+
+export const demoStock: StockItem[] = (
+  Object.keys(stockSeed) as BloodComponent[]
+).flatMap((component) =>
+  stockSeed[component].map((units, i) => ({
+    component,
+    bloodType: bloodOrder[i],
+    units,
+    expiringSoon: units > 14 ? 2 : units > 6 ? 1 : 0,
+  })),
+);
+
+export const demoTransfers: TransferRequest[] = [
+  {
+    id: "trf-1",
+    component: "CGR",
+    bloodType: "O-",
+    quantity: 4,
+    urgency: "vitale",
+    requesterId: "ddddddd1-0000-4000-8000-000000000002",
+    requesterName: "Hôpital de Zone de Porto-Novo",
+    requesterCity: "Porto-Novo",
+    status: "ouverte",
+    createdAt: iso(35),
+  },
+  {
+    id: "trf-2",
+    component: "Plaquettes",
+    bloodType: "AB-",
+    quantity: 2,
+    urgency: "haute",
+    requesterId: "ddddddd1-0000-4000-8000-000000000004",
+    requesterName: "Centre de collecte de Parakou",
+    requesterCity: "Parakou",
+    status: "ouverte",
+    createdAt: iso(120),
+  },
+  {
+    id: "trf-3",
+    component: "CGR",
+    bloodType: "B+",
+    quantity: 6,
+    urgency: "moderee",
+    requesterId: DEMO_ORG_ID,
+    requesterName: "CNHU-HKM de Cotonou",
+    requesterCity: "Cotonou",
+    responderId: "ddddddd1-0000-4000-8000-000000000003",
+    responderName: "Croix-Rouge Béninoise — Abomey-Calavi",
+    status: "en_transit",
+    createdAt: iso(300),
+  },
+  {
+    id: "trf-4",
+    component: "Plasma",
+    bloodType: "A+",
+    quantity: 8,
+    urgency: "moderee",
+    requesterId: DEMO_ORG_ID,
+    requesterName: "CNHU-HKM de Cotonou",
+    requesterCity: "Cotonou",
+    responderId: "ddddddd1-0000-4000-8000-000000000002",
+    responderName: "Hôpital de Zone de Porto-Novo",
+    status: "reçue",
+    createdAt: iso(2880),
+  },
+];
+
+/** Identifiant de l'organisation « courante » en mode démo. */
+export const DEMO_CURRENT_ORG_ID = DEMO_ORG_ID;
+
 /** Organisations simulées pour la vue super-admin (pas d'endpoint dédié). */
 export const demoOrganizations: Organization[] = [
   {

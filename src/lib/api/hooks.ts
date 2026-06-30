@@ -4,11 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   AUTH_BYPASS,
+  DEMO_CURRENT_ORG_ID,
   demoCampaigns,
   demoDonors,
   demoEmergencies,
   demoMatches,
   demoOrganizations,
+  demoStock,
+  demoTransfers,
+  type BloodComponent,
+  type TransferRequest,
+  type TransferUrgency,
 } from "@/lib/dev/demo";
 
 import {
@@ -326,6 +332,76 @@ export function useVerifyOrganization() {
       qc.setQueriesData<Organization[]>(
         { queryKey: ["organizations"] },
         (old) => old?.map((o) => (o.id === id ? { ...o, verified: true } : o)),
+      );
+      return Promise.resolve(null);
+    },
+  });
+}
+
+/* ------------------ Réseau inter-centres (démo) -------------------- */
+
+/** Stock de la structure par composant. Démo en attendant `GET /stock`. */
+export function useStock() {
+  return useQuery({
+    queryKey: ["stock"],
+    queryFn: () => demoDelay(demoStock),
+  });
+}
+
+/** Demandes de transfert du réseau. Démo en attendant `GET /transfers`. */
+export function useTransfers() {
+  return useQuery({
+    queryKey: ["transfers"],
+    queryFn: () => demoDelay(demoTransfers),
+  });
+}
+
+export type CreateTransferInput = {
+  component: BloodComponent;
+  bloodType: string;
+  quantity: number;
+  urgency: TransferUrgency;
+};
+
+/** Publie une demande de transfert vers le réseau (démo). */
+export function useCreateTransfer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateTransferInput) => {
+      const record: TransferRequest = {
+        ...input,
+        id: `trf-${Date.now()}`,
+        requesterId: DEMO_CURRENT_ORG_ID,
+        requesterName: "CNHU-HKM de Cotonou",
+        requesterCity: "Cotonou",
+        status: "ouverte",
+        createdAt: new Date().toISOString(),
+      };
+      qc.setQueriesData<TransferRequest[]>(
+        { queryKey: ["transfers"] },
+        (old) => [record, ...(old ?? [])],
+      );
+      return Promise.resolve(record);
+    },
+  });
+}
+
+/** Répond favorablement à une demande du réseau (démo). */
+export function useRespondTransfer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      qc.setQueriesData<TransferRequest[]>({ queryKey: ["transfers"] }, (old) =>
+        old?.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                status: "acceptée" as const,
+                responderId: DEMO_CURRENT_ORG_ID,
+                responderName: "CNHU-HKM de Cotonou",
+              }
+            : t,
+        ),
       );
       return Promise.resolve(null);
     },

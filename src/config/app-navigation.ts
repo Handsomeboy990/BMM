@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Bell,
   CalendarHeart,
   LayoutDashboard,
@@ -42,5 +43,9 @@ export const appNav: AppNavGroup[] = [
       { label: "Campagnes", href: "/campaigns", icon: CalendarHeart },
       { label: "Récompenses", href: "/cards", icon: Zap },
     ],
+  },
+  {
+    title: "Réseau",
+    items: [{ label: "Réseau & stock", href: "/reseau", icon: ArrowLeftRight }],
   },
 ];
