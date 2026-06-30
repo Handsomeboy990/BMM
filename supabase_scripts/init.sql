@@ -25,7 +25,11 @@ END$$;
 
 -- Table des Donneurs (donors)
 CREATE TABLE IF NOT EXISTS donors (
-  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  first_name      VARCHAR(255) NOT NULL,
+  last_name       VARCHAR(255) NOT NULL,
+  email           VARCHAR(255) UNIQUE NOT NULL,
+  phone_number    VARCHAR(50) NOT NULL,
   blood_type      VARCHAR(3) NOT NULL CHECK (
     blood_type IN ('A+','A-','B+','B-','AB+','AB-','O+','O-')
   ),

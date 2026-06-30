@@ -57,25 +57,92 @@ export const campaignService = {
   },
 
   /**
-   * Simule l'envoi d'emails aux donneurs ciblés
+   * Simule l'envoi d'emails aux donneurs ciblés (en local / fallback)
    */
   simulateEmailSending: (donors: DonorRecord[], campaignTitle: string) => {
-    /* eslint-disable no-console */
-    console.log(
+    console.warn(
       `[SIMULATION EMAIL] Début de l'envoi pour la campagne "${campaignTitle}"`,
     );
-    console.log(`[SIMULATION EMAIL] Cible : ${donors.length} donneur(s).`);
+    console.warn(`[SIMULATION EMAIL] Cible : ${donors.length} donneur(s).`);
 
-    // Dans un vrai projet, on utiliserait Resend, SendGrid, etc.
     donors.forEach((d) => {
-      console.log(
-        `- Email envoyé au donneur ID: ${d.id} (Groupe: ${d.bloodType})`,
+      console.warn(
+        `- Email simulé envoyé à ${d.firstName} ${d.lastName} (ID: ${d.id}, Groupe: ${d.bloodType})`,
       );
     });
 
-    console.log(`[SIMULATION EMAIL] Fin de l'envoi.`);
-    /* eslint-enable no-console */
-    return donors.length; // Retourne le nombre d'emails envoyés
+    console.warn(`[SIMULATION EMAIL] Fin de l'envoi.`);
+    return donors.length;
+  },
+
+  /**
+   * Envoie des emails réels aux donneurs ciblés via l'API REST d'EmailJS
+   */
+  sendRealEmails: async (
+    donors: DonorRecord[],
+    campaignTitle: string,
+    hospitalName: string,
+  ): Promise<number> => {
+    const serviceId = process.env.EMAILJS_SERVICE_ID;
+    const templateId = process.env.EMAILJS_TEMPLATE_ID;
+    const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+    const privateKey = process.env.EMAILJS_PRIVATE_KEY;
+
+    if (!serviceId || !templateId || !publicKey || !privateKey) {
+      console.warn(
+        "Configuration EmailJS manquante. Fallback sur la simulation de logs.",
+      );
+      return campaignService.simulateEmailSending(donors, campaignTitle);
+    }
+
+    let successCount = 0;
+
+    await Promise.all(
+      donors.map(async (donor) => {
+        try {
+          const response = await fetch(
+            "https://api.emailjs.com/api/v1.0/email/send",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                service_id: serviceId,
+                template_id: templateId,
+                user_id: publicKey,
+                accessToken: privateKey,
+                template_params: {
+                  to_email: donor.email,
+                  to_name: `${donor.firstName} ${donor.lastName}`,
+                  campaign_title: campaignTitle,
+                  hospital_name: hospitalName,
+                  blood_type: donor.bloodType,
+                  city: donor.city,
+                },
+              }),
+            },
+          );
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            const errText = await response.text();
+            console.error(
+              `Erreur d'envoi EmailJS pour le donneur ${donor.id}:`,
+              errText,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Erreur réseau lors de l'envoi EmailJS pour le donneur ${donor.id}:`,
+            error,
+          );
+        }
+      }),
+    );
+
+    return successCount;
   },
 
   /**
@@ -84,6 +151,16 @@ export const campaignService = {
   createCampaign: async (
     data: CreateCampaignDTO,
   ): Promise<CampaignRecord | null> => {
+    const supabase = await createSupabaseServerClient();
+
+    // Récupérer le nom de l'hôpital pour personnaliser l'objet et le template de l'e-mail
+    const { data: orgData } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", data.hospitalId)
+      .single();
+    const hospitalName = orgData?.name || "Hôpital partenaire";
+
     // Étape 1 : Trouver les donneurs ciblés
     const targetedDonors = await campaignService.findTargetedDonors(
       data.type,
@@ -93,15 +170,14 @@ export const campaignService = {
       data.radiusKm,
     );
 
-    // Étape 2 : Envoyer les emails (simulation)
-    const emailsSentCount = campaignService.simulateEmailSending(
+    // Étape 2 : Envoyer les emails réels
+    const emailsSentCount = await campaignService.sendRealEmails(
       targetedDonors,
       data.title,
+      hospitalName,
     );
 
     // Étape 3 : Sauvegarder la campagne avec les stats
-    const supabase = await createSupabaseServerClient();
-
     const { data: newCampaign, error } = await supabase
       .from("campaigns")
       .insert([
@@ -115,7 +191,7 @@ export const campaignService = {
           longitude: data.longitude,
           radius_km: data.radiusKm,
           emails_sent: emailsSentCount,
-          responses_count: 0, // Commence à 0
+          responses_count: 0,
         },
       ])
       .select()

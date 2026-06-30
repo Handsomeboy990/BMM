@@ -10,6 +10,14 @@ export const donorSchema = z.object({
 });
 
 export const createDonorSchema = donorSchema.extend({
+  firstName: z.string().min(1, "Le prénom est requis").max(255),
+  lastName: z.string().min(1, "Le nom est requis").max(255),
+  email: z.string().email("Adresse email invalide"),
+  phoneNumber: z.string().min(1, "Le numéro de téléphone est requis").max(50),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .max(128),
   bitcoinAddress: z.string().min(1).max(255),
   profileHash: z.string().length(64),
   signature: z.string().min(1),

@@ -1,37 +1,32 @@
-import { NextResponse } from "next/server";
 import { createDonorSchema } from "@/modules/donors";
 import { donorService } from "@/modules/donors/services/donor.service";
 import { walletService, otsService } from "@/modules/bitcoin";
+import { API_ERROR_CODE } from "@/lib/api/errors";
+import { handleApiError, success, failure } from "@/lib/api/response";
 
+/**
+ * POST /api/v1/donors
+ * Inscrit un nouveau donneur avec son identité nominative, ses identifiants d'accès
+ * et ses preuves cryptographiques Bitcoin (signature BIP-322 & horodatage OTS).
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
     // Validation des données avec Zod
-    const validatedData = createDonorSchema.safeParse(body);
-
-    if (!validatedData.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid data",
-          details: validatedData.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
-    }
-
-    const data = validatedData.data;
+    const validatedData = createDonorSchema.parse(body);
 
     // Vérification cryptographique de la signature BIP-322
     const isValidSignature = walletService.verifySignature(
-      data.profileHash,
-      data.bitcoinAddress,
-      data.signature,
+      validatedData.profileHash,
+      validatedData.bitcoinAddress,
+      validatedData.signature,
     );
 
     if (!isValidSignature) {
-      return NextResponse.json(
-        { error: "Invalid cryptographic signature" },
+      return failure(
+        API_ERROR_CODE.BAD_REQUEST,
+        "La signature cryptographique BIP-322 est invalide.",
         { status: 400 },
       );
     }
@@ -39,29 +34,22 @@ export async function POST(req: Request) {
     // Horodatage du profil sur Bitcoin via OpenTimestamps
     let otsProof = null;
     try {
-      otsProof = await otsService.stampHash(data.profileHash);
+      otsProof = await otsService.stampHash(validatedData.profileHash);
     } catch (e) {
       console.error(
-        "OTS Stamping failed, proceeding without it or handle appropriately:",
+        "L'horodatage OpenTimestamps a échoué. Poursuite de la création sans preuve.",
         e,
       );
-      // Dans le cadre du hackathon, si les serveurs OTS sont lents/indisponibles,
-      // on peut soit rejeter, soit accepter sans preuve (ou la générer asynchrone).
-      // Ici on accepte avec un log d'erreur.
     }
 
-    // Enregistrement dans la base de données
-    const newDonor = await donorService.createDonor({ ...data, otsProof });
+    // Enregistrement dans la base de données (Supabase Auth + Table donors)
+    const newDonor = await donorService.createDonor({
+      ...validatedData,
+      otsProof,
+    });
 
-    return NextResponse.json(
-      { success: true, donor: newDonor },
-      { status: 201 },
-    );
+    return success(newDonor, { status: 201 });
   } catch (error) {
-    console.error("POST /api/v1/donors error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }
