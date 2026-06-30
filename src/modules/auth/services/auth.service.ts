@@ -1,3 +1,4 @@
+import { ApiError } from "@/lib/api/errors";
 import {
   createSupabaseServerClient,
   createSupabaseAdminClient,
@@ -17,7 +18,7 @@ export const authService = {
 
     if (error) {
       console.error("Login failed:", error);
-      throw new Error(error.message || "Erreur de connexion");
+      throw ApiError.unauthorized("Email ou mot de passe incorrect.");
     }
 
     return authData;
@@ -62,8 +63,10 @@ export const authService = {
 
     if (signUpError || !authData.user) {
       console.error("Auth signUp failed:", signUpError);
-      throw new Error(
-        signUpError?.message || "Erreur lors de la création du compte",
+      // Remonte la cause réelle (email invalide, rate limit, déjà inscrit…)
+      // au lieu de la masquer derrière une erreur interne générique.
+      throw ApiError.badRequest(
+        signUpError?.message || "Erreur lors de la création du compte.",
       );
     }
 
