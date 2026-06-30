@@ -1,31 +1,30 @@
 -- =========================================================================
 -- Bitcoin Blood — Script Global d'Initialisation de la Base de Données
 -- À exécuter dans l'éditeur SQL de votre Dashboard Supabase
+-- Ce script est idempotent et préserve les tables et types existants.
 -- =========================================================================
 
--- 1. Nettoyage de l'ancienne structure (dans l'ordre inverse des dépendances)
-DROP TABLE IF EXISTS emergencies CASCADE;
-DROP TABLE IF EXISTS campaigns CASCADE;
-DROP TABLE IF EXISTS user_profiles CASCADE;
-DROP TABLE IF EXISTS organizations CASCADE;
-DROP TABLE IF EXISTS donors CASCADE;
-
-DROP TYPE IF EXISTS campaign_type CASCADE;
-DROP TYPE IF EXISTS organization_type CASCADE;
-DROP TYPE IF EXISTS user_role CASCADE;
-
--- 2. Création des Énumérations
-CREATE TYPE organization_type AS ENUM ('hospital', 'ong', 'collect');
-CREATE TYPE user_role AS ENUM ('super_admin', 'org_admin');
-CREATE TYPE campaign_type AS ENUM ('targeted', 'general');
+-- 1. Création sécurisée des Énumérations (seulement si elles n'existent pas)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'organization_type') THEN
+        CREATE TYPE organization_type AS ENUM ('hospital', 'ong', 'collect');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE user_role AS ENUM ('super_admin', 'org_admin');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'campaign_type') THEN
+        CREATE TYPE campaign_type AS ENUM ('targeted', 'general');
+    END IF;
+END$$;
 
 
 -- =========================================================================
--- 3. Création des Tables
+-- 2. Création des Tables (seulement si elles n'existent pas)
 -- =========================================================================
 
 -- Table des Donneurs (donors)
-CREATE TABLE donors (
+CREATE TABLE IF NOT EXISTS donors (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   blood_type      VARCHAR(3) NOT NULL CHECK (
     blood_type IN ('A+','A-','B+','B-','AB+','AB-','O+','O-')
@@ -42,7 +41,7 @@ CREATE TABLE donors (
 );
 
 -- Table des Organisations (organizations)
-CREATE TABLE organizations (
+CREATE TABLE IF NOT EXISTS organizations (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name          VARCHAR(255) NOT NULL,
   type          organization_type NOT NULL,
@@ -55,7 +54,7 @@ CREATE TABLE organizations (
 );
 
 -- Table des Profils Utilisateurs (user_profiles)
-CREATE TABLE user_profiles (
+CREATE TABLE IF NOT EXISTS user_profiles (
   id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   organization_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
   role            user_role NOT NULL DEFAULT 'org_admin',
@@ -63,7 +62,7 @@ CREATE TABLE user_profiles (
 );
 
 -- Table des Campagnes de don (campaigns)
-CREATE TABLE campaigns (
+CREATE TABLE IF NOT EXISTS campaigns (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id       UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   title             VARCHAR(255) NOT NULL,
@@ -83,7 +82,7 @@ CREATE TABLE campaigns (
 );
 
 -- Table des Urgences Sanguines (emergencies)
-CREATE TABLE emergencies (
+CREATE TABLE IF NOT EXISTS emergencies (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hospital_id       UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   blood_type        VARCHAR(3) NOT NULL CHECK (
@@ -99,22 +98,22 @@ CREATE TABLE emergencies (
 
 
 -- =========================================================================
--- 4. Indexation
+-- 3. Indexation (seulement s'ils n'existent pas)
 -- =========================================================================
 
-CREATE INDEX idx_donors_blood_type ON donors (blood_type);
-CREATE INDEX idx_donors_available  ON donors (available);
+CREATE INDEX IF NOT EXISTS idx_donors_blood_type ON donors (blood_type);
+CREATE INDEX IF NOT EXISTS idx_donors_available  ON donors (available);
 
-CREATE INDEX idx_campaigns_hospital   ON campaigns (hospital_id);
-CREATE INDEX idx_campaigns_created_at ON campaigns (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_campaigns_hospital   ON campaigns (hospital_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_created_at ON campaigns (created_at DESC);
 
-CREATE INDEX idx_emergencies_hospital   ON emergencies (hospital_id);
-CREATE INDEX idx_emergencies_status     ON emergencies (status);
-CREATE INDEX idx_emergencies_created_at ON emergencies (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_emergencies_hospital   ON emergencies (hospital_id);
+CREATE INDEX IF NOT EXISTS idx_emergencies_status     ON emergencies (status);
+CREATE INDEX IF NOT EXISTS idx_emergencies_created_at ON emergencies (created_at DESC);
 
 
 -- =========================================================================
--- 5. Sécurité : Activation RLS
+-- 4. Sécurité : Activation RLS
 -- =========================================================================
 
 ALTER TABLE donors ENABLE ROW LEVEL SECURITY;
@@ -125,49 +124,58 @@ ALTER TABLE emergencies ENABLE ROW LEVEL SECURITY;
 
 
 -- =========================================================================
--- 6. Politiques RLS (Row Level Security)
+-- 5. Recréation des Politiques RLS (Row Level Security)
 -- =========================================================================
 
 -- Table: donors
+DROP POLICY IF EXISTS "Tout le monde peut s'inscrire comme donneur" ON donors;
 CREATE POLICY "Tout le monde peut s'inscrire comme donneur"
   ON donors FOR INSERT
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Tout le monde peut lire les profils de donneurs" ON donors;
 CREATE POLICY "Tout le monde peut lire les profils de donneurs"
   ON donors FOR SELECT
   USING (true);
 
 -- Table: organizations
+DROP POLICY IF EXISTS "Lecture publique des organisations vérifiées" ON organizations;
 CREATE POLICY "Lecture publique des organisations vérifiées"
   ON organizations FOR SELECT
   USING (verified = true OR (SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin');
 
+DROP POLICY IF EXISTS "Super admin gère les organisations" ON organizations;
 CREATE POLICY "Super admin gère les organisations"
   ON organizations FOR ALL
   USING ((SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin');
 
 -- Table: user_profiles
+DROP POLICY IF EXISTS "Les admins peuvent voir leur propre profil" ON user_profiles;
 CREATE POLICY "Les admins peuvent voir leur propre profil"
   ON user_profiles FOR SELECT
   USING (id = auth.uid() OR (SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin');
 
+DROP POLICY IF EXISTS "Super admin gère tous les profils" ON user_profiles;
 CREATE POLICY "Super admin gère tous les profils"
   ON user_profiles FOR ALL
   USING ((SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin');
 
 -- Table: campaigns
+DROP POLICY IF EXISTS "Super admin gère toutes les campagnes" ON campaigns;
 CREATE POLICY "Super admin gère toutes les campagnes"
   ON campaigns FOR ALL
   USING (
     (SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin'
   );
 
+DROP POLICY IF EXISTS "Org admin voit les campagnes de son hôpital" ON campaigns;
 CREATE POLICY "Org admin voit les campagnes de son hôpital"
   ON campaigns FOR SELECT
   USING (
     hospital_id = (SELECT organization_id FROM user_profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Org admin peut créer des campagnes" ON campaigns;
 CREATE POLICY "Org admin peut créer des campagnes"
   ON campaigns FOR INSERT
   WITH CHECK (
@@ -175,24 +183,28 @@ CREATE POLICY "Org admin peut créer des campagnes"
   );
 
 -- Table: emergencies
+DROP POLICY IF EXISTS "Super admin gère toutes les urgences" ON emergencies;
 CREATE POLICY "Super admin gère toutes les urgences"
   ON emergencies FOR ALL
   USING (
     (SELECT role FROM user_profiles WHERE id = auth.uid()) = 'super_admin'
   );
 
+DROP POLICY IF EXISTS "Org admin voit les urgences de son hôpital" ON emergencies;
 CREATE POLICY "Org admin voit les urgences de son hôpital"
   ON emergencies FOR SELECT
   USING (
     hospital_id = (SELECT organization_id FROM user_profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Org admin peut créer des urgences" ON emergencies;
 CREATE POLICY "Org admin peut créer des urgences"
   ON emergencies FOR INSERT
   WITH CHECK (
     hospital_id = (SELECT organization_id FROM user_profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "Org admin peut modifier ses propres urgences" ON emergencies;
 CREATE POLICY "Org admin peut modifier ses propres urgences"
   ON emergencies FOR UPDATE
   USING (

@@ -2,6 +2,7 @@ import {
   emergencyService,
   updateEmergencyStatusSchema,
 } from "@/modules/emergencies";
+import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -14,6 +15,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+
     const id = (await params).id;
 
     // Validation du format UUID
@@ -47,6 +55,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+
     const id = (await params).id;
 
     const uuidRegex =
@@ -67,7 +82,17 @@ export async function PATCH(
       });
     }
 
-    // TODO(security): Valider que l'utilisateur appartient au même hospitalId que l'urgence pour empêcher les modifications transverses
+    // Sécurité: Seul le super admin ou un admin de la même organisation peut modifier l'urgence
+    if (
+      user.role !== "super_admin" &&
+      user.organizationId !== emergency.hospitalId
+    ) {
+      return failure(
+        API_ERROR_CODE.FORBIDDEN,
+        "Accès refusé. Vous ne pouvez modifier que les urgences de votre propre organisation.",
+        { status: 403 },
+      );
+    }
 
     const updated = await emergencyService.updateEmergencyStatus(
       id,
@@ -88,6 +113,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+
     const id = (await params).id;
 
     const uuidRegex =
@@ -105,7 +137,17 @@ export async function DELETE(
       });
     }
 
-    // TODO(security): Valider que l'utilisateur appartient au même hospitalId que l'urgence pour empêcher les suppressions transverses
+    // Sécurité: Seul le super admin ou un admin de la même organisation peut supprimer l'urgence
+    if (
+      user.role !== "super_admin" &&
+      user.organizationId !== emergency.hospitalId
+    ) {
+      return failure(
+        API_ERROR_CODE.FORBIDDEN,
+        "Accès refusé. Vous ne pouvez supprimer que les urgences de votre propre organisation.",
+        { status: 403 },
+      );
+    }
 
     const deleted = await emergencyService.deleteEmergency(id);
     if (!deleted) {

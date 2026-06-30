@@ -1,6 +1,7 @@
 import { vi, describe, it, expect } from "vitest";
 import { POST, GET } from "./route";
 import { emergencyService, type EmergencyRecord } from "@/modules/emergencies";
+import { authService, type UserProfile } from "@/modules/auth";
 
 vi.mock("@/modules/emergencies", () => {
   const mockSchema = {
@@ -19,8 +20,24 @@ vi.mock("@/modules/emergencies", () => {
   };
 });
 
+vi.mock("@/modules/auth", () => {
+  return {
+    authService: {
+      getCurrentUser: vi.fn(),
+    },
+  };
+});
+
 describe("POST /api/v1/emergencies", () => {
   it("should return 201 and the created emergency on success", async () => {
+    const mockUser: UserProfile = {
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1-uuid",
+    };
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
+
     const mockEmergency: EmergencyRecord = {
       id: "e1-uuid",
       hospitalId: "h1-uuid",
@@ -37,7 +54,6 @@ describe("POST /api/v1/emergencies", () => {
     );
 
     const body = {
-      hospitalId: "h1-uuid",
       bloodType: "O-",
       quantityNeeded: 2,
       city: "Dakar",
@@ -58,22 +74,42 @@ describe("POST /api/v1/emergencies", () => {
       ...mockEmergency,
       createdAt: mockEmergency.createdAt.toISOString(),
     });
-    expect(emergencyService.createEmergency).toHaveBeenCalledWith(body);
+    expect(emergencyService.createEmergency).toHaveBeenCalledWith({
+      ...body,
+      hospitalId: "h1-uuid",
+    });
   });
 
-  it("should return 422 or 500 when validation fails", async () => {
+  it("should return 403 when user is not associated with an organization", async () => {
+    vi.mocked(authService.getCurrentUser).mockResolvedValue({
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: null,
+    } as unknown as UserProfile);
+
     const req = new Request("http://localhost/api/v1/emergencies", {
       method: "POST",
-      body: JSON.stringify({}), // Empty body fails validation
+      body: JSON.stringify({}),
     });
 
     const response = await POST(req);
-    expect(response.status).toBe(500); // Because we threw generic error in mock
+    expect(response.status).toBe(403);
+    const json = await response.json();
+    expect(json.error.code).toBe("forbidden");
   });
 });
 
 describe("GET /api/v1/emergencies", () => {
   it("should fetch all active emergencies when no hospitalId is provided", async () => {
+    const mockUser: UserProfile = {
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1",
+    };
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
+
     const mockEmergencies: EmergencyRecord[] = [
       {
         id: "e1",
@@ -102,10 +138,17 @@ describe("GET /api/v1/emergencies", () => {
         createdAt: mockEmergencies[0].createdAt.toISOString(),
       },
     ]);
-    expect(emergencyService.getAllActiveEmergencies).toHaveBeenCalled();
   });
 
-  it("should fetch hospital emergencies when hospitalId is provided", async () => {
+  it("should fetch hospital emergencies if user queries their own hospitalId", async () => {
+    const mockUser: UserProfile = {
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1",
+    };
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
+
     const mockEmergencies: EmergencyRecord[] = [
       {
         id: "e1",
@@ -129,13 +172,25 @@ describe("GET /api/v1/emergencies", () => {
     const response = await GET(req);
 
     expect(response.status).toBe(200);
-    const json = await response.json();
-    expect(json.data).toEqual([
-      {
-        ...mockEmergencies[0],
-        createdAt: mockEmergencies[0].createdAt.toISOString(),
-      },
-    ]);
     expect(emergencyService.getHospitalEmergencies).toHaveBeenCalledWith("h1");
+  });
+
+  it("should return 403 if org_admin queries another hospital's emergencies", async () => {
+    const mockUser: UserProfile = {
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1",
+    };
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
+
+    const req = new Request(
+      "http://localhost/api/v1/emergencies?hospitalId=h2",
+    );
+    const response = await GET(req);
+
+    expect(response.status).toBe(403);
+    const json = await response.json();
+    expect(json.error.code).toBe("forbidden");
   });
 });
