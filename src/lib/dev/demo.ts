@@ -185,6 +185,141 @@ export const demoMatches: MatchingDonor[] = demoDonors
     historyCount: 5 - i,
   }));
 
+/* --------------------- Espace donneur (démo) ----------------------- */
+
+export type DonationComponent = "Sang total" | "Plasma" | "Plaquettes";
+export type DonationRarity = "Commun" | "Rare" | "Très rare";
+
+export type DonorEligibility = {
+  status: "éligible" | "ajourné";
+  /** Date à partir de laquelle un nouveau don est possible (ISO court). */
+  nextEligibleDate: string;
+  reason?: string;
+};
+
+export type DonationEntry = {
+  id: string;
+  date: string;
+  centerName: string;
+  city: string;
+  component: DonationComponent;
+  volumeMl: number;
+  status: "Validé" | "En attente";
+};
+
+export type RewardEntry = {
+  id: string;
+  date: string;
+  sats: number;
+  status: "Envoyée" | "En attente" | "Échouée";
+  label: string;
+};
+
+export type DonorAccount = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  city: string;
+  bloodType: string;
+  /** Phénotype étendu (Rh, Kell…). */
+  phenotype: string;
+  rarity: DonationRarity;
+  cmvNegative: boolean;
+  preferredDonation: DonationComponent;
+  available: boolean;
+  eligibility: DonorEligibility;
+  totalDonations: number;
+  lastDonation: string;
+  bitcoinAddress: string;
+  verified: boolean;
+};
+
+const day = (daysAgo: number) =>
+  new Date(now - daysAgo * 86_400_000).toISOString().slice(0, 10);
+
+export const demoDonorAccount: DonorAccount = {
+  id: "ccccccc1-0000-4000-8000-000000000001",
+  firstName: "Carmelle",
+  lastName: "Dossou",
+  email: "carmelle.dossou@exemple.bj",
+  phoneNumber: "+229 01 97 12 34 56",
+  city: "Cotonou",
+  bloodType: "O-",
+  phenotype: "O Rh− (ccddee, K−)",
+  rarity: "Rare",
+  cmvNegative: true,
+  preferredDonation: "Sang total",
+  available: true,
+  eligibility: {
+    status: "éligible",
+    nextEligibleDate: day(0),
+  },
+  totalDonations: 7,
+  lastDonation: day(96),
+  bitcoinAddress: "bc1qdemo1xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  verified: true,
+};
+
+export const demoDonations: DonationEntry[] = [
+  {
+    id: "don-1",
+    date: day(96),
+    centerName: "CNHU-HKM",
+    city: "Cotonou",
+    component: "Sang total",
+    volumeMl: 450,
+    status: "Validé",
+  },
+  {
+    id: "don-2",
+    date: day(210),
+    centerName: "Hôpital de Zone",
+    city: "Porto-Novo",
+    component: "Sang total",
+    volumeMl: 450,
+    status: "Validé",
+  },
+  {
+    id: "don-3",
+    date: day(320),
+    centerName: "Croix-Rouge Béninoise",
+    city: "Abomey-Calavi",
+    component: "Plasma",
+    volumeMl: 600,
+    status: "Validé",
+  },
+];
+
+export const demoRewards: RewardEntry[] = [
+  {
+    id: "rw-1",
+    date: day(96),
+    sats: 2000,
+    status: "Envoyée",
+    label: "Don validé — CNHU Cotonou",
+  },
+  {
+    id: "rw-2",
+    date: day(210),
+    sats: 1500,
+    status: "Envoyée",
+    label: "Don validé — Porto-Novo",
+  },
+  {
+    id: "rw-3",
+    date: day(320),
+    sats: 1500,
+    status: "Envoyée",
+    label: "Don plasma — Abomey-Calavi",
+  },
+];
+
+export const demoRewardTotalSats = demoRewards
+  .filter((r) => r.status === "Envoyée")
+  .reduce((sum, r) => sum + r.sats, 0);
+
 /** Organisations simulées pour la vue super-admin (pas d'endpoint dédié). */
 export const demoOrganizations: Organization[] = [
   {

@@ -130,12 +130,17 @@ export function DonorRegistrationForm() {
             </div>
           </div>
 
-          <Button asChild className="w-full">
-            <Link href={`/verify/${success.donor.id}`}>
-              <ShieldCheck className="size-4" />
-              Voir ma preuve d'intégrité
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button asChild className="w-full">
+              <Link href="/donneur">Accéder à mon espace donneur</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href={`/verify/${success.donor.id}`}>
+                <ShieldCheck className="size-4" />
+                Voir ma preuve d'intégrité
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
