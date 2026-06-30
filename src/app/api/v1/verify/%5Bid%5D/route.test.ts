@@ -23,6 +23,7 @@ vi.mock("@/modules/bitcoin", () => {
     rewardService: {
       createRewardLog: vi.fn(),
       updateRewardStatus: vi.fn(),
+      hasRecentCompletedReward: vi.fn(),
     },
   };
 });
@@ -101,6 +102,7 @@ describe("POST /api/v1/verify/[id]", () => {
         ReturnType<typeof donorService.getDonorById>
       >,
     );
+    vi.mocked(rewardService.hasRecentCompletedReward).mockResolvedValue(false);
 
     const mockRewardLog = {
       id: "r1",
@@ -162,5 +164,47 @@ describe("POST /api/v1/verify/[id]", () => {
       params: Promise.resolve({ id: VALID_UUID }),
     });
     expect(response.status).toBe(403);
+  });
+
+  it("should return 409 conflict if donor was rewarded within 60 days", async () => {
+    const mockUser: UserProfile = {
+      id: "u1",
+      email: "hospital@blood.org",
+      role: "org_admin",
+      organizationId: "h1",
+    };
+    vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser);
+
+    const mockDonor = {
+      id: VALID_UUID,
+      bloodType: "O-",
+      city: "Dakar",
+      latitude: 14.5,
+      longitude: -17.5,
+      age: 30,
+      available: true,
+      bitcoinAddress: "bc1q...",
+      profileHash: "hash...",
+      otsProof: "proof...",
+      createdAt: new Date(),
+    };
+    vi.mocked(donorService.getDonorById).mockResolvedValue(
+      mockDonor as unknown as Awaited<
+        ReturnType<typeof donorService.getDonorById>
+      >,
+    );
+    vi.mocked(rewardService.hasRecentCompletedReward).mockResolvedValue(true);
+
+    const req = new Request(`http://localhost/api/v1/verify/${VALID_UUID}`, {
+      method: "POST",
+      body: JSON.stringify({ bolt11Invoice: "lnbc..." }),
+    });
+
+    const response = await POST(req, {
+      params: Promise.resolve({ id: VALID_UUID }),
+    });
+    expect(response.status).toBe(409);
+    const json = await response.json();
+    expect(json.error.code).toBe("conflict");
   });
 });

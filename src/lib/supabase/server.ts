@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 import { env } from "@/lib/env";
@@ -31,4 +32,22 @@ export async function createSupabaseServerClient() {
       },
     },
   );
+}
+
+/**
+ * Client administratif Supabase (Service Role).
+ * Utilisé uniquement côté serveur pour des tâches d'administration privilégiées
+ * comme la suppression d'utilisateurs Auth lors d'un rollback.
+ */
+export function createSupabaseAdminClient() {
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return null;
+
+  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }

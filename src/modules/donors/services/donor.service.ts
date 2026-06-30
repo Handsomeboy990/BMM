@@ -1,4 +1,7 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseAdminClient,
+} from "@/lib/supabase/server";
 import { CreateDonorDTO, DonorRecord } from "../types";
 
 export const donorService = {
@@ -51,7 +54,10 @@ export const donorService = {
 
     if (error) {
       console.error("Error creating donor profile:", error);
-      // Essayer de supprimer le compte auth orphelin si possible
+      const adminClient = createSupabaseAdminClient();
+      if (adminClient) {
+        await adminClient.auth.admin.deleteUser(userId);
+      }
       throw new Error("Erreur lors de l'enregistrement du profil de donneur");
     }
 
@@ -118,7 +124,8 @@ export const donorService = {
     const { data: donors, error } = await supabase
       .from("donors")
       .select("*")
-      .eq("available", true);
+      .eq("available", true)
+      .limit(200);
 
     if (error || !donors) {
       return [];

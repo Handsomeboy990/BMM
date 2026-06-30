@@ -1,4 +1,7 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseAdminClient,
+} from "@/lib/supabase/server";
 import { LoginDTO, SignUpDTO, UserProfile } from "../types";
 
 export const authService = {
@@ -74,6 +77,10 @@ export const authService = {
 
       if (orgError || !newOrg) {
         console.error("Org insertion failed:", orgError);
+        const adminClient = createSupabaseAdminClient();
+        if (adminClient) {
+          await adminClient.auth.admin.deleteUser(userId);
+        }
         throw new Error("Erreur lors de la création de l'organisation");
       }
 
@@ -92,6 +99,13 @@ export const authService = {
         console.error("Profile insertion failed:", profileError);
         // Nettoyage de l'organisation créée
         await supabase.from("organizations").delete().eq("id", newOrg.id);
+
+        // Nettoyage de l'utilisateur auth créé
+        const adminClient = createSupabaseAdminClient();
+        if (adminClient) {
+          await adminClient.auth.admin.deleteUser(userId);
+        }
+
         throw new Error("Erreur lors de la création du profil utilisateur");
       }
 

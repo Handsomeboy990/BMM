@@ -126,4 +126,31 @@ export const rewardService = {
       createdAt: new Date(record.created_at),
     }));
   },
+
+  /**
+   * Vérifie si le donneur a reçu une récompense complétée au cours des N derniers jours
+   */
+  hasRecentCompletedReward: async (
+    donorId: string,
+    days: number,
+  ): Promise<boolean> => {
+    const supabase = await createSupabaseServerClient();
+    const thresholdDate = new Date();
+    thresholdDate.setDate(thresholdDate.getDate() - days);
+
+    const { data, error } = await supabase
+      .from("reward_logs")
+      .select("id")
+      .eq("donor_id", donorId)
+      .eq("status", "completed")
+      .gte("created_at", thresholdDate.toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking recent completed reward:", error);
+    }
+
+    return !!data;
+  },
 };

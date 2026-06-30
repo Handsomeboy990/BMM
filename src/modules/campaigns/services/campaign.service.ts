@@ -96,10 +96,12 @@ export const campaignService = {
     }
 
     let successCount = 0;
+    const chunkSize = 50;
 
-    await Promise.all(
-      donors.map(async (donor) => {
-        try {
+    for (let i = 0; i < donors.length; i += chunkSize) {
+      const chunk = donors.slice(i, i + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map(async (donor) => {
           const response = await fetch(
             "https://api.emailjs.com/api/v1.0/email/send",
             {
@@ -124,23 +126,24 @@ export const campaignService = {
             },
           );
 
-          if (response.ok) {
-            successCount++;
-          } else {
+          if (!response.ok) {
             const errText = await response.text();
-            console.error(
-              `Erreur d'envoi EmailJS pour le donneur ${donor.id}:`,
-              errText,
+            throw new Error(
+              `Erreur d'envoi EmailJS pour le donneur ${donor.id}: ${errText}`,
             );
           }
-        } catch (error) {
-          console.error(
-            `Erreur réseau lors de l'envoi EmailJS pour le donneur ${donor.id}:`,
-            error,
-          );
+          return true;
+        }),
+      );
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          successCount++;
+        } else {
+          console.error(result.reason);
         }
-      }),
-    );
+      }
+    }
 
     return successCount;
   },

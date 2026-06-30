@@ -117,6 +117,19 @@ export async function POST(
       });
     }
 
+    // Vérification de sécurité réglementaire: interdiction de récompenser plus d'une fois tous les 60 jours
+    const hasRecentReward = await rewardService.hasRecentCompletedReward(
+      id,
+      60,
+    );
+    if (hasRecentReward) {
+      return failure(
+        API_ERROR_CODE.CONFLICT,
+        "Le donneur a déjà reçu une récompense au cours des 60 derniers jours.",
+        { status: 409 },
+      );
+    }
+
     // 3. Validation de la facture BOLT11
     const body = await req.json();
     const validatedData = rewardPayloadSchema.parse(body);
