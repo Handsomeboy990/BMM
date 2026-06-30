@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCampaigns, useCreateCampaign } from "@/lib/api/hooks";
 import {
@@ -132,10 +132,10 @@ export function CampaignsBoard() {
                     id="type"
                     name="type"
                     value={type}
-                    onChange={(e) => setType(e.target.value as CampaignType)}
+                    onValueChange={(v) => setType(v as CampaignType)}
                   >
-                    <option value="general">Générale</option>
-                    <option value="targeted">Ciblée</option>
+                    <SelectItem value="general">Générale</SelectItem>
+                    <SelectItem value="targeted">Ciblée</SelectItem>
                   </Select>
                 </div>
                 <div className="space-y-2">
@@ -147,15 +147,15 @@ export function CampaignsBoard() {
                     disabled={type !== "targeted"}
                   >
                     {BLOOD_TYPES.map((g) => (
-                      <option key={g} value={g}>
+                      <SelectItem key={g} value={g}>
                         {g}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Ville</Label>
-                  <Input id="city" name="city" required placeholder="Dakar" />
+                  <Input id="city" name="city" required placeholder="Cotonou" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="radiusKm">Rayon (km)</Label>

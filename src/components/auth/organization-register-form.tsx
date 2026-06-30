@@ -8,7 +8,7 @@ import { AuthField } from "@/components/auth/auth-field";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useRegisterOrganization } from "@/lib/api/hooks";
 import type { OrganizationType } from "@/lib/api/resources";
 
@@ -83,7 +83,7 @@ export function OrganizationRegisterForm() {
         icon={Building2}
         name="name"
         required
-        placeholder="Hôpital Principal de Dakar"
+        placeholder="CNHU-HKM de Cotonou"
       />
 
       <div className="grid grid-cols-2 gap-3">
@@ -95,9 +95,9 @@ export function OrganizationRegisterForm() {
             defaultValue="hospital"
             className="h-11"
           >
-            <option value="hospital">Hôpital</option>
-            <option value="ong">ONG</option>
-            <option value="collect">Centre de collecte</option>
+            <SelectItem value="hospital">Hôpital</SelectItem>
+            <SelectItem value="ong">ONG</SelectItem>
+            <SelectItem value="collect">Centre de collecte</SelectItem>
           </Select>
         </div>
         <AuthField
@@ -106,7 +106,7 @@ export function OrganizationRegisterForm() {
           name="city"
           autoComplete="address-level2"
           required
-          placeholder="Dakar"
+          placeholder="Cotonou"
         />
       </div>
 
@@ -117,7 +117,7 @@ export function OrganizationRegisterForm() {
         type="email"
         autoComplete="email"
         required
-        placeholder="admin@hopital.africa"
+        placeholder="admin@hopital.bj"
       />
       <AuthField
         label="Email de contact public"
@@ -125,7 +125,7 @@ export function OrganizationRegisterForm() {
         name="contactEmail"
         type="email"
         required
-        placeholder="contact@hopital.africa"
+        placeholder="contact@hopital.bj"
       />
       <PasswordField
         name="password"

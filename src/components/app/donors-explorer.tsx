@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useDonors, useValidateDonor } from "@/lib/api/hooks";
 import { BLOOD_TYPES } from "@/lib/api/resources";
 
@@ -55,15 +55,15 @@ export function DonorsExplorer() {
           </div>
           <Select
             value={group}
-            onChange={(e) => setGroup(e.target.value)}
+            onValueChange={setGroup}
             className="sm:w-40"
             aria-label="Groupe sanguin"
           >
-            <option value="tous">Tous les groupes</option>
+            <SelectItem value="tous">Tous les groupes</SelectItem>
             {BLOOD_TYPES.map((g) => (
-              <option key={g} value={g}>
+              <SelectItem key={g} value={g}>
                 {g}
-              </option>
+              </SelectItem>
             ))}
           </Select>
         </CardContent>

@@ -93,7 +93,7 @@ export function ForgotPasswordForm() {
           type="email"
           autoComplete="email"
           required
-          placeholder="contact@hopital.africa"
+          placeholder="contact@hopital.bj"
         />
         <Button type="submit" size="lg" className="w-full" disabled={busy}>
           {busy ? "Envoi…" : "Envoyer le lien"}

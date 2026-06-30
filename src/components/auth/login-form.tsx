@@ -47,7 +47,7 @@ export function LoginForm() {
         type="email"
         autoComplete="email"
         required
-        placeholder="contact@hopital.africa"
+        placeholder="contact@hopital.bj"
       />
       <PasswordField
         name="password"

@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useSearchDonors } from "@/lib/api/hooks";
 import {
@@ -73,12 +73,12 @@ export function MatchingExplorer() {
             <Select
               id="bloodType"
               value={bloodType}
-              onChange={(e) => setBloodType(e.target.value as BloodType)}
+              onValueChange={(v) => setBloodType(v as BloodType)}
             >
               {BLOOD_TYPES.map((g) => (
-                <option key={g} value={g}>
+                <SelectItem key={g} value={g}>
                   {g}
-                </option>
+                </SelectItem>
               ))}
             </Select>
           </div>
@@ -105,7 +105,7 @@ export function MatchingExplorer() {
             type="button"
             onClick={() => setUseAi((v) => !v)}
             className={cn(
-              "flex h-10 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
+              "flex h-10 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
               useAi
                 ? "border-primary/30 bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-accent",

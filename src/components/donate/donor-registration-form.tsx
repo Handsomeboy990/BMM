@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCreateDonor } from "@/lib/api/hooks";
 import {
@@ -158,7 +158,7 @@ export function DonorRegistrationForm() {
                 id="firstName"
                 name="firstName"
                 required
-                placeholder="Aïssatou"
+                placeholder="Carmelle"
               />
             </Field>
             <Field label="Nom" htmlFor="lastName">
@@ -166,15 +166,15 @@ export function DonorRegistrationForm() {
                 id="lastName"
                 name="lastName"
                 required
-                placeholder="Diallo"
+                placeholder="Dossou"
               />
             </Field>
             <Field label="Groupe sanguin" htmlFor="bloodType">
               <Select id="bloodType" name="bloodType" defaultValue="O-">
                 {BLOOD_TYPES.map((g) => (
-                  <option key={g} value={g}>
+                  <SelectItem key={g} value={g}>
                     {g}
-                  </option>
+                  </SelectItem>
                 ))}
               </Select>
             </Field>
@@ -195,11 +195,11 @@ export function DonorRegistrationForm() {
                 name="phoneNumber"
                 type="tel"
                 required
-                placeholder="+221 77 123 45 67"
+                placeholder="+229 01 97 12 34 56"
               />
             </Field>
             <Field label="Ville" htmlFor="city">
-              <Input id="city" name="city" required placeholder="Dakar" />
+              <Input id="city" name="city" required placeholder="Cotonou" />
             </Field>
             <Field label="Email" htmlFor="email">
               <Input
@@ -207,7 +207,7 @@ export function DonorRegistrationForm() {
                 name="email"
                 type="email"
                 required
-                placeholder="vous@exemple.africa"
+                placeholder="vous@exemple.bj"
               />
             </Field>
             <Field label="Mot de passe" htmlFor="password">

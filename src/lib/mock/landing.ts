@@ -45,39 +45,39 @@ export const testimonials: Testimonial[] = [
   {
     quote:
       "Une alerte m'a notifié à temps. Trente minutes plus tard, j'avais donné mon sang pour un nouveau-né. C'est concret, c'est immédiat.",
-    name: "Awa Diallo",
-    role: "Donneuse, Dakar",
-    initials: "AD",
+    name: "Carmelle Dossou",
+    role: "Donneuse, Cotonou",
+    initials: "CD",
     avatar:
       "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
   {
     quote:
       "Nous trouvons des donneurs compatibles en quelques secondes au lieu de plusieurs heures. Cela change la prise en charge des urgences.",
-    name: "Dr Kwame Mensah",
-    role: "Médecin urgentiste, Accra",
-    initials: "KM",
+    name: "Dr Rodrigue Houngbédji",
+    role: "Médecin urgentiste, CNHU Cotonou",
+    initials: "RH",
     avatar:
       "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
   {
     quote:
       "Organiser une campagne est devenu simple. Les inscriptions et le suivi sont centralisés, et la mobilisation est bien plus forte.",
-    name: "Fatou Bensouda",
-    role: "Coordinatrice de campagne, Abidjan",
-    initials: "FB",
+    name: "Nadège Gbaguidi",
+    role: "Coordinatrice de campagne, Porto-Novo",
+    initials: "NG",
     avatar:
       "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
 ];
 
 export const partnerRegions: string[] = [
-  "Sénégal",
-  "Ghana",
-  "Côte d'Ivoire",
-  "Nigéria",
-  "Kenya",
-  "Rwanda",
-  "Cameroun",
-  "Maroc",
+  "Cotonou",
+  "Porto-Novo",
+  "Abomey-Calavi",
+  "Parakou",
+  "Bohicon",
+  "Djougou",
+  "Natitingou",
+  "Ouidah",
 ];

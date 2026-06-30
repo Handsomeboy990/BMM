@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import {
   useCreateEmergency,
@@ -134,9 +134,9 @@ export function AlertsBoard() {
                   <Label htmlFor="bloodType">Groupe recherché</Label>
                   <Select id="bloodType" name="bloodType" defaultValue="O-">
                     {BLOOD_TYPES.map((g) => (
-                      <option key={g} value={g}>
+                      <SelectItem key={g} value={g}>
                         {g}
-                      </option>
+                      </SelectItem>
                     ))}
                   </Select>
                 </div>
@@ -153,7 +153,7 @@ export function AlertsBoard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">Ville</Label>
-                  <Input id="city" name="city" required placeholder="Dakar" />
+                  <Input id="city" name="city" required placeholder="Cotonou" />
                 </div>
               </div>
 
