@@ -93,6 +93,10 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
+  /* Courbes d'accélération signature (inspirées de Spaceship). */
+  --ease-brand: cubic-bezier(0.55, 0, 0.35, 1);
+  --ease-reveal: cubic-bezier(0, 0, 0.35, 1);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -147,7 +151,7 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -164,6 +168,85 @@
   }
 }
 
+/* Swap-in for the rotating headline word (Spaceship-style). */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes word-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.5em);
+  }
+}
+
+/* Heartbeat pulse line that draws itself on a loop. */
+@keyframes pulse-draw {
+  0% {
+    stroke-dashoffset: 260;
+    opacity: 0.15;
+  }
+  35% {
+    opacity: 1;
+  }
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.15;
+  }
+}
+
+/* Wide ECG trace for the auth monitor: draws across, holds, fades, redraws. */
+@keyframes ecg-sweep {
+  0% {
+    stroke-dashoffset: 1200;
+    opacity: 0.25;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.25;
+  }
+}
+
+/* Leading blip that rides the baseline like a monitor cursor. */
+@keyframes ecg-cursor {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
 @layer utilities {
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -174,11 +257,50 @@
   }
 
   .animate-rise-in {
-    animation: rise-in 0.7s ease-out both;
+    animation: rise-in 0.6s var(--ease-reveal) both;
   }
 
   .animate-marquee {
     animation: marquee 32s linear infinite;
+  }
+
+  .animate-word-in {
+    animation: word-in 0.5s var(--ease-reveal) both;
+  }
+
+  .animate-word-out {
+    animation: word-out 0.4s var(--ease-brand) both;
+  }
+
+  .animate-pulse-draw {
+    stroke-dasharray: 260;
+    animation: pulse-draw 3.2s var(--ease-brand) infinite;
+  }
+
+  .animate-ecg-sweep {
+    stroke-dasharray: 1200;
+    animation: ecg-sweep 5s var(--ease-brand) infinite;
+  }
+
+  .animate-ecg-cursor {
+    animation: ecg-cursor 5s var(--ease-brand) infinite;
+  }
+
+  /* Révélation d'image : fondu + léger zoom + dé-flou, courbe Spaceship. */
+  .img-reveal {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(12px);
+    transition:
+      opacity 0.7s var(--ease-reveal),
+      transform 0.9s var(--ease-reveal),
+      filter 0.7s var(--ease-reveal);
+  }
+
+  .img-reveal[data-shown="true"] {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
   }
 
   .text-gradient {
@@ -196,8 +318,25 @@
     .animate-float,
     .animate-pulse-glow,
     .animate-rise-in,
-    .animate-marquee {
+    .animate-marquee,
+    .animate-word-in,
+    .animate-word-out,
+    .animate-pulse-draw,
+    .animate-ecg-sweep,
+    .animate-ecg-cursor {
       animation: none;
+    }
+
+    .animate-ecg-sweep {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+
+    .img-reveal {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
     }
   }
 }

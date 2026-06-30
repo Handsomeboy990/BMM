@@ -14,6 +14,7 @@ export type Testimonial = {
   name: string;
   role: string;
   initials: string;
+  avatar: string;
 };
 
 export type LandingStat = {
@@ -47,6 +48,8 @@ export const testimonials: Testimonial[] = [
     name: "Awa Diallo",
     role: "Donneuse, Dakar",
     initials: "AD",
+    avatar:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
   {
     quote:
@@ -54,6 +57,8 @@ export const testimonials: Testimonial[] = [
     name: "Dr Kwame Mensah",
     role: "Médecin urgentiste, Accra",
     initials: "KM",
+    avatar:
+      "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
   {
     quote:
@@ -61,6 +66,8 @@ export const testimonials: Testimonial[] = [
     name: "Fatou Bensouda",
     role: "Coordinatrice de campagne, Abidjan",
     initials: "FB",
+    avatar:
+      "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=160&q=70&auto=format&fit=crop&crop=faces",
   },
 ];
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Droplet } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Container } from "@/components/layout/container";
@@ -49,10 +50,17 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-            Se connecter
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
+            <Link href="/login">Se connecter</Link>
           </Button>
-          <Button size="sm">Devenir donneur</Button>
+          <Button asChild size="sm">
+            <Link href="/register">Devenir donneur</Link>
+          </Button>
         </div>
       </Container>
     </header>

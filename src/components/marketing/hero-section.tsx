@@ -1,7 +1,8 @@
 import { ArrowRight, BellRing, Droplet, HeartPulse } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
-import { HeroIllustration } from "@/components/marketing/hero-illustration";
+import { RevealImage } from "@/components/marketing/reveal-image";
+import { RotatingHeadline } from "@/components/marketing/rotating-headline";
 import { StatCounter } from "@/components/marketing/stat-counter";
 import { GridPattern } from "@/components/shared/grid-pattern";
 import { Badge } from "@/components/ui/badge";
@@ -53,12 +54,18 @@ export function HeroSection() {
           </Badge>
 
           <h1
-            className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl"
+            className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl"
             style={{ animationDelay: "80ms" }}
           >
             Chaque goutte compte.{" "}
-            <span className="text-gradient">Connectons les donneurs</span> à
-            ceux qui en ont besoin.
+            <RotatingHeadline
+              className="font-semibold"
+              words={[
+                "Connectons les donneurs.",
+                "Sauvons des vies ensemble.",
+                "Mobilisons toute l'Afrique.",
+              ]}
+            />
           </h1>
 
           <p
@@ -85,10 +92,18 @@ export function HeroSection() {
         </div>
 
         <div
-          className="animate-rise-in relative"
+          className="animate-rise-in relative mx-auto w-full max-w-md"
           style={{ animationDelay: "200ms" }}
         >
-          <HeroIllustration className="mx-auto max-w-md" />
+          <RevealImage
+            priority
+            ratio="4 / 5"
+            delay={120}
+            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=70&auto=format&fit=crop"
+            alt="Soignant africain consultant une alerte de don sur son téléphone"
+            sizes="(min-width: 1024px) 28rem, 90vw"
+            className="shadow-primary/10 shadow-2xl"
+          />
           <FloatingCard
             className="top-6 -left-2 sm:left-6"
             icon={<BellRing className="size-4" />}

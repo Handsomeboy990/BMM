@@ -1,5 +1,6 @@
 import { Container } from "@/components/layout/container";
 import { features } from "@/components/marketing/content";
+import { PulseLine } from "@/components/marketing/pulse-line";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/shared/reveal";
 import {
@@ -13,11 +14,16 @@ export function FeaturesSection() {
   return (
     <section id="donneurs" className="relative py-24">
       <Container className="flex flex-col gap-14">
-        <SectionHeading
-          eyebrow="Fonctionnalités"
-          title="Tout ce qu'il faut pour mobiliser les donneurs"
-          description="Une plateforme pensée pour la rapidité, la confiance et la traçabilité, de l'inscription jusqu'au don."
-        />
+        <div className="flex flex-col gap-6">
+          <SectionHeading
+            eyebrow="Fonctionnalités"
+            title="Tout ce qu'il faut pour mobiliser les donneurs"
+            description="Une plateforme pensée pour la rapidité, la confiance et la traçabilité, de l'inscription jusqu'au don."
+          />
+          <Reveal delay={220}>
+            <PulseLine />
+          </Reveal>
+        </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (

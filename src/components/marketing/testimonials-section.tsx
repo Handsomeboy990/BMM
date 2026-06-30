@@ -1,4 +1,5 @@
 import { Quote } from "lucide-react";
+import Image from "next/image";
 
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
@@ -30,9 +31,14 @@ export function TestimonialsSection() {
                   <Quote className="text-primary size-6" />
                   <p className="flex-1 text-pretty">{item.quote}</p>
                   <div className="flex items-center gap-3">
-                    <span className="from-primary/20 to-primary/5 text-primary ring-primary/10 flex size-10 items-center justify-center rounded-full bg-linear-to-br text-sm font-semibold ring-1">
-                      {item.initials}
-                    </span>
+                    <Image
+                      src={item.avatar}
+                      alt={item.name}
+                      width={40}
+                      height={40}
+                      sizes="40px"
+                      className="ring-primary/15 size-10 rounded-full object-cover ring-2"
+                    />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{item.name}</span>
                       <span className="text-muted-foreground text-xs">
