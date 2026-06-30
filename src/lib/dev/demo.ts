@@ -3,6 +3,7 @@ import type {
   DonorRecord,
   EmergencyRecord,
   MatchingDonor,
+  Organization,
   UserProfile,
 } from "@/lib/api/resources";
 
@@ -183,3 +184,51 @@ export const demoMatches: MatchingDonor[] = demoDonors
         : "Compatible et disponible à proximité.",
     historyCount: 5 - i,
   }));
+
+/** Organisations simulées pour la vue super-admin (pas d'endpoint dédié). */
+export const demoOrganizations: Organization[] = [
+  {
+    id: DEMO_ORG_ID,
+    name: "CNHU-HKM de Cotonou",
+    type: "hospital",
+    latitude: 6.3703,
+    longitude: 2.4256,
+    city: "Cotonou",
+    contactEmail: "contact@cnhu-cotonou.bj",
+    verified: true,
+    createdAt: iso(43200),
+  },
+  {
+    id: "ddddddd1-0000-4000-8000-000000000002",
+    name: "Hôpital de Zone de Porto-Novo",
+    type: "hospital",
+    latitude: 6.4969,
+    longitude: 2.6283,
+    city: "Porto-Novo",
+    contactEmail: "contact@hz-portonovo.bj",
+    verified: true,
+    createdAt: iso(40000),
+  },
+  {
+    id: "ddddddd1-0000-4000-8000-000000000003",
+    name: "Croix-Rouge Béninoise — Abomey-Calavi",
+    type: "ong",
+    latitude: 6.4486,
+    longitude: 2.3556,
+    city: "Abomey-Calavi",
+    contactEmail: "calavi@croixrouge.bj",
+    verified: false,
+    createdAt: iso(2880),
+  },
+  {
+    id: "ddddddd1-0000-4000-8000-000000000004",
+    name: "Centre de collecte de Parakou",
+    type: "collect",
+    latitude: 9.337,
+    longitude: 2.6303,
+    city: "Parakou",
+    contactEmail: "don@collecte-parakou.bj",
+    verified: false,
+    createdAt: iso(1440),
+  },
+];

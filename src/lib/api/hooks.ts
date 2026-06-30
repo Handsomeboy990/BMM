@@ -8,6 +8,7 @@ import {
   demoDonors,
   demoEmergencies,
   demoMatches,
+  demoOrganizations,
 } from "@/lib/dev/demo";
 
 import {
@@ -25,6 +26,7 @@ import {
   type EmergencyRecord,
   type EmergencyStatus,
   type LoginPayload,
+  type Organization,
   type RegisterOrganizationPayload,
   type RewardPayload,
   type SearchParams,
@@ -300,5 +302,32 @@ export function useRewardDonor() {
       AUTH_BYPASS
         ? demoDelay({ message: "Récompense simulée envoyée.", reward: null })
         : verifyApi.reward(id, payload).then((r) => r.data),
+  });
+}
+
+/* ------------------------- Super-admin (orgs) ---------------------- */
+
+/**
+ * Liste des organisations (vue super-admin). En attente d'un endpoint
+ * backend `GET /api/v1/organizations`: pour l'instant données simulées.
+ */
+export function useOrganizations() {
+  return useQuery({
+    queryKey: ["organizations"],
+    queryFn: () => demoDelay(demoOrganizations),
+  });
+}
+
+/** Vérifie une organisation (vue super-admin). Démo en attendant l'endpoint. */
+export function useVerifyOrganization() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      qc.setQueriesData<Organization[]>(
+        { queryKey: ["organizations"] },
+        (old) => old?.map((o) => (o.id === id ? { ...o, verified: true } : o)),
+      );
+      return Promise.resolve(null);
+    },
   });
 }

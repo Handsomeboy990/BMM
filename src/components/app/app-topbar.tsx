@@ -25,13 +25,21 @@ function initialsOf(name: string): string {
   );
 }
 
+const demoRoles = [
+  { value: "org_admin", label: "Structure" },
+  { value: "super_admin", label: "Super-admin" },
+] as const;
+
 export function AppTopbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isDemo, setDemoRole } = useAuth();
   const logout = useLogout();
 
-  const orgName = user?.organization?.name ?? user?.email ?? "Mon organisation";
+  const orgName =
+    user?.role === "super_admin"
+      ? "Administration plateforme"
+      : (user?.organization?.name ?? user?.email ?? "Mon organisation");
 
   async function handleLogout() {
     await logout.mutateAsync().catch(() => {});
@@ -67,13 +75,36 @@ export function AppTopbar() {
 
         <div className="hidden flex-1 lg:block" />
 
+        {/* Bascule de rôle — visible uniquement en mode démo */}
+        {isDemo && setDemoRole ? (
+          <div className="bg-muted/60 hidden items-center gap-0.5 rounded-lg p-0.5 md:flex">
+            {demoRoles.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => setDemoRole(r.value)}
+                className={cn(
+                  "cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                  user?.role === r.value
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/alerts">
-              <Plus className="size-4" />
-              Nouvelle alerte
-            </Link>
-          </Button>
+          {user?.role !== "super_admin" ? (
+            <Button asChild size="sm" className="hidden sm:inline-flex">
+              <Link href="/alerts">
+                <Plus className="size-4" />
+                Nouvelle alerte
+              </Link>
+            </Button>
+          ) : null}
           <ThemeToggle />
           <div className="flex items-center gap-2 pl-1">
             <Avatar initials={initialsOf(orgName)} className="size-9" />
