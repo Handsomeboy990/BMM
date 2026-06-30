@@ -1,6 +1,13 @@
 "use client";
 
-import { BadgeCheck, Phone, Search } from "lucide-react";
+import {
+  AlertCircle,
+  BadgeCheck,
+  Check,
+  Phone,
+  Search,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -9,40 +16,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { useDonors } from "@/lib/api/hooks";
-import { bloodGroups } from "@/lib/mock/blood";
-import {
-  donorStatusBadge,
-  donorStatusLabel,
-  type DonorStatus,
-} from "@/lib/mock/donors";
+import { useDonors, useValidateDonor } from "@/lib/api/hooks";
+import { BLOOD_TYPES } from "@/lib/api/resources";
 
-const statuses: Array<DonorStatus | "tous"> = [
-  "tous",
-  "disponible",
-  "recent",
-  "indisponible",
-];
+function initialsOf(first: string, last: string) {
+  return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase() || "DN";
+}
 
 export function DonorsExplorer() {
-  const { data: donors = [], isLoading } = useDonors();
+  const { data: donors, isLoading, isError, error } = useDonors();
+  const validateDonor = useValidateDonor();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("tous");
-  const [status, setStatus] = useState("tous");
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return donors.filter((d) => {
+    return (donors ?? []).filter((d) => {
+      const fullName = `${d.firstName} ${d.lastName}`.toLowerCase();
       const matchesQuery =
-        !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.city.toLowerCase().includes(q) ||
-        d.country.toLowerCase().includes(q);
-      const matchesGroup = group === "tous" || d.group === group;
-      const matchesStatus = status === "tous" || d.status === status;
-      return matchesQuery && matchesGroup && matchesStatus;
+        !q || fullName.includes(q) || d.city.toLowerCase().includes(q);
+      const matchesGroup = group === "tous" || d.bloodType === group;
+      return matchesQuery && matchesGroup;
     });
-  }, [donors, query, group, status]);
+  }, [donors, query, group]);
 
   return (
     <div className="space-y-4">
@@ -64,82 +60,105 @@ export function DonorsExplorer() {
             aria-label="Groupe sanguin"
           >
             <option value="tous">Tous les groupes</option>
-            {bloodGroups.map((g) => (
+            {BLOOD_TYPES.map((g) => (
               <option key={g} value={g}>
                 {g}
-              </option>
-            ))}
-          </Select>
-          <Select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="sm:w-44"
-            aria-label="Disponibilité"
-          >
-            {statuses.map((s) => (
-              <option key={s} value={s}>
-                {s === "tous" ? "Toutes dispos." : donorStatusLabel[s]}
               </option>
             ))}
           </Select>
         </CardContent>
       </Card>
 
-      <p className="text-muted-foreground text-sm">
-        {isLoading
-          ? "Chargement…"
-          : `${results.length} donneur${results.length > 1 ? "s" : ""} trouvé${
-              results.length > 1 ? "s" : ""
-            }`}
-      </p>
+      {isLoading ? (
+        <p className="text-muted-foreground py-12 text-center text-sm">
+          Chargement de l'annuaire…
+        </p>
+      ) : isError ? (
+        <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center gap-2 rounded-lg border px-4 py-8 text-sm">
+          <AlertCircle className="size-4" />
+          {error instanceof Error ? error.message : "Chargement impossible."}
+        </p>
+      ) : results.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
+            <Users className="text-muted-foreground size-8" />
+            <p className="font-medium">Aucun donneur validé</p>
+            <p className="text-muted-foreground text-sm">
+              Les donneurs apparaissent ici après validation d'un premier don.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <p className="text-muted-foreground text-sm">
+            {results.length} donneur{results.length > 1 ? "s" : ""} validé
+            {results.length > 1 ? "s" : ""}
+          </p>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {results.map((donor) => (
-          <Card key={donor.id}>
-            <CardContent className="space-y-4 p-5">
-              <div className="flex items-start gap-3">
-                <Avatar initials={donor.initials} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <p className="truncate font-medium">{donor.name}</p>
-                    {donor.verified ? (
-                      <BadgeCheck className="text-primary size-4 shrink-0" />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {results.map((donor) => (
+              <Card key={donor.id}>
+                <CardContent className="space-y-4 p-5">
+                  <div className="flex items-start gap-3">
+                    <Avatar
+                      initials={initialsOf(donor.firstName, donor.lastName)}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="truncate font-medium">
+                          {donor.firstName} {donor.lastName}
+                        </p>
+                        {donor.validated ? (
+                          <BadgeCheck className="text-primary size-4 shrink-0" />
+                        ) : null}
+                      </div>
+                      <p className="text-muted-foreground truncate text-sm">
+                        {donor.city} · {donor.age} ans
+                      </p>
+                    </div>
+                    <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full text-sm font-semibold">
+                      {donor.bloodType}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <Badge variant={donor.available ? "success" : "neutral"}>
+                      {donor.available ? "Disponible" : "Indisponible"}
+                    </Badge>
+                    <Badge variant={donor.validated ? "primary" : "warning"}>
+                      {donor.validated ? "Validé" : "À valider"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
+                    >
+                      <a href={`tel:${donor.phoneNumber.replace(/\s/g, "")}`}>
+                        <Phone className="size-4" />
+                        Contacter
+                      </a>
+                    </Button>
+                    {!donor.validated ? (
+                      <Button
+                        size="sm"
+                        onClick={() => validateDonor.mutate(donor.id)}
+                        disabled={validateDonor.isPending}
+                      >
+                        <Check className="size-4" />
+                        Valider
+                      </Button>
                     ) : null}
                   </div>
-                  <p className="text-muted-foreground truncate text-sm">
-                    {donor.city}, {donor.country}
-                  </p>
-                </div>
-                <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full text-sm font-semibold">
-                  {donor.group}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <Badge variant={donorStatusBadge[donor.status]}>
-                  {donorStatusLabel[donor.status]}
-                </Badge>
-                <span className="text-muted-foreground">
-                  {donor.donations} dons
-                </span>
-              </div>
-
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <a href={`tel:${donor.phone.replace(/\s/g, "")}`}>
-                  <Phone className="size-4" />
-                  Contacter
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-
-        {results.length === 0 ? (
-          <p className="text-muted-foreground col-span-full py-12 text-center text-sm">
-            Aucun donneur ne correspond à ces critères.
-          </p>
-        ) : null}
-      </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

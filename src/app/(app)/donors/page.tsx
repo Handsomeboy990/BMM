@@ -13,7 +13,7 @@ export default function DonorsPage() {
     <>
       <PageHeader
         title="Annuaire des donneurs"
-        description="Aperçu des donneurs volontaires du réseau. Données provisoires en attendant l'endpoint de liste."
+        description="Donneurs validés du réseau. Recherchez, filtrez et validez après un don confirmé."
         actions={
           <Button asChild variant="outline">
             <Link href="/donate">

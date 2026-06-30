@@ -86,6 +86,7 @@ export type DonorRecord = {
   bitcoinAddress: string;
   profileHash: string;
   otsProof: string | null;
+  validated: boolean;
   createdAt: string;
 };
 

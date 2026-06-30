@@ -128,18 +128,11 @@ export function useSearchDonors() {
 
 /* ----------------------------- Donneurs ---------------------------- */
 
-/**
- * Annuaire des donneurs. S'appuie pour l'instant sur des données simulées:
- * dès que `GET /api/v1/donors` est disponible, il suffira de remplacer le
- * `queryFn` par `donorsApi.list().then((r) => r.data)`.
- */
+/** Annuaire des donneurs validés (endpoint réel `GET /api/v1/donors`). */
 export function useDonors() {
   return useQuery({
     queryKey: ["donors", "directory"],
-    queryFn: async () => {
-      const { donors } = await import("@/lib/mock/donors");
-      return donors;
-    },
+    queryFn: () => donorsApi.list().then((r) => r.data),
   });
 }
 
@@ -147,6 +140,14 @@ export function useCreateDonor() {
   return useMutation({
     mutationFn: (payload: CreateDonorPayload) =>
       donorsApi.create(payload).then((r) => r.data),
+  });
+}
+
+export function useValidateDonor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => donorsApi.validate(id).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["donors"] }),
   });
 }
 

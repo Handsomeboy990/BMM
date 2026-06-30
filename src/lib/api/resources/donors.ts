@@ -28,7 +28,12 @@ export const donorsApi = {
   create: (payload: CreateDonorPayload) =>
     httpClient.post<DonorRecord>("/donors", payload),
 
-  // TODO(backend): brancher dès que `GET /api/v1/donors` (liste annuaire)
-  // est disponible. Pour l'instant l'annuaire s'appuie sur des données
-  // simulées via le hook `useDonors`.
+  /** Donneurs validés (≥ 1 don confirmé). Réservé aux structures connectées. */
+  list: () => httpClient.get<DonorRecord[]>("/donors"),
+
+  /** Valide un donneur après confirmation d'un don physique. */
+  validate: (id: string) =>
+    httpClient.patch<{ message: string; donor: DonorRecord }>(
+      `/donors/${id}/validate`,
+    ),
 };
