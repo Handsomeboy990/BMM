@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS donors (
   longitude       DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
   age             INTEGER NOT NULL CHECK (age BETWEEN 18 AND 120),
   available       BOOLEAN NOT NULL DEFAULT TRUE,
+  validated       BOOLEAN NOT NULL DEFAULT FALSE,
   bitcoin_address VARCHAR(255) NOT NULL UNIQUE,
   profile_hash    CHAR(64) NOT NULL UNIQUE,
   ots_proof       TEXT,
@@ -141,6 +142,13 @@ DROP POLICY IF EXISTS "Tout le monde peut lire les profils de donneurs" ON donor
 CREATE POLICY "Tout le monde peut lire les profils de donneurs"
   ON donors FOR SELECT
   USING (true);
+
+DROP POLICY IF EXISTS "Les admins peuvent modifier les profils de donneurs" ON donors;
+CREATE POLICY "Les admins peuvent modifier les profils de donneurs"
+  ON donors FOR UPDATE
+  USING (
+    (SELECT role FROM user_profiles WHERE id = auth.uid()) IN ('super_admin', 'org_admin')
+  );
 
 -- Table: organizations
 DROP POLICY IF EXISTS "Lecture publique des organisations vérifiées" ON organizations;
