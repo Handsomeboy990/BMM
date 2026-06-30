@@ -76,6 +76,7 @@ export const donorService = {
       bitcoinAddress: newDonor.bitcoin_address,
       profileHash: newDonor.profile_hash,
       otsProof: newDonor.ots_proof,
+      validated: newDonor.validated,
       createdAt: new Date(newDonor.created_at),
     };
   },
@@ -111,6 +112,7 @@ export const donorService = {
       bitcoinAddress: donor.bitcoin_address,
       profileHash: donor.profile_hash,
       otsProof: donor.ots_proof,
+      validated: donor.validated,
       createdAt: new Date(donor.created_at),
     };
   },
@@ -146,7 +148,82 @@ export const donorService = {
       bitcoinAddress: donor.bitcoin_address,
       profileHash: donor.profile_hash,
       otsProof: donor.ots_proof,
+      validated: donor.validated,
       createdAt: new Date(donor.created_at),
     }));
+  },
+
+  /**
+   * Récupère tous les donneurs validés (donneur ayant déjà effectué au moins un don réel)
+   */
+  getValidatedDonors: async (): Promise<DonorRecord[]> => {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: donors, error } = await supabase
+      .from("donors")
+      .select("*")
+      .eq("validated", true)
+      .limit(200);
+
+    if (error || !donors) {
+      return [];
+    }
+
+    return donors.map((donor) => ({
+      id: donor.id,
+      firstName: donor.first_name,
+      lastName: donor.last_name,
+      email: donor.email,
+      phoneNumber: donor.phone_number,
+      bloodType: donor.blood_type,
+      city: donor.city,
+      latitude: donor.latitude,
+      longitude: donor.longitude,
+      age: donor.age,
+      available: donor.available,
+      bitcoinAddress: donor.bitcoin_address,
+      profileHash: donor.profile_hash,
+      otsProof: donor.ots_proof,
+      validated: donor.validated,
+      createdAt: new Date(donor.created_at),
+    }));
+  },
+
+  /**
+   * Valide le profil d'un donneur (effectué par l'administrateur d'un hôpital après un don)
+   */
+  validateDonor: async (id: string): Promise<DonorRecord | null> => {
+    const supabase = await createSupabaseServerClient();
+
+    const { data: donor, error } = await supabase
+      .from("donors")
+      .update({ validated: true })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !donor) {
+      console.error("Error validating donor profile:", error);
+      return null;
+    }
+
+    return {
+      id: donor.id,
+      firstName: donor.first_name,
+      lastName: donor.last_name,
+      email: donor.email,
+      phoneNumber: donor.phone_number,
+      bloodType: donor.blood_type,
+      city: donor.city,
+      latitude: donor.latitude,
+      longitude: donor.longitude,
+      age: donor.age,
+      available: donor.available,
+      bitcoinAddress: donor.bitcoin_address,
+      profileHash: donor.profile_hash,
+      otsProof: donor.ots_proof,
+      validated: donor.validated,
+      createdAt: new Date(donor.created_at),
+    };
   },
 };

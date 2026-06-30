@@ -1,6 +1,7 @@
 import { createDonorSchema } from "@/modules/donors";
 import { donorService } from "@/modules/donors/services/donor.service";
 import { walletService, otsService } from "@/modules/bitcoin";
+import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -49,6 +50,27 @@ export async function POST(req: Request) {
     });
 
     return success(newDonor, { status: 201 });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * GET /api/v1/donors
+ * Récupère tous les donneurs validés (ayant effectué au moins un don).
+ * Accessible uniquement aux utilisateurs authentifiés (Hôpitaux/Admins).
+ */
+export async function GET() {
+  try {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+
+    const validatedDonors = await donorService.getValidatedDonors();
+    return success(validatedDonors);
   } catch (error) {
     return handleApiError(error);
   }
