@@ -56,7 +56,7 @@ export function LoginForm() {
         placeholder="••••••••"
         hint={
           <Link
-            href="#"
+            href="/forgot-password"
             className="text-muted-foreground hover:text-foreground text-xs"
           >
             Mot de passe oublié ?

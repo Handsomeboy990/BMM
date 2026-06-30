@@ -3,21 +3,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  AUTH_BYPASS,
+  demoCampaigns,
+  demoDonors,
+  demoEmergencies,
+  demoMatches,
+} from "@/lib/dev/demo";
+
+import {
   authApi,
   campaignsApi,
   donorsApi,
   emergenciesApi,
   searchApi,
   verifyApi,
+  type CampaignRecord,
   type CreateCampaignPayload,
   type CreateDonorPayload,
   type CreateEmergencyPayload,
+  type DonorRecord,
+  type EmergencyRecord,
   type EmergencyStatus,
   type LoginPayload,
   type RegisterOrganizationPayload,
   type RewardPayload,
   type SearchParams,
 } from "./resources";
+
+/** Délai simulé pour que les états de chargement restent visibles en démo. */
+const demoDelay = <T>(value: T) =>
+  new Promise<T>((resolve) => setTimeout(() => resolve(value), 350));
 
 export const queryKeys = {
   me: ["auth", "me"] as const,
@@ -35,6 +50,7 @@ export function useMe() {
   return useQuery({
     queryKey: queryKeys.me,
     queryFn: () => authApi.me().then((r) => r.data),
+    enabled: !AUTH_BYPASS,
     retry: false,
     staleTime: 60_000,
   });
@@ -43,7 +59,8 @@ export function useMe() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: LoginPayload) => authApi.login(payload),
+    mutationFn: (payload: LoginPayload) =>
+      AUTH_BYPASS ? Promise.resolve(null) : authApi.login(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.me }),
   });
 }
@@ -52,7 +69,7 @@ export function useRegisterOrganization() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: RegisterOrganizationPayload) =>
-      authApi.register(payload),
+      AUTH_BYPASS ? Promise.resolve(null) : authApi.register(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.me }),
   });
 }
@@ -70,33 +87,74 @@ export function useLogout() {
 export function useEmergencies(hospitalId?: string) {
   return useQuery({
     queryKey: queryKeys.emergencies(hospitalId),
-    queryFn: () => emergenciesApi.list(hospitalId).then((r) => r.data),
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoEmergencies)
+        : emergenciesApi.list(hospitalId).then((r) => r.data),
   });
 }
 
 export function useCreateEmergency() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateEmergencyPayload) =>
-      emergenciesApi.create(payload).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["emergencies"] }),
+    mutationFn: (payload: CreateEmergencyPayload) => {
+      if (AUTH_BYPASS) {
+        const record: EmergencyRecord = {
+          id: `demo-${Date.now()}`,
+          hospitalId: "demo",
+          status: "active",
+          createdAt: new Date().toISOString(),
+          ...payload,
+        };
+        qc.setQueriesData<EmergencyRecord[]>(
+          { queryKey: ["emergencies"] },
+          (old) => [record, ...(old ?? [])],
+        );
+        return Promise.resolve(record);
+      }
+      return emergenciesApi.create(payload).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["emergencies"] });
+    },
   });
 }
 
 export function useUpdateEmergencyStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: EmergencyStatus }) =>
-      emergenciesApi.updateStatus(id, status).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["emergencies"] }),
+    mutationFn: ({ id, status }: { id: string; status: EmergencyStatus }) => {
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<EmergencyRecord[]>(
+          { queryKey: ["emergencies"] },
+          (old) => old?.map((e) => (e.id === id ? { ...e, status } : e)),
+        );
+        return Promise.resolve(null);
+      }
+      return emergenciesApi.updateStatus(id, status).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["emergencies"] });
+    },
   });
 }
 
 export function useDeleteEmergency() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => emergenciesApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["emergencies"] }),
+    mutationFn: (id: string) => {
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<EmergencyRecord[]>(
+          { queryKey: ["emergencies"] },
+          (old) => old?.filter((e) => e.id !== id),
+        );
+        return Promise.resolve({ success: true });
+      }
+      return emergenciesApi.remove(id).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["emergencies"] });
+    },
   });
 }
 
@@ -105,16 +163,39 @@ export function useDeleteEmergency() {
 export function useCampaigns(hospitalId?: string) {
   return useQuery({
     queryKey: queryKeys.campaigns(hospitalId),
-    queryFn: () => campaignsApi.list(hospitalId).then((r) => r.data),
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoCampaigns)
+        : campaignsApi.list(hospitalId).then((r) => r.data),
   });
 }
 
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateCampaignPayload) =>
-      campaignsApi.create(payload).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["campaigns"] }),
+    mutationFn: (payload: CreateCampaignPayload) => {
+      if (AUTH_BYPASS) {
+        const record: CampaignRecord = {
+          ...payload,
+          id: `demo-${Date.now()}`,
+          hospitalId: "demo",
+          targetBloodType: payload.targetBloodType ?? null,
+          emailsSent: 0,
+          responsesCount: 0,
+          status: "active",
+          createdAt: new Date().toISOString(),
+        };
+        qc.setQueriesData<CampaignRecord[]>(
+          { queryKey: ["campaigns"] },
+          (old) => [record, ...(old ?? [])],
+        );
+        return Promise.resolve(record);
+      }
+      return campaignsApi.create(payload).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["campaigns"] });
+    },
   });
 }
 
@@ -122,7 +203,13 @@ export function useCreateCampaign() {
 
 export function useSearchDonors() {
   return useMutation({
-    mutationFn: (params: SearchParams) => searchApi.donors(params),
+    mutationFn: (params: SearchParams) =>
+      AUTH_BYPASS
+        ? demoDelay({
+            ai: !!params.ai,
+            matches: demoMatches.filter((d) => d.available),
+          })
+        : searchApi.donors(params),
   });
 }
 
@@ -132,22 +219,45 @@ export function useSearchDonors() {
 export function useDonors() {
   return useQuery({
     queryKey: ["donors", "directory"],
-    queryFn: () => donorsApi.list().then((r) => r.data),
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoDonors)
+        : donorsApi.list().then((r) => r.data),
   });
 }
 
 export function useCreateDonor() {
   return useMutation({
-    mutationFn: (payload: CreateDonorPayload) =>
-      donorsApi.create(payload).then((r) => r.data),
+    mutationFn: (payload: CreateDonorPayload): Promise<DonorRecord> => {
+      if (AUTH_BYPASS) {
+        return demoDelay({
+          ...payload,
+          id: `demo-${Date.now()}`,
+          otsProof: null,
+          validated: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      return donorsApi.create(payload).then((r) => r.data);
+    },
   });
 }
 
 export function useValidateDonor() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => donorsApi.validate(id).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["donors"] }),
+    mutationFn: (id: string) => {
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<DonorRecord[]>({ queryKey: ["donors"] }, (old) =>
+          old?.map((d) => (d.id === id ? { ...d, validated: true } : d)),
+        );
+        return Promise.resolve(null);
+      }
+      return donorsApi.validate(id).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donors"] });
+    },
   });
 }
 
@@ -156,7 +266,29 @@ export function useValidateDonor() {
 export function useVerifyDonor(id: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.verify(id),
-    queryFn: () => verifyApi.get(id).then((r) => r.data),
+    queryFn: () => {
+      if (AUTH_BYPASS) {
+        const donor = demoDonors[0];
+        return demoDelay({
+          donor: {
+            id,
+            bloodType: donor.bloodType,
+            bitcoinAddress: donor.bitcoinAddress,
+            profileHash: donor.profileHash,
+            hasOtsProof: true,
+            createdAt: donor.createdAt,
+          },
+          verification: {
+            isTimestampVerified: true,
+            details: {
+              height: 842119,
+              timestamp: Math.floor(Date.now() / 1000),
+            },
+          },
+        });
+      }
+      return verifyApi.get(id).then((r) => r.data);
+    },
     enabled: enabled && id.length > 0,
     retry: false,
   });
@@ -165,6 +297,8 @@ export function useVerifyDonor(id: string, enabled = true) {
 export function useRewardDonor() {
   return useMutation({
     mutationFn: ({ id, ...payload }: { id: string } & RewardPayload) =>
-      verifyApi.reward(id, payload).then((r) => r.data),
+      AUTH_BYPASS
+        ? demoDelay({ message: "Récompense simulée envoyée.", reward: null })
+        : verifyApi.reward(id, payload).then((r) => r.data),
   });
 }

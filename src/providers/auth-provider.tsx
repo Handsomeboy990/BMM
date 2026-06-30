@@ -4,6 +4,7 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { useMe } from "@/lib/api/hooks";
 import type { UserProfile } from "@/lib/api/resources";
+import { AUTH_BYPASS, BYPASS_USER } from "@/lib/dev/demo";
 
 type AuthContextValue = {
   user: UserProfile | null;
@@ -20,11 +21,13 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data, isLoading, isSuccess } = useMe();
 
-  const value: AuthContextValue = {
-    user: isSuccess ? (data ?? null) : null,
-    isLoading,
-    isAuthenticated: isSuccess && !!data,
-  };
+  const value: AuthContextValue = AUTH_BYPASS
+    ? { user: BYPASS_USER, isLoading: false, isAuthenticated: true }
+    : {
+        user: isSuccess ? (data ?? null) : null,
+        isLoading,
+        isAuthenticated: isSuccess && !!data,
+      };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
