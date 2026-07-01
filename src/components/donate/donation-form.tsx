@@ -75,13 +75,14 @@ export function DonationForm() {
             {DONATION_PURPOSE_LABELS[invoice.purpose].toLowerCase()}.
           </p>
 
+          {/* Avertissement de facture simulee, masque a la demande.
           {invoice.simulated ? (
             <p className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
               <AlertCircle className="mt-0.5 size-4 shrink-0" />
               Facture de demonstration (SDK Breez en mode simulation cote
               serveur). Configurez le noeud Breez pour des factures reelles.
             </p>
-          ) : null}
+          ) : null} */}
 
           <div className="flex justify-center">
             <QrBadge

@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -57,7 +58,14 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="border-t p-4">
+      <div className="space-y-3 border-t p-4">
+        <Link
+          href="/soutenir"
+          className="border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
+        >
+          <Heart className="size-4" />
+          Soutenir la plateforme
+        </Link>
         <p className="text-muted-foreground text-xs">Time's Care 2026</p>
       </div>
     </aside>

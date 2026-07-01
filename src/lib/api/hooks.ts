@@ -471,6 +471,26 @@ export function useCreateDonation() {
   });
 }
 
+/** Historique des dons + total collecte (super-admin). */
+export function useDonationsHistory() {
+  return useQuery({
+    queryKey: ["donations", "history"],
+    enabled: !AUTH_BYPASS,
+    refetchInterval: 30_000,
+    queryFn: () => donationsApi.history().then((r) => r.data),
+  });
+}
+
+/** Retire les fonds collectes vers une facture Lightning (super-admin). */
+export function useWithdrawDonations() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bolt11: string) =>
+      donationsApi.withdraw(bolt11).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["donations"] }),
+  });
+}
+
 /* ------------------ Réseau inter-centres (démo) -------------------- */
 
 /** Stock de la structure par composant. Démo en attendant `GET /stock`. */

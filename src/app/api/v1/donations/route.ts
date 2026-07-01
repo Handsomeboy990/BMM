@@ -4,6 +4,7 @@ import {
   donationService,
   type DonationPurpose,
 } from "@/modules/donations";
+import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { failure, handleApiError, success } from "@/lib/api/response";
 
@@ -56,6 +57,32 @@ export async function POST(req: Request) {
       },
       { status: 201 },
     );
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+/**
+ * GET /api/v1/donations
+ * Historique des dons a la plateforme + total collecte. Reserve au super-admin.
+ */
+export async function GET() {
+  try {
+    const user = await authService.getCurrentUser();
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+    if (user.role !== "super_admin") {
+      return failure(API_ERROR_CODE.FORBIDDEN, "Acces reserve au super-admin.", {
+        status: 403,
+      });
+    }
+
+    const donations = await donationService.listDonations();
+    const totalSats = donations.reduce((sum, d) => sum + d.amountSats, 0);
+    return success({ donations, totalSats, count: donations.length });
   } catch (error) {
     return handleApiError(error);
   }

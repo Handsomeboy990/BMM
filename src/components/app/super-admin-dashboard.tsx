@@ -9,17 +9,20 @@ import {
   Droplet,
   ExternalLink,
   FileText,
+  Heart,
   MapPin,
   ShieldCheck,
   X,
 } from "lucide-react";
 import { useState } from "react";
 
+import { DonationsPanel } from "@/components/app/donations-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  useDonationsHistory,
   useDonors,
   useEmergencies,
   useOrgDocuments,
@@ -50,10 +53,12 @@ export function SuperAdminDashboard() {
   const orgs = useOrganizations();
   const donors = useDonors();
   const emergencies = useEmergencies();
+  const donations = useDonationsHistory();
 
   const activeEmergencies =
     emergencies.data?.filter((e) => e.status === "active") ?? [];
   const pendingOrgs = orgs.data?.filter((o) => !o.verified) ?? [];
+  const donationCount = donations.data?.count ?? 0;
 
   const metrics = [
     {
@@ -80,11 +85,17 @@ export function SuperAdminDashboard() {
       value: emergencies.isLoading ? "…" : String(activeEmergencies.length),
       icon: Bell,
     },
+    {
+      key: "donations",
+      label: "Dons reçus",
+      value: donations.isLoading ? "…" : String(donationCount),
+      icon: Heart,
+    },
   ];
 
   return (
     <div className="space-y-8">
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
@@ -167,6 +178,8 @@ export function SuperAdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <DonationsPanel />
     </div>
   );
 }

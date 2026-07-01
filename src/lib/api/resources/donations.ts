@@ -34,8 +34,31 @@ export type DonationInvoice = {
   simulated: boolean;
 };
 
+export type DonationRecord = {
+  id: string;
+  amountSats: number;
+  purpose: DonationPurpose;
+  message: string | null;
+  bolt11: string | null;
+  status: string;
+  createdAt: string;
+};
+
+export type DonationsHistory = {
+  donations: DonationRecord[];
+  totalSats: number;
+  count: number;
+};
+
 export const donationsApi = {
   /** Genere une facture Lightning pour un don a la plateforme. */
   create: (payload: CreateDonationPayload) =>
     httpClient.post<DonationInvoice>("/donations", payload),
+
+  /** Historique des dons + total collecte (super-admin). */
+  history: () => httpClient.get<DonationsHistory>("/donations"),
+
+  /** Retire les fonds vers une facture Lightning externe (super-admin). */
+  withdraw: (bolt11: string) =>
+    httpClient.post<{ paymentHash: string }>("/donations/withdraw", { bolt11 }),
 };

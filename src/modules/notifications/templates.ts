@@ -13,9 +13,13 @@ const BRAND = {
   bg: "#f4f4f5",
 };
 
-// URL absolue du logo (les clients mail exigent une image hébergée
-// publiquement). En production, NEXT_PUBLIC_APP_URL pointe vers le domaine.
-const LOGO_URL = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/logo_bmm.png`;
+// URL absolue et PUBLIQUE du logo. Les clients mail ne peuvent pas charger une
+// image depuis localhost: on la sert donc depuis le bucket public Supabase
+// (joignable partout, en local comme en production).
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const LOGO_URL = SUPABASE_URL
+  ? `${SUPABASE_URL}/storage/v1/object/public/assets/logo_bmm.png`
+  : `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/logo_bmm.png`;
 
 function escapeHtml(input: string): string {
   return input
