@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
 import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -8,14 +8,16 @@ import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
 
-const geistSans = Geist({
+const sansFont = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
+const techFont = Space_Grotesk({
   variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -34,7 +36,7 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${sansFont.variable} ${techFont.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
         <ThemeProvider
