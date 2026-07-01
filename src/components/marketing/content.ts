@@ -1,65 +1,51 @@
-import {
-  BellRing,
-  CalendarHeart,
-  HeartPulse,
-  MapPin,
-  ShieldCheck,
-  UsersRound,
-} from "lucide-react";
+import { BellRing, HeartPulse, MapPin, ShieldCheck } from "lucide-react";
 
 export const features = [
   {
-    icon: UsersRound,
-    title: "Donneurs volontaires",
-    description:
-      "Enregistrez votre profil et votre groupe sanguin en quelques minutes, en toute confidentialité.",
-  },
-  {
-    icon: MapPin,
-    title: "Recherche compatible",
-    description:
-      "Retrouvez rapidement des donneurs compatibles à proximité du lieu de l'urgence.",
-  },
-  {
     icon: BellRing,
-    title: "Alertes ciblées",
+    title: "Alerte de proximité instantanée",
     description:
-      "Notifiez instantanément les bons donneurs lorsqu'une vie est en jeu.",
-  },
-  {
-    icon: CalendarHeart,
-    title: "Campagnes de don",
-    description:
-      "Organisez et suivez vos campagnes de collecte, de l'inscription au bilan.",
+      "Recevez des notifications uniquement lorsque votre groupe sanguin est requis d'urgence près de chez vous.",
   },
   {
     icon: ShieldCheck,
-    title: "Cartes vérifiables",
+    title: "Identité souveraine et privée",
     description:
-      "Cartes physiques et numériques dont l'authenticité est vérifiable en un instant.",
+      "Vos données personnelles sont signées et contrôlées par vous seul grâce à des clés cryptographiques privées.",
   },
   {
     icon: HeartPulse,
-    title: "Preuves Bitcoin",
+    title: "Preuve d'intégrité transparente",
     description:
-      "L'intégrité des données est ancrée sur Bitcoin, vérifiable publiquement.",
+      "Chaque inscription et chaque don historique sont ancrés de façon immuable sur la blockchain Bitcoin.",
+  },
+  {
+    icon: MapPin,
+    title: "Reconnaissance par Lightning",
+    description:
+      "Recevez des récompenses en Satoshis directement sur votre portefeuille mobile après chaque don validé.",
   },
 ] as const;
 
 export const steps = [
   {
-    title: "Inscrivez-vous",
+    title: "Créez votre profil sécurisé",
     description:
-      "Créez votre profil de donneur et renseignez votre groupe sanguin et votre zone.",
+      "Renseignez votre groupe sanguin et partagez votre position pour être répertorié dans votre région.",
   },
   {
-    title: "Soyez alerté",
+    title: "Sécurisez vos données sur Bitcoin",
     description:
-      "Recevez une notification dès qu'un besoin compatible survient près de chez vous.",
+      "Votre profil génère une identité souveraine et sa preuve d'intégrité est ancrée de manière transparente.",
   },
   {
-    title: "Sauvez des vies",
+    title: "Répondez aux appels urgents",
     description:
-      "Rendez-vous au point de collecte et confirmez votre don en toute simplicité.",
+      "Lorsqu'une alerte compatible retentit près de vous, présentez-vous au centre de collecte pour faire votre don.",
+  },
+  {
+    title: "Recevez vos Satoshis de soutien",
+    description:
+      "Dès votre don validé par l'hôpital, votre portefeuille Lightning reçoit automatiquement des Satoshis.",
   },
 ] as const;

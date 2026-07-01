@@ -1,10 +1,10 @@
 "use client";
 
+import { Logo } from "@/components/shared/logo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Container } from "@/components/layout/container";
-import { BrandLogo } from "@/components/shared/brand-logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { primaryNav } from "@/config/navigation";
@@ -30,8 +30,8 @@ export function SiteHeader() {
       )}
     >
       <Container className="flex h-16 items-center justify-between">
-        <a href="#" className="flex items-center gap-2 font-semibold">
-          <BrandLogo priority />
+        <a href="#" className="flex items-center">
+          <Logo />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">

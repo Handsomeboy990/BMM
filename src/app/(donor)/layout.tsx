@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BrandLogo } from "@/components/shared/brand-logo";
+import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -17,7 +17,7 @@ export default function DonorLayout({
       <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
         <div className="mx-auto flex h-16 w-full max-w-4xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center">
-            <BrandLogo />
+            <Logo />
           </Link>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground hidden text-sm sm:inline">

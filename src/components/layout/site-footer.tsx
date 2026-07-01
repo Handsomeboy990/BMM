@@ -1,18 +1,14 @@
-import { Droplet } from "lucide-react";
+import { Logo } from "@/components/shared/logo";
 
 import { Container } from "@/components/layout/container";
 import { footerNav } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
 
 export function SiteFooter() {
   return (
     <footer className="bg-secondary/30 border-t">
       <Container className="grid gap-10 py-14 md:grid-cols-[1.5fr_repeat(3,1fr)]">
         <div className="flex flex-col gap-3">
-          <span className="flex items-center gap-2 font-semibold">
-            <Droplet className="text-primary" />
-            {siteConfig.name}
-          </span>
+          <Logo />
           <p className="text-muted-foreground max-w-xs text-sm">
             Mieux gérer les donneurs de sang pour sauver plus de vies, partout
             en Afrique.
@@ -40,7 +36,7 @@ export function SiteFooter() {
 
       <Container className="text-muted-foreground flex flex-col items-center justify-between gap-2 border-t py-6 text-sm sm:flex-row">
         <span>
-          {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
+          {new Date().getFullYear()} Bitcoin Blood. Tous droits réservés.
         </span>
         <span>Time's Care 2026</span>
       </Container>

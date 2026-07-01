@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { BrandLogo } from "@/components/shared/brand-logo";
+import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
 import { appNav } from "@/config/app-navigation";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ export function AppSidebar() {
   return (
     <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
       <Link href="/dashboard" className="flex h-16 items-center border-b px-6">
-        <BrandLogo />
+        <Logo />
       </Link>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">

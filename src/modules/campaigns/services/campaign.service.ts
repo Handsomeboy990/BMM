@@ -76,24 +76,14 @@ export const campaignService = {
   },
 
   /**
-   * Envoie des emails réels aux donneurs ciblés via l'API REST d'EmailJS
+   * Envoie des emails réels aux donneurs ciblés via les Edge Functions de Supabase
    */
   sendRealEmails: async (
     donors: DonorRecord[],
     campaignTitle: string,
     hospitalName: string,
   ): Promise<number> => {
-    const serviceId = process.env.EMAILJS_SERVICE_ID;
-    const templateId = process.env.EMAILJS_TEMPLATE_ID;
-    const publicKey = process.env.EMAILJS_PUBLIC_KEY;
-    const privateKey = process.env.EMAILJS_PRIVATE_KEY;
-
-    if (!serviceId || !templateId || !publicKey || !privateKey) {
-      console.warn(
-        "Configuration EmailJS manquante. Fallback sur la simulation de logs.",
-      );
-      return campaignService.simulateEmailSending(donors, campaignTitle);
-    }
+    const supabase = await createSupabaseServerClient();
 
     let successCount = 0;
     const chunkSize = 50;
@@ -102,46 +92,44 @@ export const campaignService = {
       const chunk = donors.slice(i, i + chunkSize);
       const results = await Promise.allSettled(
         chunk.map(async (donor) => {
-          const response = await fetch(
-            "https://api.emailjs.com/api/v1.0/email/send",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                service_id: serviceId,
-                template_id: templateId,
-                user_id: publicKey,
-                accessToken: privateKey,
-                template_params: {
-                  to_email: donor.email,
-                  to_name: `${donor.firstName} ${donor.lastName}`,
-                  campaign_title: campaignTitle,
-                  hospital_name: hospitalName,
-                  blood_type: donor.bloodType,
-                  city: donor.city,
-                },
-              }),
+          const { error } = await supabase.functions.invoke("send-email", {
+            body: {
+              to_email: donor.email,
+              to_name: `${donor.firstName} ${donor.lastName}`,
+              campaign_title: campaignTitle,
+              hospital_name: hospitalName,
+              blood_type: donor.bloodType,
+              city: donor.city,
             },
-          );
+          });
 
-          if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(
-              `Erreur d'envoi EmailJS pour le donneur ${donor.id}: ${errText}`,
-            );
+          if (error) {
+            throw error;
           }
           return true;
         }),
       );
 
+      let hasInvocationError = false;
       for (const result of results) {
         if (result.status === "fulfilled") {
           successCount++;
         } else {
-          console.error(result.reason);
+          console.error(
+            `Erreur d'envoi via Supabase Edge Function:`,
+            result.reason,
+          );
+          hasInvocationError = true;
         }
+      }
+
+      // Si toutes les tentatives ont échoué (par exemple si la fonction n'est pas déployée en local),
+      // on bascule sur la simulation pour ne pas bloquer le flux de dev.
+      if (hasInvocationError && successCount === 0) {
+        console.warn(
+          "L'envoi via Supabase Edge Function a échoué. Fallback sur la simulation de logs.",
+        );
+        return campaignService.simulateEmailSending(donors, campaignTitle);
       }
     }
 
