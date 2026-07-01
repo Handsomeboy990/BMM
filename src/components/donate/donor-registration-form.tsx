@@ -98,9 +98,12 @@ export function DonorRegistrationForm() {
           <div className="flex flex-col items-center gap-3 text-center">
             <CheckCircle2 className="size-12 text-emerald-500" />
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold">Vous êtes enregistré !</h2>
+              <h2 className="text-lg font-semibold">
+                Vous êtes enregistré comme donneur volontaire !
+              </h2>
               <p className="text-muted-foreground text-sm">
-                Votre profil a été signé et est en cours d'ancrage sur Bitcoin.
+                Votre profil de donneur a été signé et sa preuve d'ancrage est
+                en cours de traitement sur la blockchain Bitcoin.
               </p>
             </div>
           </div>
@@ -108,11 +111,12 @@ export function DonorRegistrationForm() {
           <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
               <KeyRound className="size-4" />
-              Conservez votre clé privée
+              Conservez précieusement votre clé privée
             </p>
             <p className="text-muted-foreground text-xs">
-              Elle prouve la propriété de votre profil. Nous ne la stockons pas
-              : copiez-la et gardez-la en lieu sûr.
+              Elle prouve la propriété de votre profil et vous permet de vous
+              authentifier de manière souveraine. Nous ne stockons pas cette clé
+              : copiez-la et gardez-la dans un endroit sûr.
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-background flex-1 truncate rounded border px-2 py-1.5 font-mono text-xs">
@@ -244,7 +248,9 @@ export function DonorRegistrationForm() {
           </p>
 
           <Button type="submit" size="lg" className="w-full" disabled={busy}>
-            {busy ? "Signature & enregistrement…" : "Devenir donneur"}
+            {busy
+              ? "Signature & enregistrement…"
+              : "Devenir donneur maintenant"}
           </Button>
         </form>
       </CardContent>

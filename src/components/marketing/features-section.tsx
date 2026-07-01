@@ -16,16 +16,16 @@ export function FeaturesSection() {
       <Container className="flex flex-col gap-14">
         <div className="flex flex-col gap-6">
           <SectionHeading
-            eyebrow="Fonctionnalités"
-            title="Tout ce qu'il faut pour mobiliser les donneurs"
-            description="Une plateforme pensée pour la rapidité, la confiance et la traçabilité, de l'inscription jusqu'au don."
+            eyebrow="Proposition de valeur"
+            title="Une révolution humanitaire guidée par la solidarité et la technologie."
+            description="Découvrez comment Bitcoin Blood combine la preuve cryptographique et le réseau Lightning pour sauver des vies."
           />
           <Reveal delay={220}>
             <PulseLine />
           </Reveal>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature, index) => (
             <Reveal
               key={feature.title}

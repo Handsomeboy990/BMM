@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type SectionHeadingProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   align?: "left" | "center";
@@ -22,9 +22,11 @@ export function SectionHeading({
         align === "center" && "mx-auto items-center text-center",
       )}
     >
-      <Reveal direction="scale">
-        <Badge variant="primary">{eyebrow}</Badge>
-      </Reveal>
+      {eyebrow && (
+        <Reveal direction="scale">
+          <Badge variant="primary">{eyebrow}</Badge>
+        </Reveal>
+      )}
       <Reveal delay={80}>
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
           {title}
