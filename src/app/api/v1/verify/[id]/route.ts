@@ -90,7 +90,13 @@ export async function POST(
   try {
     // 1. Authentification & Autorisation (Seuls les hôpitaux/administrateurs connectés peuvent récompenser)
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId) {
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
+    }
+
+    if (!user.organizationId) {
       return failure(
         API_ERROR_CODE.FORBIDDEN,
         "Accès refusé. L'utilisateur n'est associé à aucune organisation.",

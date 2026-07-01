@@ -152,7 +152,7 @@ describe("POST /api/v1/verify/[id]", () => {
     );
   });
 
-  it("should return 403 if unauthorized", async () => {
+  it("should return 401 if unauthorized", async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null);
 
     const req = new Request(`http://localhost/api/v1/verify/${VALID_UUID}`, {
@@ -163,7 +163,7 @@ describe("POST /api/v1/verify/[id]", () => {
     const response = await POST(req, {
       params: Promise.resolve({ id: VALID_UUID }),
     });
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
   });
 
   it("should return 409 conflict if donor was rewarded within 60 days", async () => {
