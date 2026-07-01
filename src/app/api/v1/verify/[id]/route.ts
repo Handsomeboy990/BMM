@@ -1,6 +1,8 @@
 import { donorService } from "@/modules/donors";
 import { otsService, breezService, rewardService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
+import { emailService } from "@/modules/notifications";
+import { clientEnv } from "@/lib/env/client";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 import { z } from "zod";
@@ -159,6 +161,17 @@ export async function POST(
         "completed",
         payoutResult.paymentHash,
       );
+
+      // 7. Email de récompense (best-effort: n'échoue jamais le paiement).
+      void emailService
+        .sendDonorReward({
+          toEmail: donor.email,
+          toName: `${donor.firstName} ${donor.lastName}`,
+          sats: satsAmount,
+          hospitalName: user.organization?.name ?? "un centre partenaire",
+          verifyUrl: `${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${donor.id}`,
+        })
+        .catch((e) => console.error("Reward email failed:", e));
 
       return success({
         message: "Récompense envoyée avec succès.",
