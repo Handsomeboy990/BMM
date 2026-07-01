@@ -1,6 +1,6 @@
 import { createDonorSchema } from "@/modules/donors";
 import { donorService } from "@/modules/donors/services/donor.service";
-import { walletService, otsService } from "@/modules/bitcoin";
+import { walletService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
@@ -32,21 +32,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Horodatage du profil sur Bitcoin via OpenTimestamps
-    let otsProof = null;
-    try {
-      otsProof = await otsService.stampHash(validatedData.profileHash);
-    } catch (e) {
-      console.error(
-        "L'horodatage OpenTimestamps a échoué. Poursuite de la création sans preuve.",
-        e,
-      );
-    }
-
-    // Enregistrement dans la base de données (Supabase Auth + Table donors)
+    // Enregistrement dans la base de données (Supabase Auth + Table donors) sans preuve OTS initiale
     const newDonor = await donorService.createDonor({
       ...validatedData,
-      otsProof,
+      otsProof: null,
     });
 
     return success(newDonor, { status: 201 });

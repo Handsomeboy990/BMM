@@ -2,11 +2,18 @@ import { vi, describe, it, expect } from "vitest";
 import { PATCH } from "./route";
 import { donorService } from "@/modules/donors/services/donor.service";
 import { authService } from "@/modules/auth";
+import { otsService } from "@/modules/bitcoin";
 
 vi.mock("@/modules/donors/services/donor.service", () => ({
   donorService: {
     getDonorById: vi.fn(),
     validateDonor: vi.fn(),
+  },
+}));
+
+vi.mock("@/modules/bitcoin", () => ({
+  otsService: {
+    stampHash: vi.fn(),
   },
 }));
 
@@ -31,12 +38,15 @@ describe("PATCH /api/v1/donors/[id]/validate", () => {
       id: VALID_UUID,
       firstName: "Kofi",
       validated: false,
+      profileHash: "hash...",
     };
     const mockValidatedDonor = {
       ...mockDonor,
       validated: true,
+      otsProof: "ots-proof-xyz",
     };
 
+    vi.mocked(otsService.stampHash).mockResolvedValue("ots-proof-xyz");
     vi.mocked(donorService.getDonorById).mockResolvedValue(
       mockDonor as unknown as Awaited<
         ReturnType<typeof donorService.getDonorById>
@@ -62,7 +72,11 @@ describe("PATCH /api/v1/donors/[id]/validate", () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json.data.donor.validated).toBe(true);
-    expect(donorService.validateDonor).toHaveBeenCalledWith(VALID_UUID);
+    expect(otsService.stampHash).toHaveBeenCalledWith("hash...");
+    expect(donorService.validateDonor).toHaveBeenCalledWith(
+      VALID_UUID,
+      "ots-proof-xyz",
+    );
   });
 
   it("should return 403 if user is not associated with an organization", async () => {
