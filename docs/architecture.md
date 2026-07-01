@@ -16,10 +16,19 @@ d'implémentation.
 
 ## Cœur technique (`src/lib`)
 
-### `env.ts`
+### `env/`
 
-Valide les variables d'environnement avec Zod au chargement du module. Le reste
-de l'application importe `env` plutôt que de lire `process.env`.
+Valide les variables d'environnement avec Zod au chargement du module. La
+validation est scindée pour respecter la frontière client/serveur:
+
+- `client.ts` expose `clientEnv` (variables `NEXT_PUBLIC_*`), sûr à importer
+  depuis n'importe quel composant. Chaque clé est référencée littéralement pour
+  être inlinée dans le bundle client.
+- `server.ts` expose `serverEnv` (secrets serveur comme `DATABASE_URL`),
+  importé uniquement par le code serveur et l'outillage.
+
+Le reste de l'application importe `clientEnv`/`serverEnv` plutôt que de lire
+`process.env`. Ne jamais importer `server.ts` depuis un Composant Client.
 
 ### `api/`
 

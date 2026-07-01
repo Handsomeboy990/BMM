@@ -3,6 +3,7 @@ import {
   createSupabaseAdminClient,
 } from "@/lib/supabase/server";
 import { CreateDonorDTO, DonorRecord } from "../types";
+import type { UpdateDonorDTO } from "../schemas";
 
 export const donorService = {
   /**
@@ -53,12 +54,21 @@ export const donorService = {
       .single();
 
     if (error) {
-      console.error("Error creating donor profile:", error);
+      // On journalise le détail réel (message/code) au lieu d'un objet vide,
+      // et on nettoie l'utilisateur auth créé pour éviter les orphelins.
+      console.error(
+        "Error creating donor profile:",
+        error.message,
+        error.code,
+        error.details,
+      );
       const adminClient = createSupabaseAdminClient();
       if (adminClient) {
         await adminClient.auth.admin.deleteUser(userId);
       }
-      throw new Error("Erreur lors de l'enregistrement du profil de donneur");
+      throw new Error(
+        `Erreur lors de l'enregistrement du profil de donneur: ${error.message}`,
+      );
     }
 
     return {
@@ -205,6 +215,55 @@ export const donorService = {
     if (error || !donor) {
       console.error("Error validating donor profile:", error);
       return null;
+    }
+
+    return {
+      id: donor.id,
+      firstName: donor.first_name,
+      lastName: donor.last_name,
+      email: donor.email,
+      phoneNumber: donor.phone_number,
+      bloodType: donor.blood_type,
+      city: donor.city,
+      latitude: donor.latitude,
+      longitude: donor.longitude,
+      age: donor.age,
+      available: donor.available,
+      bitcoinAddress: donor.bitcoin_address,
+      profileHash: donor.profile_hash,
+      otsProof: donor.ots_proof,
+      validated: donor.validated,
+      createdAt: new Date(donor.created_at),
+    };
+  },
+
+  /**
+   * Met à jour les informations d'un donneur (depuis son espace).
+   */
+  updateDonor: async (
+    id: string,
+    data: UpdateDonorDTO,
+  ): Promise<DonorRecord | null> => {
+    const supabase = await createSupabaseServerClient();
+
+    const patch: Record<string, unknown> = {};
+    if (data.phoneNumber !== undefined) patch.phone_number = data.phoneNumber;
+    if (data.email !== undefined) patch.email = data.email;
+    if (data.city !== undefined) patch.city = data.city;
+    if (data.latitude !== undefined) patch.latitude = data.latitude;
+    if (data.longitude !== undefined) patch.longitude = data.longitude;
+    if (data.available !== undefined) patch.available = data.available;
+
+    const { data: donor, error } = await supabase
+      .from("donors")
+      .update(patch)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error || !donor) {
+      console.error("Error updating donor profile:", error);
+      throw new Error("Erreur lors de la mise à jour du profil de donneur");
     }
 
     return {

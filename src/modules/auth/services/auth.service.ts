@@ -1,3 +1,4 @@
+import { ApiError } from "@/lib/api/errors";
 import {
   createSupabaseServerClient,
   createSupabaseAdminClient,
@@ -17,7 +18,7 @@ export const authService = {
 
     if (error) {
       console.error("Login failed:", error);
-      throw new Error(error.message || "Erreur de connexion");
+      throw ApiError.unauthorized("Email ou mot de passe incorrect.");
     }
 
     return authData;
@@ -42,6 +43,18 @@ export const authService = {
   signUpOrganization: async (data: SignUpDTO) => {
     const supabase = await createSupabaseServerClient();
 
+    // Les insertions de bootstrap (organisation + profil) contournent RLS via
+    // le client administrateur: au moment de l'inscription, l'utilisateur n'a
+    // pas encore de rôle, donc les politiques réservées au super_admin
+    // bloqueraient l'insertion (œuf/poule). On vérifie sa disponibilité avant
+    // de créer le compte pour éviter un utilisateur auth orphelin.
+    const admin = createSupabaseAdminClient();
+    if (!admin) {
+      throw new Error(
+        "Inscription indisponible: SUPABASE_SERVICE_ROLE_KEY n'est pas configurée.",
+      );
+    }
+
     // 1. Inscription dans Supabase Auth (crée le compte)
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: data.email,
@@ -50,8 +63,10 @@ export const authService = {
 
     if (signUpError || !authData.user) {
       console.error("Auth signUp failed:", signUpError);
-      throw new Error(
-        signUpError?.message || "Erreur lors de la création du compte",
+      // Remonte la cause réelle (email invalide, rate limit, déjà inscrit…)
+      // au lieu de la masquer derrière une erreur interne générique.
+      throw ApiError.badRequest(
+        signUpError?.message || "Erreur lors de la création du compte.",
       );
     }
 
@@ -59,7 +74,7 @@ export const authService = {
 
     try {
       // 2. Création de l'organisation dans la base
-      const { data: newOrg, error: orgError } = await supabase
+      const { data: newOrg, error: orgError } = await admin
         .from("organizations")
         .insert([
           {
@@ -77,34 +92,24 @@ export const authService = {
 
       if (orgError || !newOrg) {
         console.error("Org insertion failed:", orgError);
-        const adminClient = createSupabaseAdminClient();
-        if (adminClient) {
-          await adminClient.auth.admin.deleteUser(userId);
-        }
+        await admin.auth.admin.deleteUser(userId);
         throw new Error("Erreur lors de la création de l'organisation");
       }
 
       // 3. Création du profil utilisateur lié à l'organisation
-      const { error: profileError } = await supabase
-        .from("user_profiles")
-        .insert([
-          {
-            id: userId,
-            organization_id: newOrg.id,
-            role: "org_admin",
-          },
-        ]);
+      const { error: profileError } = await admin.from("user_profiles").insert([
+        {
+          id: userId,
+          organization_id: newOrg.id,
+          role: "org_admin",
+        },
+      ]);
 
       if (profileError) {
         console.error("Profile insertion failed:", profileError);
-        // Nettoyage de l'organisation créée
-        await supabase.from("organizations").delete().eq("id", newOrg.id);
-
-        // Nettoyage de l'utilisateur auth créé
-        const adminClient = createSupabaseAdminClient();
-        if (adminClient) {
-          await adminClient.auth.admin.deleteUser(userId);
-        }
+        // Nettoyage de l'organisation puis de l'utilisateur auth créés.
+        await admin.from("organizations").delete().eq("id", newOrg.id);
+        await admin.auth.admin.deleteUser(userId);
 
         throw new Error("Erreur lors de la création du profil utilisateur");
       }

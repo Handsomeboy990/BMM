@@ -128,6 +128,37 @@ export const rewardService = {
   },
 
   /**
+   * Récupère l'historique des récompenses reçues par un donneur
+   */
+  getDonorRewardLogs: async (donorId: string): Promise<RewardLogRecord[]> => {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("reward_logs")
+      .select("*")
+      .eq("donor_id", donorId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching donor reward logs:", error);
+      throw new Error(
+        "Erreur lors de la récupération des récompenses du donneur",
+      );
+    }
+
+    return (data || []).map((record) => ({
+      id: record.id,
+      donorId: record.donor_id,
+      hospitalId: record.hospital_id,
+      satsAmount: record.sats_amount,
+      status: record.status,
+      bolt11Invoice: record.bolt11_invoice,
+      paymentHash: record.payment_hash,
+      errorMessage: record.error_message,
+      createdAt: new Date(record.created_at),
+    }));
+  },
+
+  /**
    * Vérifie si le donneur a reçu une récompense complétée au cours des N derniers jours
    */
   hasRecentCompletedReward: async (

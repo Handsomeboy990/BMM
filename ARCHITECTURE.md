@@ -70,7 +70,7 @@ validées avec Zod et toutes les réponses suivent une enveloppe normalisée. Vo
 - Le frontend ne communique avec l'API que via le client HTTP centralisé
   (`src/lib/api/http-client.ts`).
 - Les variables d'environnement sont validées au démarrage
-  (`src/lib/env.ts`); aucun accès direct à `process.env` ailleurs.
+  (`src/lib/env/`); aucun accès direct à `process.env` ailleurs.
 
 ## Décisions notables
 

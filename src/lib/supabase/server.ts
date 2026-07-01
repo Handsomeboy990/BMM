@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-import { env } from "@/lib/env";
+import { clientEnv } from "@/lib/env/client";
 
 /**
  * Client Supabase pour le serveur (Server Components, Route Handlers,
@@ -12,8 +12,8 @@ export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    clientEnv.NEXT_PUBLIC_SUPABASE_URL,
+    clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -40,11 +40,10 @@ export async function createSupabaseServerClient() {
  * comme la suppression d'utilisateurs Auth lors d'un rollback.
  */
 export function createSupabaseAdminClient() {
-  const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) return null;
 
-  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, serviceKey, {
+  return createClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
