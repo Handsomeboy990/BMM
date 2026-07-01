@@ -71,7 +71,7 @@ function wrap(options: {
         </td></tr>
         <tr><td style="background:#ffffff;border-radius:0 0 14px 14px;border:1px solid ${BRAND.border};border-top:none;padding:20px 28px;">
           <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:${BRAND.muted};">
-            ${BRAND.name} — Plateforme panafricaine de gestion des donneurs de sang.<br>
+            ${BRAND.name}. Plateforme panafricaine de gestion des donneurs de sang.<br>
             Vos dons sont ancrés sur Bitcoin pour une intégrité vérifiable.
           </p>
         </td></tr>
@@ -116,7 +116,7 @@ export function renderWelcomeEmail(params: {
     </p>`;
 
   return {
-    subject: `Bienvenue chez ${BRAND.name} 🩸`,
+    subject: `Bienvenue dans la communauté ${BRAND.name} 🩸`,
     html: wrap({
       preheader: "Votre profil de donneur est actif et ancré sur Bitcoin.",
       heading: "Vous faites désormais partie du réseau",
@@ -159,7 +159,7 @@ export function renderRewardEmail(params: {
     subject: `Vous avez reçu ${sats} sats ⚡`,
     html: wrap({
       preheader: `Récompense de ${sats} sats pour votre don.`,
-      heading: "Merci — voici votre récompense",
+      heading: "Merci, voici votre récompense",
       bodyHtml: body,
       cta: { label: "Voir ma preuve d'intégrité", url: params.verifyUrl },
     }),

@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
       path === "/api/v1/auth/register" ||
       path === "/api/v1/auth/logout" ||
       (path === "/api/v1/donors" && request.method === "POST") ||
+      (path === "/api/v1/donations" && request.method === "POST") ||
       path.startsWith("/api/v1/verify") ||
       path.startsWith("/api/v1/search")
     ) {

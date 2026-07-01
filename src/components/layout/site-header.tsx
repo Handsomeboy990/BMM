@@ -56,6 +56,14 @@ export function SiteHeader() {
           >
             <Link href="/login">Se connecter</Link>
           </Button>
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
+            <Link href="/soutenir">Soutenir</Link>
+          </Button>
           <Button asChild size="sm">
             <Link href="/donate">Devenir donneur</Link>
           </Button>

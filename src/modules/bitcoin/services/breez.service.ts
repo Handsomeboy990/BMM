@@ -11,6 +11,14 @@ interface BreezSdkInstance {
     payment?: { txId: string };
     paymentHash?: string;
   }>;
+  prepareReceivePayment: (req: {
+    paymentMethod: string;
+    amount?: { type: string; payerAmountSat: number };
+  }) => Promise<{ feesSat?: number }>;
+  receivePayment: (req: {
+    prepareResponse: unknown;
+    description?: string;
+  }) => Promise<{ destination?: string }>;
 }
 
 let breezSdk: unknown = null;
@@ -89,6 +97,70 @@ export const breezService = {
     } catch (error) {
       console.error("Erreur lors de l'initialisation de Breez Liquid:", error);
       return false;
+    }
+  },
+
+  /**
+   * S'assure qu'une session Breez est connectée (initialise à la demande).
+   * En mode simulation, aucune instance réelle n'est créée mais on renvoie
+   * vrai pour laisser les appelants basculer sur leur repli simulé.
+   */
+  ensureConnected: async (): Promise<boolean> => {
+    if (activeSdkInstance) return true;
+    return breezService.initialize();
+  },
+
+  /**
+   * Génère une facture Lightning (BOLT11) à payer pour recevoir un don.
+   * amountSat: montant en satoshis. description: objet du don (campagne, dev...).
+   * En l'absence de SDK réel, renvoie une facture simulée clairement marquée.
+   */
+  receivePayment: async (
+    amountSat: number,
+    description: string,
+  ): Promise<{ bolt11: string; feesSat: number; simulated: boolean }> => {
+    try {
+      await breezService.ensureConnected();
+      const sdkModule = await getBreezSdk();
+
+      if (!sdkModule || !activeSdkInstance) {
+        console.warn(
+          `[Breez Simulation] Facture simulée de ${amountSat} sats pour: ${description}`,
+        );
+        const suffix = Date.now().toString(36);
+        return {
+          bolt11: `lnbcsimulated${amountSat}u1p${suffix}`,
+          feesSat: 0,
+          simulated: true,
+        };
+      }
+
+      const sdkTyped = sdkModule as {
+        PaymentMethod?: { LIGHTNING: string };
+      };
+      const paymentMethod = sdkTyped.PaymentMethod?.LIGHTNING ?? "lightning";
+
+      const prepareResponse = await activeSdkInstance.prepareReceivePayment({
+        paymentMethod,
+        amount: { type: "bitcoin", payerAmountSat: amountSat },
+      });
+
+      const result = await activeSdkInstance.receivePayment({
+        prepareResponse,
+        description,
+      });
+
+      return {
+        bolt11: result.destination ?? "",
+        feesSat: prepareResponse.feesSat ?? 0,
+        simulated: false,
+      };
+    } catch (error) {
+      console.error(
+        "Échec de la génération de la facture Lightning via Breez:",
+        error,
+      );
+      throw error;
     }
   },
 

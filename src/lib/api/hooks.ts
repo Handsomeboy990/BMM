@@ -24,6 +24,7 @@ import {
 import {
   authApi,
   campaignsApi,
+  donationsApi,
   donorsApi,
   emergenciesApi,
   organizationsApi,
@@ -33,6 +34,7 @@ import {
   verifyApi,
   type CampaignRecord,
   type CreateCampaignPayload,
+  type CreateDonationPayload,
   type CreateDonorPayload,
   type CreateEmergencyPayload,
   type DonorRecord,
@@ -456,6 +458,16 @@ export function useUploadOrgDocument() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["org-documents", "me"] });
     },
+  });
+}
+
+/* ----------------------- Dons a la plateforme --------------------- */
+
+/** Genere une facture Lightning pour un don a la plateforme. */
+export function useCreateDonation() {
+  return useMutation({
+    mutationFn: (payload: CreateDonationPayload) =>
+      donationsApi.create(payload).then((r) => r.data),
   });
 }
 
