@@ -127,6 +127,7 @@ export function DonorRegistrationForm() {
               <h2 className="text-lg font-semibold">Vous êtes enregistré !</h2>
               <p className="text-muted-foreground text-sm">
                 Votre profil a été signé et est en cours d'ancrage sur Bitcoin.
+                Un email de bienvenue vient de vous être envoyé.
               </p>
             </div>
           </div>
