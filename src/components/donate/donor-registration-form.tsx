@@ -4,6 +4,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Copy,
+  Download,
   KeyRound,
   Navigation,
   ShieldCheck,
@@ -26,6 +27,31 @@ import {
 import { createDonorIdentity } from "@/lib/bitcoin/donor-identity";
 
 type Success = { donor: DonorRecord; wif: string };
+
+/** Télécharge la clé privée en fichier local. Aucune transmission réseau. */
+function downloadKey({ donor, wif }: Success) {
+  const content = [
+    "Bitcoin Blood — Clé privée du donneur",
+    "",
+    `Donneur : ${donor.firstName} ${donor.lastName}`,
+    `Identifiant : ${donor.id}`,
+    `Adresse Bitcoin : ${donor.bitcoinAddress}`,
+    `Clé privée (WIF) : ${wif}`,
+    "",
+    "⚠️ Conservez ce fichier en lieu sûr et ne le partagez avec personne.",
+    "Cette clé prouve la propriété de votre profil de donneur.",
+  ].join("\n");
+
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bitcoin-blood-cle-${donor.id.slice(0, 8)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 export function DonorRegistrationForm() {
   const createDonor = useCreateDonor();
@@ -112,7 +138,8 @@ export function DonorRegistrationForm() {
             </p>
             <p className="text-muted-foreground text-xs">
               Elle prouve la propriété de votre profil. Nous ne la stockons pas
-              : copiez-la et gardez-la en lieu sûr.
+              et ne l'envoyons jamais par email : copiez-la ou téléchargez-la et
+              gardez-la en lieu sûr.
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-background flex-1 truncate rounded border px-2 py-1.5 font-mono text-xs">
@@ -126,6 +153,15 @@ export function DonorRegistrationForm() {
                 onClick={() => navigator.clipboard?.writeText(success.wif)}
               >
                 <Copy className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                aria-label="Télécharger la clé"
+                onClick={() => downloadKey(success)}
+              >
+                <Download className="size-4" />
               </Button>
             </div>
           </div>

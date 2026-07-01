@@ -2,6 +2,8 @@ import { createDonorSchema } from "@/modules/donors";
 import { donorService } from "@/modules/donors/services/donor.service";
 import { walletService, otsService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
+import { emailService } from "@/modules/notifications";
+import { clientEnv } from "@/lib/env/client";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -48,6 +50,25 @@ export async function POST(req: Request) {
       ...validatedData,
       otsProof,
     });
+
+    if (!newDonor) {
+      return failure(
+        API_ERROR_CODE.INTERNAL_ERROR,
+        "Échec de l'enregistrement du donneur.",
+        { status: 500 },
+      );
+    }
+
+    // Email de bienvenue (best-effort: n'échoue jamais l'inscription).
+    void emailService
+      .sendDonorWelcome({
+        toEmail: newDonor.email,
+        toName: `${newDonor.firstName} ${newDonor.lastName}`,
+        bloodType: newDonor.bloodType,
+        city: newDonor.city,
+        verifyUrl: `${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${newDonor.id}`,
+      })
+      .catch((e) => console.error("Welcome email failed:", e));
 
     return success(newDonor, { status: 201 });
   } catch (error) {
