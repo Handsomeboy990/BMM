@@ -1,63 +1,56 @@
-# Endpoints backend à implémenter
+# Endpoints backend — état d'implémentation
 
-Le frontend est entièrement câblé. Certaines fonctionnalités tournent
-aujourd'hui sur des **données simulées** (mode démo `NEXT_PUBLIC_AUTH_BYPASS`)
-faute d'endpoint. Voici ce qui manque côté backend pour passer du mock au réel.
+Le frontend est entièrement câblé (chaque hook a une branche réelle activée
+quand `NEXT_PUBLIC_AUTH_BYPASS=false`). Ce document suit ce qui est fait et ce
+qui reste.
 
 Conventions : préfixe `/api/v1`, enveloppe `{ data, meta }` / `{ error }`,
 validation Zod, authentification par session Supabase.
 
-## 1. Espace donneur
+## ✅ Déjà en place (existant)
 
-Aujourd'hui, `authService.getCurrentUser()` ne lit que `user_profiles`
-(structures) : une session donneur renvoie `null`. Les donneurs ont pourtant
-un compte Supabase (créé à l'inscription).
+`auth` (login, register, logout, me), `donors` (POST + GET liste,
+`:id/validate`), `emergencies` (CRUD + `:id`), `campaigns` (GET/POST),
+`search`, `verify/:id` (GET + POST récompense), `health`.
 
-| Méthode | Route                          | Rôle                  | Description                                                                            |
-| ------- | ------------------------------ | --------------------- | -------------------------------------------------------------------------------------- |
-| GET     | `/api/v1/donors/me`            | donneur               | Profil du donneur connecté (étendre `getCurrentUser` pour résoudre la table `donors`). |
-| PATCH   | `/api/v1/donors/:id`           | donneur (soi)         | Mise à jour : téléphone, email, ville, lat/lon, disponibilité, type de don préféré.    |
-| GET     | `/api/v1/donors/:id/rewards`   | donneur (soi) / admin | Historique des récompenses Lightning du donneur.                                       |
-| GET     | `/api/v1/donors/:id/donations` | donneur (soi) / admin | Historique des dons (centre, composant, volume, date, statut).                         |
+## ✅ Ajoutés dans ce lot
 
-**Champs `donors` à ajouter** (schéma) : `phenotype`, `rarity`,
-`cmv_negative`, `preferred_donation`, éligibilité (`eligible_at` /
-`deferred_reason`).
+| Méthode | Route                              | Rôle          | Statut                         |
+| ------- | ---------------------------------- | ------------- | ------------------------------ |
+| GET     | `/api/v1/organizations`            | super_admin   | ✅ route + service             |
+| PATCH   | `/api/v1/organizations/:id/verify` | super_admin   | ✅                             |
+| GET     | `/api/v1/stock`                    | org_admin     | ✅ route + service             |
+| GET     | `/api/v1/transfers`                | org_admin     | ✅                             |
+| POST    | `/api/v1/transfers`                | org_admin     | ✅                             |
+| POST    | `/api/v1/transfers/:id/respond`    | org_admin     | ✅                             |
+| GET     | `/api/v1/donors/me`                | donneur       | ✅ (donors.id = auth.users.id) |
+| PATCH   | `/api/v1/donors/:id`               | donneur (soi) | ✅                             |
+| GET     | `/api/v1/donors/:id/rewards`       | donneur/org   | ✅                             |
 
-## 2. Organisations (console super-admin)
+## ⚙️ À faire côté Supabase (obligatoire pour le runtime)
 
-| Méthode | Route                              | Rôle        | Description                        |
-| ------- | ---------------------------------- | ----------- | ---------------------------------- |
-| GET     | `/api/v1/organizations`            | super_admin | Liste de toutes les organisations. |
-| PATCH   | `/api/v1/organizations/:id/verify` | super_admin | Vérifie (valide) une organisation. |
+1. **Exécuter `supabase_scripts/network.sql`** dans le SQL Editor : crée les
+   tables `stock` et `transfer_requests`, et ajoute les politiques RLS
+   (stock par org, réseau visible, donneur modifie/ lit son profil et ses
+   récompenses).
+2. (Déjà fait si `init.sql` exécuté) `organizations`, `donors`, `reward_logs`
+   existent.
 
-## 3. Réseau inter-centres (stock & transferts)
+## 🔌 Reste à câbler côté frontend
 
-| Méthode | Route                           | Rôle      | Description                                                           |
-| ------- | ------------------------------- | --------- | --------------------------------------------------------------------- |
-| GET     | `/api/v1/stock`                 | org_admin | Stock de la structure par composant et groupe.                        |
-| PATCH   | `/api/v1/stock/:id`             | org_admin | Ajuste un niveau de stock.                                            |
-| GET     | `/api/v1/transfers`             | org_admin | Demandes de transfert du réseau (entrantes + sortantes).              |
-| POST    | `/api/v1/transfers`             | org_admin | Publie une demande (composant, groupe, quantité, urgence).            |
-| POST    | `/api/v1/transfers/:id/respond` | org_admin | Un centre s'engage à fournir la demande.                              |
-| PATCH   | `/api/v1/transfers/:id`         | org_admin | Statut : `ouverte` → `acceptée` → `en_transit` → `reçue` / `annulée`. |
+- **Espace donneur** (`/donneur`) : encore alimenté par les données de démo.
+  Le brancher via `donorsApi.me()` / `donorsApi.update()` /
+  `donorsApi.rewards()` — nécessite un **flux de connexion donneur** (page de
+  login donneur + garde), à ajouter.
 
-**Schéma à ajouter** :
+## Champs `donors` optionnels (confort produit)
 
-- `stock(id, hospital_id, component['CGR'|'Plasma'|'Plaquettes'], blood_type,
-units, expiring_soon, updated_at)`
-- `transfer_requests(id, component, blood_type, quantity, urgency,
-requester_id, responder_id, status, created_at)`
+Pour l'espace donneur enrichi : `phenotype`, `rarity`, `cmv_negative`,
+`preferred_donation`, éligibilité (`eligible_at` / `deferred_reason`).
+Non requis par les endpoints actuels.
 
-> Piste : ancrer les transferts validés sur Bitcoin (OpenTimestamps) pour la
-> traçabilité poche → receveur, dans la continuité de l'existant.
+## Basculer démo → réel
 
-## Côté frontend (où câbler)
-
-Tous les points d'intégration sont isolés dans `src/lib/api/` :
-
-- `src/lib/api/resources/*` : ajouter les fonctions HTTP (réutiliser
-  `httpClient`).
-- `src/lib/api/hooks.ts` : chaque hook a déjà une branche `AUTH_BYPASS`
-  (mock) ; il suffira de remplacer l'appel mock par l'appel réel.
-- Désactiver le mode démo : `NEXT_PUBLIC_AUTH_BYPASS=false`.
+`NEXT_PUBLIC_AUTH_BYPASS=false` puis relancer. Les écrans structures
+(dashboard, alertes, campagnes, annuaire, recherche, récompenses, réseau,
+console super-admin) appellent alors les vrais endpoints.

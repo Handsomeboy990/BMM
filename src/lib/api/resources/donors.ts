@@ -1,6 +1,16 @@
 import { httpClient } from "@/lib/api/http-client";
 
-import type { BloodType, DonorRecord } from "./types";
+import type { BloodType, DonorRecord, RewardLog } from "./types";
+
+/** Champs qu'un donneur peut mettre à jour depuis son espace. */
+export type UpdateDonorPayload = Partial<{
+  phoneNumber: string;
+  email: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  available: boolean;
+}>;
 
 /**
  * Inscription d'un donneur. Les champs cryptographiques (adresse Bitcoin,
@@ -36,4 +46,14 @@ export const donorsApi = {
     httpClient.patch<{ message: string; donor: DonorRecord }>(
       `/donors/${id}/validate`,
     ),
+
+  /** Profil du donneur connecté. */
+  me: () => httpClient.get<DonorRecord>("/donors/me"),
+
+  /** Met à jour le profil du donneur. */
+  update: (id: string, payload: UpdateDonorPayload) =>
+    httpClient.patch<DonorRecord>(`/donors/${id}`, payload),
+
+  /** Historique des récompenses Lightning d'un donneur. */
+  rewards: (id: string) => httpClient.get<RewardLog[]>(`/donors/${id}/rewards`),
 };

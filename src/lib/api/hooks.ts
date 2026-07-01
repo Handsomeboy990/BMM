@@ -22,7 +22,10 @@ import {
   campaignsApi,
   donorsApi,
   emergenciesApi,
+  organizationsApi,
   searchApi,
+  stockApi,
+  transfersApi,
   verifyApi,
   type CampaignRecord,
   type CreateCampaignPayload,
@@ -320,7 +323,10 @@ export function useRewardDonor() {
 export function useOrganizations() {
   return useQuery({
     queryKey: ["organizations"],
-    queryFn: () => demoDelay(demoOrganizations),
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoOrganizations)
+        : organizationsApi.list().then((r) => r.data),
   });
 }
 
@@ -329,11 +335,18 @@ export function useVerifyOrganization() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => {
-      qc.setQueriesData<Organization[]>(
-        { queryKey: ["organizations"] },
-        (old) => old?.map((o) => (o.id === id ? { ...o, verified: true } : o)),
-      );
-      return Promise.resolve(null);
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<Organization[]>(
+          { queryKey: ["organizations"] },
+          (old) =>
+            old?.map((o) => (o.id === id ? { ...o, verified: true } : o)),
+        );
+        return Promise.resolve(null);
+      }
+      return organizationsApi.verify(id).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["organizations"] });
     },
   });
 }
@@ -344,15 +357,19 @@ export function useVerifyOrganization() {
 export function useStock() {
   return useQuery({
     queryKey: ["stock"],
-    queryFn: () => demoDelay(demoStock),
+    queryFn: () =>
+      AUTH_BYPASS ? demoDelay(demoStock) : stockApi.list().then((r) => r.data),
   });
 }
 
-/** Demandes de transfert du réseau. Démo en attendant `GET /transfers`. */
+/** Demandes de transfert du réseau. */
 export function useTransfers() {
   return useQuery({
     queryKey: ["transfers"],
-    queryFn: () => demoDelay(demoTransfers),
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoTransfers)
+        : transfersApi.list().then((r) => r.data),
   });
 }
 
@@ -368,42 +385,56 @@ export function useCreateTransfer() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateTransferInput) => {
-      const record: TransferRequest = {
-        ...input,
-        id: `trf-${Date.now()}`,
-        requesterId: DEMO_CURRENT_ORG_ID,
-        requesterName: "CNHU-HKM de Cotonou",
-        requesterCity: "Cotonou",
-        status: "ouverte",
-        createdAt: new Date().toISOString(),
-      };
-      qc.setQueriesData<TransferRequest[]>(
-        { queryKey: ["transfers"] },
-        (old) => [record, ...(old ?? [])],
-      );
-      return Promise.resolve(record);
+      if (AUTH_BYPASS) {
+        const record: TransferRequest = {
+          ...input,
+          id: `trf-${Date.now()}`,
+          requesterId: DEMO_CURRENT_ORG_ID,
+          requesterName: "CNHU-HKM de Cotonou",
+          requesterCity: "Cotonou",
+          status: "ouverte",
+          createdAt: new Date().toISOString(),
+        };
+        qc.setQueriesData<TransferRequest[]>(
+          { queryKey: ["transfers"] },
+          (old) => [record, ...(old ?? [])],
+        );
+        return Promise.resolve(record);
+      }
+      return transfersApi.create(input).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["transfers"] });
     },
   });
 }
 
-/** Répond favorablement à une demande du réseau (démo). */
+/** Répond favorablement à une demande du réseau. */
 export function useRespondTransfer() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => {
-      qc.setQueriesData<TransferRequest[]>({ queryKey: ["transfers"] }, (old) =>
-        old?.map((t) =>
-          t.id === id
-            ? {
-                ...t,
-                status: "acceptée" as const,
-                responderId: DEMO_CURRENT_ORG_ID,
-                responderName: "CNHU-HKM de Cotonou",
-              }
-            : t,
-        ),
-      );
-      return Promise.resolve(null);
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<TransferRequest[]>(
+          { queryKey: ["transfers"] },
+          (old) =>
+            old?.map((t) =>
+              t.id === id
+                ? {
+                    ...t,
+                    status: "acceptée" as const,
+                    responderId: DEMO_CURRENT_ORG_ID,
+                    responderName: "CNHU-HKM de Cotonou",
+                  }
+                : t,
+            ),
+        );
+        return Promise.resolve(null);
+      }
+      return transfersApi.respond(id).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["transfers"] });
     },
   });
 }

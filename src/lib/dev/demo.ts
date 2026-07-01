@@ -1,10 +1,23 @@
 import type {
+  BloodComponent,
   CampaignRecord,
   DonorRecord,
   EmergencyRecord,
   MatchingDonor,
   Organization,
+  StockItem,
+  StockStatus,
+  TransferRequest,
   UserProfile,
+} from "@/lib/api/resources";
+
+export type {
+  BloodComponent,
+  StockItem,
+  StockStatus,
+  TransferRequest,
+  TransferStatus,
+  TransferUrgency,
 } from "@/lib/api/resources";
 
 /**
@@ -321,36 +334,6 @@ export const demoRewardTotalSats = demoRewards
   .reduce((sum, r) => sum + r.sats, 0);
 
 /* ------------------ Réseau inter-centres (démo) -------------------- */
-
-export type BloodComponent = "CGR" | "Plasma" | "Plaquettes";
-export type StockStatus = "critique" | "faible" | "stable";
-
-export type StockItem = {
-  component: BloodComponent;
-  bloodType: string;
-  units: number;
-  /** Poches arrivant à péremption sous 7 jours. */
-  expiringSoon: number;
-};
-
-export type TransferUrgency = "vitale" | "haute" | "moderee";
-export type TransferStatus =
-  "ouverte" | "acceptée" | "en_transit" | "reçue" | "annulée";
-
-export type TransferRequest = {
-  id: string;
-  component: BloodComponent;
-  bloodType: string;
-  quantity: number;
-  urgency: TransferUrgency;
-  requesterId: string;
-  requesterName: string;
-  requesterCity: string;
-  responderId?: string;
-  responderName?: string;
-  status: TransferStatus;
-  createdAt: string;
-};
 
 export function stockStatusOf(units: number): StockStatus {
   if (units < 5) return "critique";

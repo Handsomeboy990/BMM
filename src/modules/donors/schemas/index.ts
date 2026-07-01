@@ -24,3 +24,17 @@ export const createDonorSchema = donorSchema.extend({
 });
 
 export const donorProfileBaseSchema = donorSchema;
+
+/** Champs qu'un donneur peut mettre à jour depuis son espace. */
+export const updateDonorSchema = z
+  .object({
+    phoneNumber: z.string().min(1).max(50),
+    email: z.string().email(),
+    city: z.string().min(1).max(255),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    available: z.boolean(),
+  })
+  .partial();
+
+export type UpdateDonorDTO = z.infer<typeof updateDonorSchema>;

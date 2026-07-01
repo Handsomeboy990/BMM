@@ -98,6 +98,49 @@ export type MatchingDonor = DonorRecord & {
   historyCount?: number;
 };
 
+/* ---------------------- Réseau inter-centres ----------------------- */
+
+export type BloodComponent = "CGR" | "Plasma" | "Plaquettes";
+export type StockStatus = "critique" | "faible" | "stable";
+
+export type StockItem = {
+  component: BloodComponent;
+  bloodType: string;
+  units: number;
+  expiringSoon: number;
+};
+
+export type TransferUrgency = "vitale" | "haute" | "moderee";
+export type TransferStatus =
+  "ouverte" | "acceptée" | "en_transit" | "reçue" | "annulée";
+
+export type TransferRequest = {
+  id: string;
+  component: BloodComponent;
+  bloodType: string;
+  quantity: number;
+  urgency: TransferUrgency;
+  requesterId: string;
+  requesterName: string;
+  requesterCity: string;
+  responderId?: string | null;
+  responderName?: string | null;
+  status: TransferStatus;
+  createdAt: string;
+};
+
+export type RewardLog = {
+  id: string;
+  donorId: string;
+  hospitalId: string;
+  satsAmount: number;
+  status: string;
+  bolt11Invoice?: string | null;
+  paymentHash?: string | null;
+  errorMessage?: string | null;
+  createdAt: string;
+};
+
 export type VerifyResult = {
   donor: {
     id: string;

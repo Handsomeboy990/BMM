@@ -5,3 +5,6 @@ export * from "./campaigns";
 export * from "./donors";
 export * from "./search";
 export * from "./verify";
+export * from "./organizations";
+export * from "./stock";
+export * from "./transfers";
