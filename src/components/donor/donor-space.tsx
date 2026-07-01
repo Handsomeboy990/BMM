@@ -8,6 +8,7 @@ import {
   Droplet,
   Gift,
   History,
+  LogIn,
   MapPin,
   ShieldCheck,
   Sparkles,
@@ -24,12 +25,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectItem } from "@/components/ui/select";
 import {
-  demoDonations,
-  demoDonorAccount,
-  demoRewardTotalSats,
-  demoRewards,
-  type DonationComponent,
-} from "@/lib/dev/demo";
+  useDonorDonations,
+  useDonorProfile,
+  useDonorRewardsList,
+  useUpdateDonorProfile,
+} from "@/lib/api/hooks";
+import type { DonationComponent } from "@/lib/dev/demo";
 import { cn } from "@/lib/utils";
 
 const dateFmt = new Intl.DateTimeFormat("fr-FR", {
@@ -45,15 +46,68 @@ const rarityBadge: Record<string, "neutral" | "warning" | "danger"> = {
 };
 
 export function DonorSpace() {
-  const donor = demoDonorAccount;
-  const [available, setAvailable] = useState(donor.available);
-  const [preferred, setPreferred] = useState<DonationComponent>(
-    donor.preferredDonation,
+  const { data: donor, isLoading, isError } = useDonorProfile();
+  const { data: donations = [] } = useDonorDonations();
+  const { data: rewards = [] } = useDonorRewardsList(donor?.id);
+  const update = useUpdateDonorProfile();
+
+  const [availableOverride, setAvailableOverride] = useState<boolean | null>(
+    null,
   );
+  const [preferredOverride, setPreferredOverride] =
+    useState<DonationComponent | null>(null);
   const [saved, setSaved] = useState(false);
 
-  function onSave(event: React.FormEvent<HTMLFormElement>) {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-24">
+        <Droplet className="text-primary size-6 animate-pulse" />
+        <span className="text-muted-foreground text-sm">
+          Chargement de votre espace…
+        </span>
+      </div>
+    );
+  }
+
+  if (isError || !donor) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+          <LogIn className="text-muted-foreground size-10" />
+          <div className="space-y-1">
+            <h1 className="text-lg font-semibold">Connectez-vous</h1>
+            <p className="text-muted-foreground text-sm">
+              Accédez à votre espace donneur pour suivre vos dons et
+              récompenses.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/connexion-donneur">Se connecter</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const available = availableOverride ?? donor.available;
+  const preferred = preferredOverride ?? donor.preferredDonation;
+  const rewardTotal = rewards
+    .filter((r) => r.status === "Envoyée")
+    .reduce((sum, r) => sum + r.sats, 0);
+
+  async function onSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!donor) return;
+    const form = new FormData(event.currentTarget);
+    await update
+      .mutateAsync({
+        id: donor.id,
+        phoneNumber: String(form.get("phone")),
+        email: String(form.get("email")),
+        city: String(form.get("city")),
+        available,
+      })
+      .catch(() => {});
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -129,7 +183,7 @@ export function DonorSpace() {
         <StatCard
           icon={Zap}
           label="Sats gagnés"
-          value={demoRewardTotalSats.toLocaleString("fr-FR")}
+          value={rewardTotal.toLocaleString("fr-FR")}
         />
         <StatCard
           icon={CalendarClock}
@@ -148,7 +202,7 @@ export function DonorSpace() {
             {saved ? (
               <p className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="size-4" />
-                Informations mises à jour (démo).
+                Informations mises à jour.
               </p>
             ) : null}
 
@@ -179,7 +233,9 @@ export function DonorSpace() {
                 <Select
                   id="preferred"
                   value={preferred}
-                  onValueChange={(v) => setPreferred(v as DonationComponent)}
+                  onValueChange={(v) =>
+                    setPreferredOverride(v as DonationComponent)
+                  }
                 >
                   <SelectItem value="Sang total">Sang total</SelectItem>
                   <SelectItem value="Plasma">Plasma</SelectItem>
@@ -199,7 +255,7 @@ export function DonorSpace() {
                 type="button"
                 role="switch"
                 aria-checked={available}
-                onClick={() => setAvailable((v) => !v)}
+                onClick={() => setAvailableOverride(!available)}
                 className={cn(
                   "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
                   available ? "bg-primary" : "bg-input",
@@ -215,7 +271,9 @@ export function DonorSpace() {
             </div>
 
             <div className="flex justify-end">
-              <Button type="submit">Enregistrer</Button>
+              <Button type="submit" disabled={update.isPending}>
+                {update.isPending ? "Enregistrement…" : "Enregistrer"}
+              </Button>
             </div>
           </form>
         </CardContent>
@@ -228,7 +286,7 @@ export function DonorSpace() {
           <History className="text-muted-foreground size-5" />
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
-          {demoDonations.map((d) => (
+          {donations.map((d) => (
             <div
               key={d.id}
               className="flex items-center justify-between gap-3 rounded-lg border p-3"
@@ -264,7 +322,7 @@ export function DonorSpace() {
             <Bitcoin className="size-8 text-amber-500" />
             <div>
               <p className="text-2xl font-bold tracking-tight">
-                {demoRewardTotalSats.toLocaleString("fr-FR")}{" "}
+                {rewardTotal.toLocaleString("fr-FR")}{" "}
                 <span className="text-base font-medium">sats</span>
               </p>
               <p className="text-muted-foreground text-xs">
@@ -273,7 +331,7 @@ export function DonorSpace() {
             </div>
           </div>
 
-          {demoRewards.map((r) => (
+          {rewards.map((r) => (
             <div
               key={r.id}
               className="flex items-center justify-between gap-3 rounded-lg border p-3"

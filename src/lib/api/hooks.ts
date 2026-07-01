@@ -6,15 +6,19 @@ import {
   AUTH_BYPASS,
   DEMO_CURRENT_ORG_ID,
   demoCampaigns,
+  demoDonations,
+  demoDonorAccount,
   demoDonors,
   demoEmergencies,
   demoMatches,
   demoOrganizations,
+  demoRewards,
   demoStock,
   demoTransfers,
   type BloodComponent,
+  type DonorAccount,
+  type RewardEntry,
   type TransferRequest,
-  type TransferUrgency,
 } from "@/lib/dev/demo";
 
 import {
@@ -37,9 +41,54 @@ import {
   type LoginPayload,
   type Organization,
   type RegisterOrganizationPayload,
+  type RewardLog,
   type RewardPayload,
   type SearchParams,
+  type TransferUrgency,
+  type UpdateDonorPayload,
 } from "./resources";
+
+/** Convertit un DonorRecord (API) vers la vue riche de l'espace donneur. */
+function toDonorAccount(rec: DonorRecord): DonorAccount {
+  return {
+    id: rec.id,
+    firstName: rec.firstName,
+    lastName: rec.lastName,
+    email: rec.email,
+    phoneNumber: rec.phoneNumber,
+    city: rec.city,
+    bloodType: rec.bloodType,
+    phenotype: rec.bloodType,
+    rarity: "Commun",
+    cmvNegative: false,
+    preferredDonation: "Sang total",
+    available: rec.available,
+    eligibility: {
+      status: "éligible",
+      nextEligibleDate: new Date().toISOString().slice(0, 10),
+    },
+    totalDonations: 0,
+    lastDonation: rec.createdAt,
+    bitcoinAddress: rec.bitcoinAddress,
+    verified: rec.validated,
+  };
+}
+
+function toRewardEntry(log: RewardLog): RewardEntry {
+  const status =
+    log.status === "completed"
+      ? "Envoyée"
+      : log.status === "failed"
+        ? "Échouée"
+        : "En attente";
+  return {
+    id: log.id,
+    date: log.createdAt.slice(0, 10),
+    sats: log.satsAmount,
+    status,
+    label: "Récompense de don",
+  };
+}
 
 /** Délai simulé pour que les états de chargement restent visibles en démo. */
 const demoDelay = <T>(value: T) =>
@@ -435,6 +484,56 @@ export function useRespondTransfer() {
     },
     onSuccess: () => {
       if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["transfers"] });
+    },
+  });
+}
+
+/* ------------------------- Espace donneur -------------------------- */
+
+/** Profil du donneur connecté (vue riche). Repli démo si bypass. */
+export function useDonorProfile() {
+  return useQuery({
+    queryKey: ["donor", "me"],
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoDonorAccount)
+        : donorsApi.me().then((r) => toDonorAccount(r.data)),
+    retry: false,
+  });
+}
+
+/** Historique des dons. Aucun endpoint dédié: données simulées. */
+export function useDonorDonations() {
+  return useQuery({
+    queryKey: ["donor", "donations"],
+    queryFn: () => demoDelay(demoDonations),
+  });
+}
+
+/** Récompenses Lightning du donneur. */
+export function useDonorRewardsList(donorId?: string) {
+  return useQuery({
+    queryKey: ["donor", "rewards", donorId ?? "me"],
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoRewards)
+        : donorsApi
+            .rewards(donorId as string)
+            .then((r) => r.data.map(toRewardEntry)),
+    enabled: AUTH_BYPASS || !!donorId,
+  });
+}
+
+/** Mise à jour du profil donneur. */
+export function useUpdateDonorProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }: { id: string } & UpdateDonorPayload) =>
+      AUTH_BYPASS
+        ? demoDelay(null)
+        : donorsApi.update(id, payload).then((r) => r.data),
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor"] });
     },
   });
 }

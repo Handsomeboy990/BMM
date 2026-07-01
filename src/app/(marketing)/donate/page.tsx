@@ -1,5 +1,6 @@
 import { Droplet } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { DonorRegistrationForm } from "@/components/donate/donor-registration-form";
@@ -30,6 +31,16 @@ export default function DonatePage() {
         </div>
 
         <DonorRegistrationForm />
+
+        <p className="text-muted-foreground text-center text-sm">
+          Déjà donneur ?{" "}
+          <Link
+            href="/connexion-donneur"
+            className="text-primary font-medium hover:underline"
+          >
+            Accéder à mon espace
+          </Link>
+        </p>
       </div>
     </Container>
   );
