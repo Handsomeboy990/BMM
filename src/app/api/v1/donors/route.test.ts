@@ -63,7 +63,7 @@ describe("POST /api/v1/donors", () => {
       available: true,
       bitcoinAddress: "bc1q...",
       profileHash: "hash...",
-      otsProof: "ots-proof-xyz",
+      otsProof: null,
       createdAt: new Date("2026-06-30T12:00:00.000Z"),
     };
     vi.mocked(donorService.createDonor).mockResolvedValue(
@@ -106,10 +106,9 @@ describe("POST /api/v1/donors", () => {
       "bc1q...",
       "sig...",
     );
-    expect(otsService.stampHash).toHaveBeenCalledWith("hash...");
     expect(donorService.createDonor).toHaveBeenCalledWith({
       ...body,
-      otsProof: "ots-proof-xyz",
+      otsProof: null,
     });
   });
 

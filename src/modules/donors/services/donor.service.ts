@@ -202,12 +202,22 @@ export const donorService = {
   /**
    * Valide le profil d'un donneur (effectué par l'administrateur d'un hôpital après un don)
    */
-  validateDonor: async (id: string): Promise<DonorRecord | null> => {
+  validateDonor: async (
+    id: string,
+    otsProof?: string | null,
+  ): Promise<DonorRecord | null> => {
     const supabase = await createSupabaseServerClient();
+
+    const updateFields: { validated: boolean; ots_proof?: string | null } = {
+      validated: true,
+    };
+    if (otsProof !== undefined) {
+      updateFields.ots_proof = otsProof;
+    }
 
     const { data: donor, error } = await supabase
       .from("donors")
-      .update({ validated: true })
+      .update(updateFields)
       .eq("id", id)
       .select()
       .single();
