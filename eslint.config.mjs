@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
+      // Le contenu français contient de nombreuses apostrophes; l'échappement
+      // en entités HTML nuirait à la lisibilité du texte source.
+      "react/no-unescaped-entities": "off",
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "@typescript-eslint/no-unused-vars": [
         "error",

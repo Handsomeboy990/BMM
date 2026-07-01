@@ -45,7 +45,7 @@ src/
 │   ├── api/              Enveloppe API, erreurs, client HTTP
 │   ├── db/               Client Drizzle et schémas
 │   ├── supabase/         Clients Supabase (navigateur, serveur)
-│   ├── env.ts            Validation des variables d'environnement
+│   ├── env/              Validation env: client.ts (public), server.ts (serveur)
 │   └── utils.ts          Utilitaires transverses
 │
 ├── config/               Configuration applicative (site, navigation)

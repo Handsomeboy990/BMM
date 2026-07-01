@@ -1,8 +1,7 @@
 /**
  * Point d'entrée unique des schémas Drizzle.
- * Chaque domaine métier exporte ses tables ici (ex: `export * from "./donors"`).
- * Aucune table n'est définie pour l'instant: la modélisation arrivera
- * avec les fonctionnalités correspondantes.
+ * Aucune table n'est définie ici: nous utilisons le client Supabase natif.
+ * Les schémas SQL sont gérés directement dans le dashboard Supabase.
  */
 
 export {};
