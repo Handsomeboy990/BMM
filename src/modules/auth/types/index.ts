@@ -12,12 +12,13 @@ export type UserProfile = {
   organization?: {
     id: string;
     name: string;
-    type: "hospital" | "ong" | "collect";
+    type: "hospital" | "ngo" | "blood_center";
     latitude: number;
     longitude: number;
     city: string;
     contactEmail: string;
     verified: boolean;
+    rejectionReason: string | null;
     createdAt: Date;
   } | null;
 };

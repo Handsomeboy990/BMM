@@ -152,6 +152,7 @@ describe("authService", () => {
           city: "Dakar",
           contactEmail: "contact@hospital.org",
           verified: true,
+          rejectionReason: null,
           createdAt: new Date("2026-06-30T12:00:00.000Z"),
         },
       });

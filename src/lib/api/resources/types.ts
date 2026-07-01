@@ -17,7 +17,7 @@ export const BLOOD_TYPES = [
 
 export type BloodType = (typeof BLOOD_TYPES)[number];
 
-export type OrganizationType = "hospital" | "ong" | "collect";
+export type OrganizationType = "hospital" | "ngo" | "blood_center";
 
 export type Organization = {
   id: string;
@@ -28,6 +28,7 @@ export type Organization = {
   city: string;
   contactEmail: string;
   verified: boolean;
+  rejectionReason?: string | null;
   createdAt: string;
 };
 

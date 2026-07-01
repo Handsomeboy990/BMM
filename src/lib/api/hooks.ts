@@ -40,6 +40,8 @@ import {
   type EmergencyStatus,
   type LoginPayload,
   type Organization,
+  type OrgDocument,
+  type OrgDocumentType,
   type RegisterOrganizationPayload,
   type RewardLog,
   type RewardPayload,
@@ -396,6 +398,63 @@ export function useVerifyOrganization() {
     },
     onSuccess: () => {
       if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
+}
+
+/** Rejette une organisation avec un motif (vue super-admin). */
+export function useRejectOrganization() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => {
+      if (AUTH_BYPASS) {
+        qc.setQueriesData<Organization[]>(
+          { queryKey: ["organizations"] },
+          (old) =>
+            old?.map((o) =>
+              o.id === id
+                ? { ...o, verified: false, rejectionReason: reason }
+                : o,
+            ),
+        );
+        return Promise.resolve(null);
+      }
+      return organizationsApi.reject(id, reason).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
+}
+
+/** Justificatifs déposés par la structure connectée. */
+export function useMyOrgDocuments() {
+  return useQuery({
+    queryKey: ["org-documents", "me"],
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay<OrgDocument[]>([])
+        : organizationsApi.myDocuments().then((r) => r.data),
+  });
+}
+
+/** Justificatifs d'une structure avec URLs signées (vue super-admin). */
+export function useOrgDocuments(id: string | undefined) {
+  return useQuery({
+    queryKey: ["org-documents", id],
+    enabled: Boolean(id) && !AUTH_BYPASS,
+    queryFn: () => organizationsApi.documentsForOrg(id!).then((r) => r.data),
+  });
+}
+
+/** Téléverse un justificatif pour la structure connectée. */
+export function useUploadOrgDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ docType, file }: { docType: OrgDocumentType; file: File }) =>
+      organizationsApi.uploadDocument(docType, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["org-documents", "me"] });
     },
   });
 }

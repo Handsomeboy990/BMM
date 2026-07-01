@@ -42,7 +42,7 @@ export function SiteFooter() {
         <span>
           {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
         </span>
-        <span>Hackathon Bitcoin Mastermind 2026</span>
+        <span>Time's Care 2026</span>
       </Container>
     </footer>
   );

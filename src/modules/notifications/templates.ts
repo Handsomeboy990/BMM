@@ -13,6 +13,10 @@ const BRAND = {
   bg: "#f4f4f5",
 };
 
+// URL absolue du logo (les clients mail exigent une image hébergée
+// publiquement). En production, NEXT_PUBLIC_APP_URL pointe vers le domaine.
+const LOGO_URL = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/logo_bmm.png`;
+
 function escapeHtml(input: string): string {
   return input
     .replace(/&/g, "&amp;")
@@ -55,10 +59,8 @@ function wrap(options: {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.bg};padding:24px 12px;">
     <tr><td align="center">
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-        <tr><td style="background:${BRAND.dark};border-radius:14px 14px 0 0;padding:22px 28px;">
-          <span style="font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:bold;color:#ffffff;">
-            <span style="color:${BRAND.red};">&#10084;</span>&nbsp; ${BRAND.name}
-          </span>
+        <tr><td align="center" style="background:#ffffff;border-radius:14px 14px 0 0;border:1px solid ${BRAND.border};border-bottom:none;padding:22px 28px;">
+          <img src="${LOGO_URL}" alt="${BRAND.name}" height="40" style="display:block;height:40px;width:auto;border:0;outline:none;text-decoration:none;">
         </td></tr>
         <tr><td style="background:#ffffff;padding:32px 28px;border-left:1px solid ${BRAND.border};border-right:1px solid ${BRAND.border};">
           <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:22px;line-height:1.3;color:${BRAND.text};">${escapeHtml(heading)}</h1>

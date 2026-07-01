@@ -446,7 +446,7 @@ export const demoOrganizations: Organization[] = [
   {
     id: "ddddddd1-0000-4000-8000-000000000003",
     name: "Croix-Rouge Béninoise — Abomey-Calavi",
-    type: "ong",
+    type: "ngo",
     latitude: 6.4486,
     longitude: 2.3556,
     city: "Abomey-Calavi",
@@ -457,7 +457,7 @@ export const demoOrganizations: Organization[] = [
   {
     id: "ddddddd1-0000-4000-8000-000000000004",
     name: "Centre de collecte de Parakou",
-    type: "collect",
+    type: "blood_center",
     latitude: 9.337,
     longitude: 2.6303,
     city: "Parakou",

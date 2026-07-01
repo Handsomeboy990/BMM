@@ -8,15 +8,17 @@ import {
   Droplet,
   Gift,
   History,
+  KeyRound,
   LogIn,
   MapPin,
-  ShieldCheck,
+  ScanLine,
   Sparkles,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { QrBadge } from "@/components/donor/qr-badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +33,14 @@ import {
   useUpdateDonorProfile,
 } from "@/lib/api/hooks";
 import type { DonationComponent } from "@/lib/dev/demo";
+import { clientEnv } from "@/lib/env/client";
 import { cn } from "@/lib/utils";
+
+/** Tronque une longue chaîne au milieu (adresse, hash) pour l'affichage. */
+function truncateMiddle(value: string, head = 10, tail = 6) {
+  if (value.length <= head + tail + 1) return value;
+  return `${value.slice(0, head)}…${value.slice(-tail)}`;
+}
 
 const dateFmt = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -166,8 +175,8 @@ export function DonorSpace() {
           </Badge>
           <Button asChild variant="outline" size="sm" className="ml-auto">
             <Link href={`/verify/${donor.id}`}>
-              <ShieldCheck className="size-4" />
-              Ma preuve Bitcoin
+              <ScanLine className="size-4" />
+              Ouvrir ma preuve
             </Link>
           </Button>
         </CardContent>
@@ -191,6 +200,39 @@ export function DonorSpace() {
           value={dateFmt.format(new Date(donor.lastDonation))}
         />
       </div>
+
+      {/* Vérification & clés — via QR codes plutôt qu'affichage brut */}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between">
+          <CardTitle>Vérification & clés</CardTitle>
+          <ScanLine className="text-primary size-5" />
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-muted-foreground mb-4 text-sm">
+            Faites scanner ces QR codes pour prouver votre identité de donneur.
+            Votre clé privée n'est jamais exposée : elle reste sur votre
+            appareil.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <QrBadge
+              value={`${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${donor.id}`}
+              label="Preuve de don (vérification publique)"
+              caption={truncateMiddle(donor.id, 8, 6)}
+            />
+            <QrBadge
+              value={donor.bitcoinAddress}
+              label="Adresse Bitcoin (clé publique)"
+              caption={truncateMiddle(donor.bitcoinAddress)}
+              copyable
+            />
+          </div>
+          <p className="text-muted-foreground mt-4 flex items-center gap-1.5 text-xs">
+            <KeyRound className="size-3.5" />
+            Conservez précieusement le fichier de clé téléchargé lors de votre
+            inscription : il est nécessaire pour signer vos futurs dons.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Informations modifiables */}
       <Card>

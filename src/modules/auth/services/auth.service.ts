@@ -96,14 +96,21 @@ export const authService = {
         throw new Error("Erreur lors de la création de l'organisation");
       }
 
-      // 3. Création du profil utilisateur lié à l'organisation
-      const { error: profileError } = await admin.from("user_profiles").insert([
-        {
-          id: userId,
-          organization_id: newOrg.id,
-          role: "org_admin",
-        },
-      ]);
+      // 3. Rattachement du profil utilisateur à l'organisation.
+      // Un trigger `handle_new_user` peut déjà avoir créé la ligne
+      // `user_profiles` lors du signUp Auth: on fait donc un upsert sur la
+      // clé primaire `id` (au lieu d'un insert qui violerait la PK) pour
+      // renseigner l'organisation et le rôle, que le trigger existe ou non.
+      const { error: profileError } = await admin.from("user_profiles").upsert(
+        [
+          {
+            id: userId,
+            organization_id: newOrg.id,
+            role: "org_admin",
+          },
+        ],
+        { onConflict: "id" },
+      );
 
       if (profileError) {
         console.error("Profile insertion failed:", profileError);
@@ -138,14 +145,25 @@ export const authService = {
       return null;
     }
 
-    // Récupère le rôle et l'organisation associée
-    const { data: profile, error: profileError } = await supabase
+    // Récupère le rôle et l'organisation associée via le client admin: la
+    // session est déjà authentifiée (JWT validé par getUser ci-dessus), et
+    // lire le profil avec le service-role rend /auth/me insensible aux
+    // défauts de politiques RLS sur user_profiles (ex: récursion). On ne lit
+    // que la ligne de l'utilisateur courant, identifiée par son id vérifié.
+    const db = createSupabaseAdminClient() ?? supabase;
+    const { data: profile, error: profileError } = await db
       .from("user_profiles")
       .select("*, organization:organizations(*)")
       .eq("id", user.id)
       .single();
 
     if (profileError || !profile) {
+      if (profileError) {
+        console.error(
+          "getCurrentUser: lecture du profil échouée:",
+          profileError,
+        );
+      }
       return null;
     }
 
@@ -166,6 +184,7 @@ export const authService = {
             city: org.city,
             contactEmail: org.contact_email,
             verified: org.verified,
+            rejectionReason: org.rejection_reason ?? null,
             createdAt: new Date(org.created_at),
           }
         : null,

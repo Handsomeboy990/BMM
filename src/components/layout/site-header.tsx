@@ -1,14 +1,13 @@
 "use client";
 
-import { Droplet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Container } from "@/components/layout/container";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { primaryNav } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -32,8 +31,7 @@ export function SiteHeader() {
     >
       <Container className="flex h-16 items-center justify-between">
         <a href="#" className="flex items-center gap-2 font-semibold">
-          <Droplet className="text-primary" />
-          {siteConfig.name}
+          <BrandLogo priority />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">

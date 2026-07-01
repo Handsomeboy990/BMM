@@ -96,8 +96,8 @@ export function OrganizationRegisterForm() {
             className="h-11"
           >
             <SelectItem value="hospital">Hôpital</SelectItem>
-            <SelectItem value="ong">ONG</SelectItem>
-            <SelectItem value="collect">Centre de collecte</SelectItem>
+            <SelectItem value="ngo">ONG</SelectItem>
+            <SelectItem value="blood_center">Centre de collecte</SelectItem>
           </Select>
         </div>
         <AuthField

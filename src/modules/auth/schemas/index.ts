@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ORG_TYPES = ["hospital", "ong", "collect"] as const;
+const ORG_TYPES = ["hospital", "ngo", "blood_center"] as const;
 
 export const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
