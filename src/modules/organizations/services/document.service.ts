@@ -54,8 +54,10 @@ export const documentService = {
     if (!file || file.size === 0) {
       throw ApiError.badRequest("Fichier manquant ou vide.");
     }
-    if (file.size > 10 * 1024 * 1024) {
-      throw ApiError.badRequest("Le fichier ne doit pas dépasser 10 Mo.");
+    // Les justificatifs scannés (agréments, statuts) sont souvent volumineux:
+    // limite haute à 25 Mo pour ne pas rejeter les PDF de plusieurs pages.
+    if (file.size > 25 * 1024 * 1024) {
+      throw ApiError.badRequest("Le fichier ne doit pas dépasser 25 Mo.");
     }
 
     const storagePath = `${organizationId}/${docType}`;

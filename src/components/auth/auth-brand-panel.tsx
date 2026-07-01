@@ -1,9 +1,8 @@
-import { Droplet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { HeartbeatMonitor } from "@/components/auth/heartbeat-monitor";
-import { siteConfig } from "@/config/site";
+import { Logo } from "@/components/shared/logo";
 
 const readouts = [
   { value: "12 480", label: "donneurs" },
@@ -47,12 +46,10 @@ export function AuthBrandPanel() {
         }}
       />
 
-      <Link
-        href="/"
-        className="relative flex items-center gap-2 text-lg font-semibold tracking-tight"
-      >
-        <Droplet className="size-6 text-[var(--color-primary)]" />
-        {siteConfig.name}
+      {/* Volet toujours sombre: on force le contexte `.dark` pour que le texte
+          du logo reste clair quel que soit le thème global. */}
+      <Link href="/" className="dark relative flex items-center">
+        <Logo />
       </Link>
 
       <div className="relative space-y-8">

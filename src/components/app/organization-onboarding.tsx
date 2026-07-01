@@ -22,7 +22,10 @@ import {
 } from "@/lib/api/resources";
 import { useAuth } from "@/providers/auth-provider";
 
-const ACCEPT = ".pdf,.png,.jpg,.jpeg";
+// On déclare les types MIME **et** les extensions: certains sélecteurs de
+// fichiers (Linux/Chromium notamment) filtrent mal avec les seules extensions
+// et masquent alors les PDF.
+const ACCEPT = "application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg";
 
 /**
  * Écran affiché à une structure non encore vérifiée: dépôt des justificatifs
@@ -108,7 +111,7 @@ export function OrganizationOnboarding() {
       </Card>
 
       <p className="text-muted-foreground text-center text-xs">
-        Formats acceptés : PDF, PNG, JPG — 10 Mo maximum par fichier.
+        Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier.
       </p>
     </div>
   );

@@ -2,6 +2,7 @@ import {
   createSupabaseServerClient,
   createSupabaseAdminClient,
 } from "@/lib/supabase/server";
+import { ApiError } from "@/lib/api/errors";
 import { CreateDonorDTO, DonorRecord } from "../types";
 import type { UpdateDonorDTO } from "../schemas";
 
@@ -22,9 +23,16 @@ export const donorService = {
 
     if (authError || !authData.user) {
       console.error("Auth signUp for donor failed:", authError);
-      throw new Error(
-        authError?.message || "Erreur lors de la création du compte donneur",
-      );
+      // Remonte la cause réelle (email déjà utilisé, mot de passe faible,
+      // rate limit…) en 400 explicite au lieu d'un 500 générique opaque.
+      const message =
+        authError?.message || "Erreur lors de la création du compte donneur";
+      if (/already registered|already been registered|exists/i.test(message)) {
+        throw ApiError.conflict(
+          "Un compte existe déjà avec cet email. Connectez-vous ou utilisez une autre adresse.",
+        );
+      }
+      throw ApiError.badRequest(message);
     }
 
     const userId = authData.user.id;
@@ -66,7 +74,14 @@ export const donorService = {
       if (adminClient) {
         await adminClient.auth.admin.deleteUser(userId);
       }
-      throw new Error(
+      // 23505 = violation de contrainte d'unicité (email / bitcoin_address /
+      // profile_hash déjà présents) → conflit explicite plutôt qu'un 500.
+      if (error.code === "23505") {
+        throw ApiError.conflict(
+          "Un donneur existe déjà avec ces informations (email ou identité Bitcoin).",
+        );
+      }
+      throw ApiError.badRequest(
         `Erreur lors de l'enregistrement du profil de donneur: ${error.message}`,
       );
     }
