@@ -54,12 +54,21 @@ export const donorService = {
       .single();
 
     if (error) {
-      console.error("Error creating donor profile:", error);
+      // On journalise le détail réel (message/code) au lieu d'un objet vide,
+      // et on nettoie l'utilisateur auth créé pour éviter les orphelins.
+      console.error(
+        "Error creating donor profile:",
+        error.message,
+        error.code,
+        error.details,
+      );
       const adminClient = createSupabaseAdminClient();
       if (adminClient) {
         await adminClient.auth.admin.deleteUser(userId);
       }
-      throw new Error("Erreur lors de l'enregistrement du profil de donneur");
+      throw new Error(
+        `Erreur lors de l'enregistrement du profil de donneur: ${error.message}`,
+      );
     }
 
     return {

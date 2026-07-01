@@ -9,7 +9,11 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Supabase a renommé « anon key » en « publishable key » : on accepte les
+  // deux noms, faute de quoi le middleware ne rafraîchit jamais la session.
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     return response;
@@ -43,11 +47,15 @@ export async function middleware(request: NextRequest) {
 
   // 2. Protections de routes d'API
   if (path.startsWith("/api/v1")) {
-    // Exemptions publiques
+    // Exemptions publiques (sinon on ne pourrait jamais se connecter/s'inscrire)
     if (
       path === "/api/v1/health" ||
+      path === "/api/v1/auth/login" ||
+      path === "/api/v1/auth/register" ||
+      path === "/api/v1/auth/logout" ||
       (path === "/api/v1/donors" && request.method === "POST") ||
-      path.startsWith("/api/v1/verify")
+      path.startsWith("/api/v1/verify") ||
+      path.startsWith("/api/v1/search")
     ) {
       return response;
     }
