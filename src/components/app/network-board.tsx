@@ -104,12 +104,10 @@ export function NetworkBoard() {
   >();
   for (const item of stock.data ?? []) {
     if (!stockMap.has(item.bloodType)) stockMap.set(item.bloodType, new Map());
-    stockMap
-      .get(item.bloodType)!
-      .set(item.component, {
-        units: item.units,
-        expiringSoon: item.expiringSoon,
-      });
+    stockMap.get(item.bloodType)!.set(item.component, {
+      units: item.units,
+      expiringSoon: item.expiringSoon,
+    });
   }
 
   const allTransfers = transfers.data ?? [];

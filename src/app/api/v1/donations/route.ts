@@ -44,7 +44,11 @@ export async function POST(req: Request) {
 
     // Journalisation best-effort (ne bloque jamais le don).
     void donationService
-      .logDonation({ ...data, bolt11: invoice.bolt11, simulated: invoice.simulated })
+      .logDonation({
+        ...data,
+        bolt11: invoice.bolt11,
+        simulated: invoice.simulated,
+      })
       .catch(() => {});
 
     return success(
@@ -75,9 +79,13 @@ export async function GET() {
       });
     }
     if (user.role !== "super_admin") {
-      return failure(API_ERROR_CODE.FORBIDDEN, "Acces reserve au super-admin.", {
-        status: 403,
-      });
+      return failure(
+        API_ERROR_CODE.FORBIDDEN,
+        "Acces reserve au super-admin.",
+        {
+          status: 403,
+        },
+      );
     }
 
     const donations = await donationService.listDonations();

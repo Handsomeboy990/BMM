@@ -37,6 +37,7 @@ vi.mock("@/lib/supabase/server", () => {
 
   return {
     createSupabaseServerClient: vi.fn(() => Promise.resolve(client)),
+    createSupabaseAdminClient: vi.fn(() => client),
   };
 });
 
@@ -80,7 +81,7 @@ describe("authService", () => {
         password: "wrongpassword",
       };
       await expect(authService.login(credentials)).rejects.toThrow(
-        "Invalid credentials",
+        "Email ou mot de passe incorrect.",
       );
     });
   });
