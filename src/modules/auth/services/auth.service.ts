@@ -157,14 +157,57 @@ export const authService = {
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile) {
-      if (profileError) {
-        console.error(
-          "getCurrentUser: lecture du profil échouée:",
-          profileError,
-        );
+    if (!profile) {
+      // Si l'utilisateur n'est pas dans user_profiles, vérifier s'il est dans la table donors
+      const { data: donor, error: donorError } = await db
+        .from("donors")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!donor) {
+        if (profileError) {
+          console.error(
+            "getCurrentUser: lecture du profil utilisateur échouée:",
+            profileError,
+          );
+        }
+        if (donorError) {
+          console.error(
+            "getCurrentUser: lecture du profil donneur échouée:",
+            donorError,
+          );
+        }
+        return null;
       }
-      return null;
+
+      return {
+        id: user.id,
+        email: user.email || undefined,
+        role: "donor",
+        organizationId: null,
+        organization: null,
+        donor: {
+          id: donor.id,
+          firstName: donor.first_name,
+          lastName: donor.last_name,
+          bloodType: donor.blood_type,
+          city: donor.city,
+          latitude: donor.latitude,
+          longitude: donor.longitude,
+          age: donor.age,
+          available: donor.available,
+          bitcoinAddress: donor.bitcoin_address,
+          profileHash: donor.profile_hash,
+          otsProof: donor.ots_proof,
+          validated: donor.validated,
+          createdAt: new Date(donor.created_at),
+          balanceSats: donor.balance_sats,
+          cardType: donor.card_type,
+          physicalCardStatus: donor.physical_card_status,
+          referredBy: donor.referred_by,
+        },
+      };
     }
 
     const org = profile.organization;

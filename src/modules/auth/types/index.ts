@@ -7,7 +7,7 @@ export type SignUpDTO = z.infer<typeof signUpSchema>;
 export type UserProfile = {
   id: string;
   email: string | undefined;
-  role: "super_admin" | "org_admin";
+  role: "super_admin" | "org_admin" | "donor";
   organizationId: string | null;
   organization?: {
     id: string;
@@ -20,5 +20,25 @@ export type UserProfile = {
     verified: boolean;
     rejectionReason: string | null;
     createdAt: Date;
+  } | null;
+  donor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    bloodType: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+    age: number;
+    available: boolean;
+    bitcoinAddress: string;
+    profileHash: string;
+    otsProof: string | null;
+    validated: boolean;
+    createdAt: Date;
+    balanceSats: number;
+    cardType: string;
+    physicalCardStatus: string;
+    referredBy: string | null;
   } | null;
 };

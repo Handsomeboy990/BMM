@@ -58,6 +58,13 @@ export async function PATCH(
       );
     }
 
+    // Enregistrer l'activité de don de sang
+    await donorService.addActivity(
+      id,
+      "blood_donation",
+      "Don de sang physique validé à la clinique.",
+    );
+
     return success({
       message: "Donneur validé avec succès.",
       donor: validatedDonor,

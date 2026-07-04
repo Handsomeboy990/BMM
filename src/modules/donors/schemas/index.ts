@@ -21,6 +21,10 @@ export const createDonorSchema = donorSchema.extend({
   bitcoinAddress: z.string().min(1).max(255),
   profileHash: z.string().length(64),
   signature: z.string().min(1),
+  referredById: z
+    .string()
+    .uuid("L'identifiant du parrain doit être un UUID valide")
+    .optional(),
 });
 
 export const donorProfileBaseSchema = donorSchema;

@@ -32,4 +32,29 @@ export const izichangeService = {
     );
     return transactionId;
   },
+
+  /**
+   * Simule l'initiation d'un paiement Izichange Pay pour une carte physique.
+   * Retourne une URL de checkout simulée.
+   */
+  initiateCardPayment: async (
+    orderId: string,
+    amountXof: number,
+  ): Promise<{ checkoutUrl: string; paymentReference: string }> => {
+    console.warn(
+      `[Izichange Pay] Initiation du paiement pour la commande ${orderId}...`,
+    );
+    console.warn(`[Izichange Pay] Montant : ${amountXof} XOF`);
+
+    // Simulation d'un délai réseau
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const paymentReference = `izi_pay_${Math.random().toString(36).substring(2, 12)}`;
+    const checkoutUrl = `https://checkout.izichange.com/pay/${paymentReference}?orderId=${orderId}&amount=${amountXof}`;
+
+    return {
+      checkoutUrl,
+      paymentReference,
+    };
+  },
 };

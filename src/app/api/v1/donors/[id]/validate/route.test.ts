@@ -8,6 +8,7 @@ vi.mock("@/modules/donors/services/donor.service", () => ({
   donorService: {
     getDonorById: vi.fn(),
     validateDonor: vi.fn(),
+    addActivity: vi.fn().mockResolvedValue(true),
   },
 }));
 

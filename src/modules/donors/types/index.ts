@@ -15,4 +15,8 @@ export type DonorRecord = DonorProfile & {
   otsProof: string | null;
   validated: boolean;
   createdAt: Date;
+  balanceSats: number;
+  cardType: string;
+  physicalCardStatus: string;
+  referredBy: string | null;
 };
