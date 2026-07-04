@@ -5,6 +5,7 @@ import {
   Check,
   Clock,
   Droplet,
+  Eye,
   Mail,
   MapPin,
   Navigation,
@@ -13,6 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -273,6 +275,13 @@ export function AlertsBoard() {
                   <Badge variant={statusBadge[alert.status]}>
                     {statusLabel[alert.status]}
                   </Badge>
+
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/alerts/${alert.id}`}>
+                      <Eye className="size-4" />
+                      Détails
+                    </Link>
+                  </Button>
 
                   {alert.status === "active" ? (
                     <>

@@ -159,6 +159,18 @@ export function useEmergencies(hospitalId?: string) {
   });
 }
 
+/** Détail d'une urgence unique (`GET /api/v1/emergencies/[id]`). */
+export function useEmergency(id: string) {
+  return useQuery({
+    queryKey: ["emergency", id],
+    enabled: id.length > 0,
+    queryFn: () =>
+      AUTH_BYPASS
+        ? demoDelay(demoEmergencies.find((e) => e.id === id) ?? null)
+        : emergenciesApi.get(id).then((r) => r.data),
+  });
+}
+
 export function useCreateEmergency() {
   const qc = useQueryClient();
   return useMutation({
