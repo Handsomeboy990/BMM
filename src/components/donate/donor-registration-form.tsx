@@ -44,15 +44,15 @@ type Success = { donor: DonorRecord; wif: string };
 /** Télécharge la clé privée en fichier local. Aucune transmission réseau. */
 function downloadKey({ donor, wif }: Success) {
   const content = [
-    "Bitcoin Blood — Clé privée du donneur",
+    "Bitcoin Blood - Cle privee du donneur",
     "",
     `Donneur : ${donor.firstName} ${donor.lastName}`,
     `Identifiant : ${donor.id}`,
     `Adresse Bitcoin : ${donor.bitcoinAddress}`,
-    `Clé privée (WIF) : ${wif}`,
+    `Cle privee (WIF) : ${wif}`,
     "",
-    "⚠️ Conservez ce fichier en lieu sûr et ne le partagez avec personne.",
-    "Cette clé prouve la propriété de votre profil de donneur.",
+    "Important : conservez ce fichier en lieu sur et ne le partagez avec personne.",
+    "Cette cle prouve la propriete de votre profil de donneur.",
   ].join("\n");
 
   const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
