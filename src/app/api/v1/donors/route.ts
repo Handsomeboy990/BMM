@@ -3,7 +3,7 @@ import { donorService } from "@/modules/donors/services/donor.service";
 import { walletService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
 import { emailService } from "@/modules/notifications";
-import { clientEnv } from "@/lib/env/client";
+import { serverPublicUrl } from "@/lib/url.server";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         toName: `${newDonor.firstName} ${newDonor.lastName}`,
         bloodType: newDonor.bloodType,
         city: newDonor.city,
-        verifyUrl: `${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${newDonor.id}`,
+        verifyUrl: await serverPublicUrl(`/verify/${newDonor.id}`),
       })
       .catch((e) => console.error("Welcome email failed:", e));
 

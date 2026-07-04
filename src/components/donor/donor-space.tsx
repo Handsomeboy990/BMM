@@ -33,7 +33,7 @@ import {
   useUpdateDonorProfile,
 } from "@/lib/api/hooks";
 import type { DonationComponent } from "@/lib/dev/demo";
-import { clientEnv } from "@/lib/env/client";
+import { publicUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 
 /** Tronque une longue chaîne au milieu (adresse, hash) pour l'affichage. */
@@ -215,7 +215,7 @@ export function DonorSpace() {
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <QrBadge
-              value={`${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${donor.id}`}
+              value={publicUrl(`/verify/${donor.id}`)}
               label="Preuve de don (vérification publique)"
               caption={truncateMiddle(donor.id, 8, 6)}
             />

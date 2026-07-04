@@ -143,7 +143,9 @@ export const donorService = {
   },
 
   /**
-   * Récupère tous les donneurs disponibles
+   * Récupère tous les donneurs mobilisables : validés par un centre ET
+   * disponibles. Un donneur non validé n'appartient pas encore à la base
+   * opérationnelle et ne doit donc jamais remonter dans la recherche/matching.
    */
   getAllAvailableDonors: async (): Promise<DonorRecord[]> => {
     const supabase = await createSupabaseServerClient();
@@ -151,6 +153,7 @@ export const donorService = {
     const { data: donors, error } = await supabase
       .from("donors")
       .select("*")
+      .eq("validated", true)
       .eq("available", true)
       .limit(200);
 

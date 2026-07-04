@@ -2,7 +2,7 @@ import { donorService } from "@/modules/donors";
 import { otsService, breezService, rewardService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
 import { emailService } from "@/modules/notifications";
-import { clientEnv } from "@/lib/env/client";
+import { serverPublicUrl } from "@/lib/url.server";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 import { z } from "zod";
@@ -175,7 +175,7 @@ export async function POST(
           toName: `${donor.firstName} ${donor.lastName}`,
           sats: satsAmount,
           hospitalName: user.organization?.name ?? "un centre partenaire",
-          verifyUrl: `${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${donor.id}`,
+          verifyUrl: await serverPublicUrl(`/verify/${donor.id}`),
         })
         .catch((e) => console.error("Reward email failed:", e));
 
