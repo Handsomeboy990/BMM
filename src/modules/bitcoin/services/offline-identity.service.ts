@@ -1,4 +1,4 @@
-import { BIP322 } from "bip322-js";
+import { Signer } from "bip322-js";
 import { sha256 } from "js-sha256";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";
@@ -42,9 +42,8 @@ export const offlineIdentityService = {
     const { address } = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
 
     // 4. Signature BIP-322 du hash du profil
-    // @ts-expect-error : L'API bip322-js peut différer de l'exemple, on ignore l'erreur pour la démo
-    const signature = BIP322.signMessage
-      ? BIP322.signMessage(profileHash, keyPair.toWIF())
+    const signature = address
+      ? Signer.sign(keyPair.toWIF(), address, profileHash)
       : "mock_signature_bip322";
 
     return {
