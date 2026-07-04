@@ -23,7 +23,8 @@ export type CreateDonorPayload = {
   email: string;
   phoneNumber: string;
   password: string;
-  bloodType: BloodType;
+  /** Optionnel : vide si le donneur ne connaît pas encore son groupe. */
+  bloodType?: BloodType;
   city: string;
   latitude: number;
   longitude: number;
@@ -32,6 +33,26 @@ export type CreateDonorPayload = {
   bitcoinAddress: string;
   profileHash: string;
   signature: string;
+  /** UUID du donneur parrain (parrainage), le cas échéant. */
+  referredById?: string;
+};
+
+export type ActivityType = "blood_donation" | "referral" | "awareness_session";
+
+export type CardOrderMethod = "merit" | "pay";
+
+export type CardOrderResult = {
+  message: string;
+  status: string;
+  orderId: string;
+  /** Présent uniquement pour une commande payante (redirection Izichange). */
+  checkoutUrl?: string;
+};
+
+export type WithdrawResult = {
+  message: string;
+  balanceSats: number;
+  reward: RewardLog;
 };
 
 export const donorsApi = {
@@ -61,6 +82,32 @@ export const donorsApi = {
   offlineIdentity: (id: string) =>
     httpClient.get<{ message: string; identity: OfflineIdentityResponse }>(
       `/donors/${id}/offline-identity`,
+    ),
+
+  /** Retrait autonome du solde plateforme vers Mobile Money (Izichange). */
+  withdraw: (payload: { amountSats: number; momoNumber: string }) =>
+    httpClient.post<WithdrawResult>("/donors/me/withdraw", payload),
+
+  /** Commande de carte physique : au mérite (gratuite) ou à l'achat. */
+  orderCard: (method: CardOrderMethod) =>
+    httpClient.post<CardOrderResult>("/donors/me/card-order", { method }),
+
+  /** Confirme le paiement d'une commande de carte (callback simulé). */
+  confirmCardOrder: (orderId: string) =>
+    httpClient.post<{
+      message: string;
+      physicalCardStatus: string;
+      cardType: string;
+    }>("/donors/me/card-order/confirm", { orderId }),
+
+  /** Ajoute une activité au donneur (réservé aux structures). */
+  addActivity: (
+    id: string,
+    payload: { activityType: ActivityType; description?: string },
+  ) =>
+    httpClient.post<{ message: string; activityType: ActivityType }>(
+      `/donors/${id}/activities`,
+      payload,
     ),
 };
 

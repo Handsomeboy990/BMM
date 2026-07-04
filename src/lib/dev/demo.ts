@@ -247,6 +247,12 @@ export type DonorAccount = {
   lastDonation: string;
   bitcoinAddress: string;
   verified: boolean;
+  /** Solde de satoshis accumulé sur la plateforme (retirable via MoMo). */
+  balanceSats: number;
+  /** "digital" ou "physical". */
+  cardType: string;
+  /** Statut de commande de carte physique (none | merited | pending | ordered_paid). */
+  physicalCardStatus: string;
 };
 
 const day = (daysAgo: number) =>
@@ -273,6 +279,9 @@ export const demoDonorAccount: DonorAccount = {
   lastDonation: day(96),
   bitcoinAddress: "bc1qdemo1xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   verified: true,
+  balanceSats: 12_000,
+  cardType: "digital",
+  physicalCardStatus: "none",
 };
 
 export const demoDonations: DonationEntry[] = [

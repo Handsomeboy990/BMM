@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import {
@@ -69,6 +70,10 @@ export function AlertsBoard() {
   const createEmergency = useCreateEmergency();
   const updateStatus = useUpdateEmergencyStatus();
   const deleteEmergency = useDeleteEmergency();
+
+  const { pageItems, page, setPage, totalPages, total } = usePagination(
+    emergencies ?? [],
+  );
 
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -245,7 +250,7 @@ export function AlertsBoard() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {emergencies.map((alert) => (
+          {pageItems.map((alert) => (
             <Card key={alert.id}>
               <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -328,6 +333,13 @@ export function AlertsBoard() {
               </CardContent>
             </Card>
           ))}
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </div>

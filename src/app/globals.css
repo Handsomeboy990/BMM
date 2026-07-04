@@ -360,3 +360,61 @@
     }
   }
 }
+
+/* Champ téléphone international (react-phone-number-input) accordé au thème. */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+}
+
+.PhoneInputInput::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.15rem;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.35rem;
+  height: 1rem;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px
+    color-mix(in oklch, var(--color-border) 80%, transparent);
+}
+
+.PhoneInputCountryIcon--border {
+  background: transparent;
+  box-shadow: 0 0 0 1px
+    color-mix(in oklch, var(--color-border) 80%, transparent);
+}
+
+.PhoneInputCountrySelectArrow {
+  color: var(--color-muted-foreground);
+  opacity: 0.9;
+  border-color: currentColor;
+  margin-left: 0.1rem;
+}
+
+.PhoneInputCountrySelect:focus
+  + .PhoneInputCountryIcon
+  + .PhoneInputCountrySelectArrow,
+.PhoneInputCountrySelect:focus + .PhoneInputCountryIcon {
+  color: var(--color-ring);
+}

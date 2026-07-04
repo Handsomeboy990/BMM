@@ -9,6 +9,8 @@ export type RewardPayload = {
   momoNumber?: string;
   /** Attribue des points de fidélité au lieu d'un versement monétaire. */
   awardPoints?: boolean;
+  /** Crédite le solde plateforme du donneur (retirable plus tard par lui). */
+  creditBalance?: boolean;
   satsAmount?: number;
 };
 

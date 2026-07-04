@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PhoneField } from "@/components/ui/phone-field";
 import { Label } from "@/components/ui/label";
 import { Select, SelectItem } from "@/components/ui/select";
 import {
@@ -141,12 +141,10 @@ export function RewardChannelCard({
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="channel-phone">Numéro</Label>
-                  <Input
+                  <PhoneField
                     id="channel-phone"
-                    type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+229 …"
+                    onChange={setPhone}
                   />
                 </div>
               </div>

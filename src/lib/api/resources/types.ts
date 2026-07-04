@@ -35,7 +35,7 @@ export type Organization = {
 export type UserProfile = {
   id: string;
   email: string | undefined;
-  role: "super_admin" | "org_admin";
+  role: "super_admin" | "org_admin" | "donor";
   organizationId: string | null;
   organization?: Organization | null;
 };
@@ -89,6 +89,14 @@ export type DonorRecord = {
   otsProof: string | null;
   validated: boolean;
   createdAt: string;
+  /** Solde de satoshis accumulé sur la plateforme (retirable par le donneur). */
+  balanceSats?: number;
+  /** Type de carte : "digital" par défaut, "physical" une fois obtenue. */
+  cardType?: string;
+  /** Statut de la commande de carte physique (none | merited | pending | ordered_paid…). */
+  physicalCardStatus?: string;
+  /** Identifiant du donneur parrain, le cas échéant. */
+  referredBy?: string | null;
 };
 
 /** Donneur renvoyé par /search, enrichi de la distance (et du score en IA). */
@@ -150,6 +158,10 @@ export type VerifyResult = {
     profileHash: string;
     hasOtsProof: boolean;
     createdAt: string;
+    balanceSats?: number;
+    cardType?: string;
+    physicalCardStatus?: string;
+    activityCount?: number;
   };
   verification: {
     isTimestampVerified: boolean;

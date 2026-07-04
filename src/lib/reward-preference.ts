@@ -1,8 +1,8 @@
 /**
- * Préférence de récompense du donneur — « la Récompense Invisible ».
+ * Préférence de récompense du donneur - « la Récompense Invisible ».
  *
  * Le donneur choisit comment recevoir ses satoshis : soit sur son propre
- * portefeuille Lightning, soit — sans jamais toucher à la crypto — sur son
+ * portefeuille Lightning, soit - sans jamais toucher à la crypto - sur son
  * compte Mobile Money, la conversion étant routée à la volée via Izichange.
  *
  * Tant que la persistance backend n'expose pas ces colonnes, la préférence
@@ -55,7 +55,7 @@ export function saveRewardPreference(
   try {
     window.localStorage.setItem(keyFor(donorId), JSON.stringify(preference));
   } catch {
-    // Stockage indisponible (mode privé, quota) — on ignore silencieusement.
+    // Stockage indisponible (mode privé, quota) - on ignore silencieusement.
   }
 }
 

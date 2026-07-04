@@ -15,7 +15,7 @@ export default function DonorLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center">
             <Logo />
           </Link>
@@ -31,7 +31,7 @@ export default function DonorLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
+      <main className="w-full flex-1 px-4 py-8 sm:px-6 lg:px-8">
         {children}
       </main>
     </div>

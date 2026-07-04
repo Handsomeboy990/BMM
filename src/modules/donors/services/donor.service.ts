@@ -63,31 +63,68 @@ export const donorService = {
    */
   createDonor: async (
     data: CreateDonorDTO & { otsProof: string | null },
+    options?: { asAdmin?: boolean },
   ): Promise<DonorRecord | null> => {
-    const supabase = await createSupabaseServerClient();
-
-    // 1. Inscription dans Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (authError || !authData.user) {
-      console.error("Auth signUp for donor failed:", authError);
-      const message =
-        authError?.message || "Erreur lors de la création du compte donneur";
-      if (/already registered|already been registered|exists/i.test(message)) {
-        throw ApiError.conflict(
-          "Un compte existe déjà avec cet email. Connectez-vous ou utilisez une autre adresse.",
-        );
-      }
-      throw ApiError.badRequest(message);
+    // Mode admin : une structure/administrateur inscrit un donneur sans que sa
+    // propre session soit affectée (création via l'API admin, pas via signUp
+    // qui écrirait les cookies de session du nouveau compte).
+    const asAdmin = options?.asAdmin ?? false;
+    const adminClient = asAdmin ? createSupabaseAdminClient() : null;
+    if (asAdmin && !adminClient) {
+      throw ApiError.badRequest(
+        "Inscription administrateur indisponible : clé service role non configurée.",
+      );
     }
 
-    const userId = authData.user.id;
+    const supabase = await createSupabaseServerClient();
 
-    // 2. Insertion du profil de donneur relié à la session
-    const { data: newDonor, error } = await supabase
+    // 1. Création du compte Auth
+    let userId: string;
+    if (asAdmin && adminClient) {
+      const { data: created, error: authError } =
+        await adminClient.auth.admin.createUser({
+          email: data.email,
+          password: data.password,
+          email_confirm: true,
+        });
+      if (authError || !created.user) {
+        const message =
+          authError?.message || "Erreur lors de la création du compte donneur";
+        if (
+          /already registered|already been registered|exists/i.test(message)
+        ) {
+          throw ApiError.conflict(
+            "Un compte existe déjà avec cet email. Utilisez une autre adresse.",
+          );
+        }
+        throw ApiError.badRequest(message);
+      }
+      userId = created.user.id;
+    } else {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+      });
+      if (authError || !authData.user) {
+        console.error("Auth signUp for donor failed:", authError);
+        const message =
+          authError?.message || "Erreur lors de la création du compte donneur";
+        if (
+          /already registered|already been registered|exists/i.test(message)
+        ) {
+          throw ApiError.conflict(
+            "Un compte existe déjà avec cet email. Connectez-vous ou utilisez une autre adresse.",
+          );
+        }
+        throw ApiError.badRequest(message);
+      }
+      userId = authData.user.id;
+    }
+
+    // 2. Insertion du profil de donneur (service role en mode admin pour
+    // contourner la RLS liée à la session).
+    const db = asAdmin && adminClient ? adminClient : supabase;
+    const { data: newDonor, error } = await db
       .from("donors")
       .insert([
         {
@@ -96,7 +133,7 @@ export const donorService = {
           last_name: data.lastName,
           email: data.email,
           phone_number: data.phoneNumber,
-          blood_type: data.bloodType,
+          blood_type: data.bloodType ?? null,
           city: data.city,
           latitude: data.latitude,
           longitude: data.longitude,

@@ -32,7 +32,10 @@ import {
   stockApi,
   transfersApi,
   verifyApi,
+  type ActivityType,
   type CampaignRecord,
+  type CardOrderMethod,
+  type CardOrderResult,
   type CreateCampaignPayload,
   type CreateDonationPayload,
   type CreateDonorPayload,
@@ -51,6 +54,7 @@ import {
   type SearchParams,
   type TransferUrgency,
   type UpdateDonorPayload,
+  type VerifyResult,
 } from "./resources";
 
 /** Convertit un DonorRecord (API) vers la vue riche de l'espace donneur. */
@@ -76,6 +80,9 @@ function toDonorAccount(rec: DonorRecord): DonorAccount {
     lastDonation: rec.createdAt,
     bitcoinAddress: rec.bitcoinAddress,
     verified: rec.validated,
+    balanceSats: rec.balanceSats ?? 0,
+    cardType: rec.cardType ?? "digital",
+    physicalCardStatus: rec.physicalCardStatus ?? "none",
   };
 }
 
@@ -309,6 +316,7 @@ export function useCreateDonor() {
       if (AUTH_BYPASS) {
         return demoDelay({
           ...payload,
+          bloodType: payload.bloodType ?? "O+",
           id: `demo-${Date.now()}`,
           otsProof: null,
           validated: false,
@@ -346,7 +354,7 @@ export function useVerifyDonor(id: string, enabled = true) {
     queryFn: () => {
       if (AUTH_BYPASS) {
         const donor = demoDonors[0];
-        return demoDelay({
+        return demoDelay<VerifyResult>({
           donor: {
             id,
             bloodType: donor.bloodType,
@@ -354,6 +362,10 @@ export function useVerifyDonor(id: string, enabled = true) {
             profileHash: donor.profileHash,
             hasOtsProof: true,
             createdAt: donor.createdAt,
+            balanceSats: 12_000,
+            cardType: "digital",
+            physicalCardStatus: "none",
+            activityCount: 4,
           },
           verification: {
             isTimestampVerified: true,
@@ -649,6 +661,114 @@ export function useDonorOfflineIdentity() {
       const res = await donorsApi.offlineIdentity(id);
       return res.data.identity;
     },
+  });
+}
+
+/** Retrait autonome du solde plateforme vers Mobile Money (Izichange). */
+export function useWithdrawBalance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { amountSats: number; momoNumber: string }) => {
+      if (AUTH_BYPASS) {
+        qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
+          old
+            ? {
+                ...old,
+                balanceSats: Math.max(0, old.balanceSats - payload.amountSats),
+              }
+            : old,
+        );
+        return demoDelay({
+          message: "Retrait simulé.",
+          balanceSats: 0,
+          reward: null,
+        });
+      }
+      const res = await donorsApi.withdraw(payload);
+      return res.data;
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+    },
+  });
+}
+
+/** Commande de carte physique (au mérite ou à l'achat). */
+export function useOrderCard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (method: CardOrderMethod): Promise<CardOrderResult> => {
+      if (AUTH_BYPASS) {
+        const status = method === "merit" ? "merited" : "pending";
+        qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
+          old ? { ...old, physicalCardStatus: status } : old,
+        );
+        return demoDelay({
+          message:
+            method === "merit"
+              ? "Carte accordée au mérite (démo)."
+              : "Commande payante initiée (démo).",
+          status,
+          orderId: `demo-order-${Date.now()}`,
+          checkoutUrl: method === "pay" ? "#demo-checkout" : undefined,
+        });
+      }
+      const res = await donorsApi.orderCard(method);
+      return res.data;
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+    },
+  });
+}
+
+/** Confirme le paiement d'une commande de carte physique. */
+export function useConfirmCardOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      if (AUTH_BYPASS) {
+        qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
+          old
+            ? {
+                ...old,
+                cardType: "physical",
+                physicalCardStatus: "ordered_paid",
+              }
+            : old,
+        );
+        return demoDelay({
+          message: "Paiement confirmé (démo).",
+          physicalCardStatus: "ordered_paid",
+          cardType: "physical",
+        });
+      }
+      const res = await donorsApi.confirmCardOrder(orderId);
+      return res.data;
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+    },
+  });
+}
+
+/** Ajoute une activité à un donneur (réservé aux structures connectées). */
+export function useAddDonorActivity() {
+  return useMutation({
+    mutationFn: ({
+      id,
+      activityType,
+      description,
+    }: {
+      id: string;
+      activityType: ActivityType;
+      description?: string;
+    }) =>
+      AUTH_BYPASS
+        ? demoDelay({ message: "Activité enregistrée (démo).", activityType })
+        : donorsApi
+            .addActivity(id, { activityType, description })
+            .then((r) => r.data),
   });
 }
 

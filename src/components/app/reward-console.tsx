@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Search,
   Smartphone,
+  Wallet,
   Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -16,16 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectItem } from "@/components/ui/select";
+import { PhoneField } from "@/components/ui/phone-field";
 import { useRewardDonor, useVerifyDonor } from "@/lib/api/hooks";
-import {
-  MOBILE_MONEY_OPERATORS,
-  type RewardMode,
-  loadRewardPreference,
-} from "@/lib/reward-preference";
+import { type RewardMode, loadRewardPreference } from "@/lib/reward-preference";
 import { cn } from "@/lib/utils";
 
-type PayoutMode = RewardMode | "points";
+type PayoutMode = RewardMode | "points" | "credit";
 
 export function RewardConsole() {
   const [query, setQuery] = useState("");
@@ -102,6 +99,26 @@ export function RewardConsole() {
     } catch (err) {
       setRewardError(
         err instanceof Error ? err.message : "L'attribution a échoué.",
+      );
+    }
+  }
+
+  // Crédite le solde plateforme du donneur (il le retirera lui-même en MoMo).
+  async function onCreditReward(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRewardError(null);
+    setSent(false);
+    const form = new FormData(event.currentTarget);
+    try {
+      await reward.mutateAsync({
+        id: donorId,
+        creditBalance: true,
+        satsAmount: Number(form.get("creditAmount")) || undefined,
+      });
+      setSent(true);
+    } catch (err) {
+      setRewardError(
+        err instanceof Error ? err.message : "Le crédit a échoué.",
       );
     }
   }
@@ -188,7 +205,9 @@ export function RewardConsole() {
                     ? "Le dépôt Mobile Money a été initié via Izichange. Le donneur reçoit un SMS de confirmation."
                     : payoutMode === "points"
                       ? "Les points de fidélité ont été attribués et ancrés sur Bitcoin (OTS)."
-                      : "Le paiement Lightning a été transmis au donneur."}
+                      : payoutMode === "credit"
+                        ? "Le solde plateforme du donneur a été crédité. Il pourra le retirer lui-même."
+                        : "Le paiement Lightning a été transmis au donneur."}
                 </p>
               </div>
               <Button
@@ -211,7 +230,7 @@ export function RewardConsole() {
               </div>
 
               {/* Canal de versement — « la Récompense Invisible ». */}
-              <div className="bg-muted/50 grid grid-cols-3 gap-1 rounded-lg p-1">
+              <div className="bg-muted/50 grid grid-cols-2 gap-1 rounded-lg p-1 sm:grid-cols-4">
                 <ModeTab
                   active={payoutMode === "mobile-money"}
                   onClick={() => setPayoutMode("mobile-money")}
@@ -223,6 +242,12 @@ export function RewardConsole() {
                   onClick={() => setPayoutMode("lightning")}
                   icon={<Zap className="size-4" />}
                   label="Lightning"
+                />
+                <ModeTab
+                  active={payoutMode === "credit"}
+                  onClick={() => setPayoutMode("credit")}
+                  icon={<Wallet className="size-4" />}
+                  label="Solde"
                 />
                 <ModeTab
                   active={payoutMode === "points"}
@@ -278,32 +303,13 @@ export function RewardConsole() {
                   onSubmit={onMomoReward}
                   className="animate-rise-in space-y-4"
                 >
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="momoOperator">Opérateur</Label>
-                      <Select
-                        id="momoOperator"
-                        name="momoOperator"
-                        defaultValue={preference?.operator ?? "mtn"}
-                      >
-                        {MOBILE_MONEY_OPERATORS.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>
-                            {o.label}
-                          </SelectItem>
-                        ))}
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="momoPhone">Numéro</Label>
-                      <Input
-                        id="momoPhone"
-                        name="momoPhone"
-                        type="tel"
-                        required
-                        defaultValue={preference?.phone ?? ""}
-                        placeholder="+229 …"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="momoPhone">Numéro Mobile Money</Label>
+                    <PhoneField
+                      id="momoPhone"
+                      name="momoPhone"
+                      defaultValue={preference?.phone ?? ""}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="momoSats">Montant (sats)</Label>
@@ -328,6 +334,38 @@ export function RewardConsole() {
                   >
                     <Smartphone className="size-4" />
                     {reward.isPending ? "Envoi…" : "Déposer sur Mobile Money"}
+                  </Button>
+                </form>
+              ) : payoutMode === "credit" ? (
+                <form
+                  onSubmit={onCreditReward}
+                  className="animate-rise-in space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="creditAmount">
+                      Montant à créditer (sats)
+                    </Label>
+                    <Input
+                      id="creditAmount"
+                      name="creditAmount"
+                      type="number"
+                      min={1}
+                      defaultValue={1000}
+                    />
+                  </div>
+                  <p className="text-muted-foreground flex items-start gap-2 text-xs">
+                    <Wallet className="mt-0.5 size-3.5 shrink-0" />
+                    Les satoshis sont ajoutés au solde plateforme du donneur. Il
+                    les retirera lui-même vers son Mobile Money quand il le
+                    souhaite.
+                  </p>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={!verify.data || reward.isPending}
+                  >
+                    <Wallet className="size-4" />
+                    {reward.isPending ? "Crédit…" : "Créditer le solde"}
                   </Button>
                 </form>
               ) : (

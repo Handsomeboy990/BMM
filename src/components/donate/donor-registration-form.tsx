@@ -9,15 +9,19 @@ import {
   Navigation,
   ShieldCheck,
   Smartphone,
+  UserPlus,
+  Users,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PhoneField } from "@/components/ui/phone-field";
 import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCreateDonor } from "@/lib/api/hooks";
@@ -62,8 +66,24 @@ function downloadKey({ donor, wif }: Success) {
   URL.revokeObjectURL(url);
 }
 
-export function DonorRegistrationForm() {
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function DonorRegistrationForm({
+  variant = "public",
+}: {
+  variant?: "public" | "admin";
+}) {
+  const isAdmin = variant === "admin";
   const createDonor = useCreateDonor();
+  const searchParams = useSearchParams();
+  // Parrainage : `?ref=<uuid>` transmis via le lien d'un donneur existant.
+  const ref = searchParams.get("ref");
+  const referredById = isAdmin
+    ? undefined
+    : ref && UUID_RE.test(ref)
+      ? ref
+      : undefined;
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<Success | null>(null);
@@ -84,7 +104,7 @@ export function DonorRegistrationForm() {
       );
       return;
     }
-    if (!consent) {
+    if (!isAdmin && !consent) {
       setError(
         "Merci de confirmer votre consentement au traitement de vos données.",
       );
@@ -115,7 +135,9 @@ export function DonorRegistrationForm() {
         email: profile.email,
         phoneNumber: profile.phoneNumber,
         password: String(form.get("password")),
-        bloodType: profile.bloodType as BloodType,
+        bloodType: profile.bloodType
+          ? (profile.bloodType as BloodType)
+          : undefined,
         city: profile.city,
         age: profile.age,
         available: true,
@@ -124,6 +146,7 @@ export function DonorRegistrationForm() {
         bitcoinAddress: identity.bitcoinAddress,
         profileHash: identity.profileHash,
         signature: identity.signature,
+        referredById,
       });
 
       // « Récompense Invisible » : on mémorise le canal de versement choisi
@@ -156,12 +179,14 @@ export function DonorRegistrationForm() {
             <CheckCircle2 className="size-12 text-emerald-500" />
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">
-                Vous êtes enregistré comme donneur volontaire !
+                {isAdmin
+                  ? "Donneur inscrit avec succès"
+                  : "Vous êtes enregistré comme donneur volontaire !"}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Votre profil de donneur a été signé et sa preuve d'ancrage est
-                en cours de traitement sur la blockchain Bitcoin. Un email de
-                bienvenue vient de vous être envoyé.
+                {isAdmin
+                  ? "Le profil du donneur a été signé et ancré sur Bitcoin. Remettez-lui sa clé privée ci-dessous : elle lui servira à accéder à son espace."
+                  : "Votre profil de donneur a été signé et sa preuve d'ancrage est en cours de traitement sur la blockchain Bitcoin. Un email de bienvenue vient de vous être envoyé."}
               </p>
             </div>
           </div>
@@ -169,13 +194,14 @@ export function DonorRegistrationForm() {
           <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
               <KeyRound className="size-4" />
-              Conservez précieusement votre clé privée
+              {isAdmin
+                ? "Clé privée à remettre au donneur"
+                : "Conservez précieusement votre clé privée"}
             </p>
             <p className="text-muted-foreground text-xs">
-              Elle prouve la propriété de votre profil et vous permet de vous
-              authentifier de manière souveraine. Nous ne la stockons pas et ne
-              l'envoyons jamais par email : copiez-la ou téléchargez-la et
-              gardez-la en lieu sûr.
+              {isAdmin
+                ? "Elle prouve la propriété du profil. Elle n'est pas stockée et n'est jamais envoyée par email : téléchargez-la et transmettez-la au donneur."
+                : "Elle prouve la propriété de votre profil et vous permet de vous authentifier de manière souveraine. Nous ne la stockons pas et ne l'envoyons jamais par email : copiez-la ou téléchargez-la et gardez-la en lieu sûr."}
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-background flex-1 truncate rounded border px-2 py-1.5 font-mono text-xs">
@@ -203,15 +229,39 @@ export function DonorRegistrationForm() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Button asChild className="w-full">
-              <Link href="/donneur">Accéder à mon espace donneur</Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full">
-              <Link href={`/verify/${success.donor.id}`}>
-                <ShieldCheck className="size-4" />
-                Voir ma preuve d'intégrité
-              </Link>
-            </Button>
+            {isAdmin ? (
+              <>
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() => {
+                    setSuccess(null);
+                    setConsent(false);
+                  }}
+                >
+                  <UserPlus className="size-4" />
+                  Inscrire un autre donneur
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`/donors/${success.donor.id}`}>
+                    <ShieldCheck className="size-4" />
+                    Voir la fiche du donneur
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild className="w-full">
+                  <Link href="/donneur">Accéder à mon espace donneur</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`/verify/${success.donor.id}`}>
+                    <ShieldCheck className="size-4" />
+                    Voir ma preuve d'intégrité
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -222,6 +272,14 @@ export function DonorRegistrationForm() {
     <Card>
       <CardContent className="p-6">
         <form className="space-y-5" onSubmit={onSubmit}>
+          {referredById ? (
+            <p className="border-primary/25 bg-primary/5 text-primary flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+              <Users className="size-4 shrink-0" />
+              Vous avez été parrainé — votre parrain sera crédité d'une
+              activité.
+            </p>
+          ) : null}
+
           {error ? (
             <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <AlertCircle className="size-4 shrink-0" />
@@ -246,14 +304,19 @@ export function DonorRegistrationForm() {
                 placeholder="Dossou"
               />
             </Field>
-            <Field label="Groupe sanguin" htmlFor="bloodType">
-              <Select id="bloodType" name="bloodType" defaultValue="O-">
+            <Field label="Groupe sanguin (optionnel)" htmlFor="bloodType">
+              <Select id="bloodType" name="bloodType" defaultValue="">
+                <SelectItem value="">Je ne le connais pas encore</SelectItem>
                 {BLOOD_TYPES.map((g) => (
                   <SelectItem key={g} value={g}>
                     {g}
                   </SelectItem>
                 ))}
               </Select>
+              <p className="text-muted-foreground text-xs">
+                Laissez vide si vous ne le connaissez pas : il sera déterminé
+                lors de votre premier don.
+              </p>
             </Field>
             <Field label="Âge" htmlFor="age">
               <Input
@@ -267,13 +330,7 @@ export function DonorRegistrationForm() {
               />
             </Field>
             <Field label="Téléphone" htmlFor="phoneNumber">
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                required
-                placeholder="+229 01 97 12 34 56"
-              />
+              <PhoneField id="phoneNumber" name="phoneNumber" />
             </Field>
             <Field label="Ville" htmlFor="city">
               <Input id="city" name="city" required placeholder="Cotonou" />
@@ -299,59 +356,58 @@ export function DonorRegistrationForm() {
             </Field>
           </div>
 
-          {/* Mode de récompense — « la Récompense Invisible ». */}
-          <div className="space-y-3">
-            <Label>Comment recevoir vos récompenses ?</Label>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <RewardModeCard
-                active={rewardMode === "mobile-money"}
-                onClick={() => setRewardMode("mobile-money")}
-                icon={<Smartphone className="size-5" />}
-                title="Mobile Money"
-                subtitle="Reçu par SMS, sans wallet crypto"
-                badge="Recommandé"
-              />
-              <RewardModeCard
-                active={rewardMode === "lightning"}
-                onClick={() => setRewardMode("lightning")}
-                icon={<Zap className="size-5" />}
-                title="Bitcoin Lightning"
-                subtitle="Sur votre propre portefeuille"
-              />
-            </div>
-
-            {rewardMode === "mobile-money" ? (
-              <div className="animate-rise-in grid gap-4 sm:grid-cols-2">
-                <Field label="Opérateur" htmlFor="momoOperator">
-                  <Select
-                    id="momoOperator"
-                    name="momoOperator"
-                    defaultValue="mtn"
-                  >
-                    {MOBILE_MONEY_OPERATORS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </Field>
-                <Field label="Numéro Mobile Money" htmlFor="momoPhone">
-                  <Input
-                    id="momoPhone"
-                    name="momoPhone"
-                    type="tel"
-                    placeholder="+229 01 97 12 34 56"
-                  />
-                </Field>
-                <p className="text-muted-foreground flex items-center gap-2 text-xs sm:col-span-2">
-                  <ShieldCheck className="size-3.5 shrink-0" />
-                  Vos satoshis sont convertis à la volée via Izichange : vous
-                  recevez un dépôt Mobile Money classique. Bitcoin reste
-                  invisible.
-                </p>
+          {/* Mode de récompense — « la Récompense Invisible ».
+              Masqué en inscription par une structure (non obligatoire ici :
+              le donneur choisira son canal depuis son espace). */}
+          {isAdmin ? null : (
+            <div className="space-y-3">
+              <Label>Comment recevoir vos récompenses ?</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <RewardModeCard
+                  active={rewardMode === "mobile-money"}
+                  onClick={() => setRewardMode("mobile-money")}
+                  icon={<Smartphone className="size-5" />}
+                  title="Mobile Money"
+                  subtitle="Reçu par SMS, sans wallet crypto"
+                  badge="Recommandé"
+                />
+                <RewardModeCard
+                  active={rewardMode === "lightning"}
+                  onClick={() => setRewardMode("lightning")}
+                  icon={<Zap className="size-5" />}
+                  title="Bitcoin Lightning"
+                  subtitle="Sur votre propre portefeuille"
+                />
               </div>
-            ) : null}
-          </div>
+
+              {rewardMode === "mobile-money" ? (
+                <div className="animate-rise-in grid gap-4 sm:grid-cols-2">
+                  <Field label="Opérateur" htmlFor="momoOperator">
+                    <Select
+                      id="momoOperator"
+                      name="momoOperator"
+                      defaultValue="mtn"
+                    >
+                      {MOBILE_MONEY_OPERATORS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Numéro Mobile Money" htmlFor="momoPhone">
+                    <PhoneField id="momoPhone" name="momoPhone" />
+                  </Field>
+                  <p className="text-muted-foreground flex items-center gap-2 text-xs sm:col-span-2">
+                    <ShieldCheck className="size-3.5 shrink-0" />
+                    Vos satoshis sont convertis à la volée via Izichange : vous
+                    recevez un dépôt Mobile Money classique. Bitcoin reste
+                    invisible.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           <Button
             type="button"
@@ -368,30 +424,34 @@ export function DonorRegistrationForm() {
                 : "Partager ma position"}
           </Button>
 
-          <label className="text-muted-foreground flex cursor-pointer items-start gap-2.5 text-xs">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="accent-primary mt-0.5 size-4 shrink-0 rounded"
-            />
-            <span>
-              J'autorise Bitcoin Blood à traiter mes données de santé pour être
-              alerté en cas de besoin compatible, conformément à la
-              réglementation sur la protection des données.
-            </span>
-          </label>
+          {isAdmin ? null : (
+            <label className="text-muted-foreground flex cursor-pointer items-start gap-2.5 text-xs">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="accent-primary mt-0.5 size-4 shrink-0 rounded"
+              />
+              <span>
+                J'autorise Bitcoin Blood à traiter mes données de santé pour
+                être alerté en cas de besoin compatible, conformément à la
+                réglementation sur la protection des données.
+              </span>
+            </label>
+          )}
 
           <p className="text-muted-foreground flex items-center gap-2 text-xs">
             <ShieldCheck className="size-3.5 shrink-0" />
-            Votre profil est signé cryptographiquement (BIP-322) puis ancré sur
+            Le profil est signé cryptographiquement (BIP-322) puis ancré sur
             Bitcoin. Aucune clé privée n'est transmise.
           </p>
 
           <Button type="submit" size="lg" className="w-full" disabled={busy}>
             {busy
-              ? "Signature & enregistrement…"
-              : "Devenir donneur maintenant"}
+              ? "Signature et enregistrement en cours"
+              : isAdmin
+                ? "Inscrire le donneur"
+                : "Devenir donneur maintenant"}
           </Button>
         </form>
       </CardContent>

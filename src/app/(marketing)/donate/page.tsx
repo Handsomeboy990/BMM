@@ -1,6 +1,7 @@
 import { Bell, Droplet, MapPin, ShieldCheck, Smartphone } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
 import { DonorRegistrationForm } from "@/components/donate/donor-registration-form";
@@ -85,7 +86,9 @@ export default function DonatePage() {
 
         {/* Volet action — formulaire d'inscription. */}
         <div className="animate-rise-in [animation-delay:120ms]">
-          <DonorRegistrationForm />
+          <Suspense fallback={null}>
+            <DonorRegistrationForm />
+          </Suspense>
         </div>
       </div>
     </Container>

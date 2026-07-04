@@ -34,11 +34,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // Si l'appelant est une structure/administrateur connecté, on inscrit le
+    // donneur sans affecter sa session (création via l'API admin).
+    const caller = await authService.getCurrentUser();
+    const asAdmin =
+      caller?.role === "org_admin" || caller?.role === "super_admin";
+
     // Enregistrement dans la base de données (Supabase Auth + Table donors) sans preuve OTS initiale
-    const newDonor = await donorService.createDonor({
-      ...validatedData,
-      otsProof: null,
-    });
+    const newDonor = await donorService.createDonor(
+      {
+        ...validatedData,
+        otsProof: null,
+      },
+      { asAdmin },
+    );
 
     if (!newDonor) {
       return failure(

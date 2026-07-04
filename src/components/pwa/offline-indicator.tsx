@@ -30,7 +30,7 @@ export function OfflineIndicator() {
       className="animate-rise-in fixed inset-x-0 bottom-0 z-50 flex items-center justify-center gap-2 bg-amber-500 px-4 py-2 text-center text-sm font-medium text-amber-950 shadow-lg"
     >
       <WifiOff className="size-4 shrink-0" />
-      Hors-ligne — la vérification de carte reste disponible localement.
+      Hors-ligne - la vérification de carte reste disponible localement.
     </div>
   );
 }

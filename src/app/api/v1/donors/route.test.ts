@@ -106,10 +106,13 @@ describe("POST /api/v1/donors", () => {
       "bc1q...",
       "sig...",
     );
-    expect(donorService.createDonor).toHaveBeenCalledWith({
-      ...body,
-      otsProof: null,
-    });
+    expect(donorService.createDonor).toHaveBeenCalledWith(
+      {
+        ...body,
+        otsProof: null,
+      },
+      { asAdmin: false },
+    );
   });
 
   it("should return 400 if BIP-322 signature is invalid", async () => {

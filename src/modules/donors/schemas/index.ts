@@ -10,6 +10,11 @@ export const donorSchema = z.object({
 });
 
 export const createDonorSchema = donorSchema.extend({
+  // Groupe sanguin optionnel à l'inscription : un donneur qui ne le connaît
+  // pas encore peut le laisser vide (renseigné plus tard, après un test).
+  bloodType: z
+    .enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+    .optional(),
   firstName: z.string().min(1, "Le prénom est requis").max(255),
   lastName: z.string().min(1, "Le nom est requis").max(255),
   email: z.string().email("Adresse email invalide"),

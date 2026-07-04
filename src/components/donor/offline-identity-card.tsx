@@ -37,7 +37,7 @@ export function OfflineIdentityCard({
     }
   }
 
-  // Charge utile encodée dans le QR — tout ce qu'il faut pour une vérification
+  // Charge utile encodée dans le QR - tout ce qu'il faut pour une vérification
   // BIP-322 hors-ligne : adresse signataire, message signé, signature.
   const qrValue = identity
     ? JSON.stringify({
@@ -63,7 +63,7 @@ export function OfflineIdentityCard({
       <CardContent className="space-y-4 pt-0">
         <p className="text-muted-foreground text-sm">
           Générez une attestation signée (BIP-322) de votre groupe sanguin.
-          Toute clinique — même sans connexion — peut scanner ce QR Code pour
+          Toute clinique - même sans connexion - peut scanner ce QR Code pour
           confirmer votre groupe {bloodType}, sans repayer de test.
         </p>
 

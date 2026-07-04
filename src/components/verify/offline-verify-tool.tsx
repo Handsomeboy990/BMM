@@ -13,7 +13,7 @@ import { verifyDonorSignature } from "@/lib/bitcoin/donor-identity";
 type Result = { ok: boolean } | null;
 
 /**
- * Vérification BIP-322 hors-ligne — « Identité Sanguine Souveraine ».
+ * Vérification BIP-322 hors-ligne - « Identité Sanguine Souveraine ».
  * Tout se passe dans le navigateur : une clinique peut confirmer une
  * attestation signée même sans connexion internet.
  */
@@ -48,7 +48,7 @@ export function OfflineVerifyTool({
       <CardContent className="space-y-4 pt-0">
         <p className="text-muted-foreground text-sm">
           Confirmez une attestation signée (groupe sanguin, empreinte de profil)
-          directement sur l'appareil, sans aucun appel réseau — idéal pour les
+          directement sur l'appareil, sans aucun appel réseau - idéal pour les
           cliniques rurales en cas de coupure.
         </p>
 
@@ -101,12 +101,12 @@ export function OfflineVerifyTool({
             result.ok ? (
               <p className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="size-4 shrink-0" />
-                Signature valide — attestation authentique.
+                Signature valide - attestation authentique.
               </p>
             ) : (
               <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <XCircle className="size-4 shrink-0" />
-                Signature invalide — attestation non vérifiée.
+                Signature invalide - attestation non vérifiée.
               </p>
             )
           ) : null}
