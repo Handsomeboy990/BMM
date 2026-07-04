@@ -120,6 +120,11 @@ describe("donorService", () => {
         profileHash: "hash...",
         otsProof: "proof...",
         createdAt: new Date("2026-06-30T12:00:00.000Z"),
+        balanceSats: 0,
+        cardType: "virtual",
+        physicalCardStatus: "none",
+        referredBy: null,
+        validated: false,
       });
     });
   });

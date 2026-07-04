@@ -17,15 +17,23 @@ const rewardPayloadSchema = z
       .optional(),
     momoNumber: z.string().min(8, "Le numéro MoMo est invalide").optional(),
     awardPoints: z.boolean().optional(),
+    creditBalance: z.boolean().optional(),
     satsAmount: z
       .number()
       .min(1, "Le montant doit être supérieur à 0")
       .optional(),
   })
-  .refine((data) => data.bolt11Invoice || data.momoNumber || data.awardPoints, {
-    message:
-      "Vous devez fournir soit une facture BOLT11, soit un numéro MoMo, soit choisir l'attribution de points",
-  });
+  .refine(
+    (data) =>
+      data.bolt11Invoice ||
+      data.momoNumber ||
+      data.awardPoints ||
+      data.creditBalance,
+    {
+      message:
+        "Vous devez fournir soit une facture BOLT11, soit un numéro MoMo, soit choisir l'attribution de points, soit créditer le solde",
+    },
+  );
 
 /**
  * GET /api/v1/verify/[id]
@@ -73,6 +81,8 @@ export async function GET(
       }
     }
 
+    const activityCount = await donorService.getActivitiesCount(donor.id);
+
     return success({
       donor: {
         id: donor.id,
@@ -81,6 +91,10 @@ export async function GET(
         profileHash: donor.profileHash,
         hasOtsProof: !!donor.otsProof,
         createdAt: donor.createdAt,
+        balanceSats: donor.balanceSats,
+        cardType: donor.cardType,
+        physicalCardStatus: donor.physicalCardStatus,
+        activityCount,
       },
       verification: {
         isTimestampVerified,
@@ -160,9 +174,11 @@ export async function POST(
     // Pour les points, on stocke "points"
     const invoiceOrMomo = validatedData.awardPoints
       ? "points"
-      : validatedData.momoNumber
-        ? `momo:${validatedData.momoNumber}`
-        : validatedData.bolt11Invoice || "";
+      : validatedData.creditBalance
+        ? "credit_balance"
+        : validatedData.momoNumber
+          ? `momo:${validatedData.momoNumber}`
+          : validatedData.bolt11Invoice || "";
 
     const rewardLog = await rewardService.createRewardLog({
       donorId: id,
@@ -172,7 +188,7 @@ export async function POST(
     });
 
     try {
-      // 5. Exécution du paiement Lightning via Breez, ou MoMo via Izichange, ou attribution de points
+      // 5. Exécution du paiement Lightning via Breez, ou MoMo via Izichange, ou attribution de points, ou crédit de solde
       let paymentHash: string;
 
       if (validatedData.awardPoints) {
@@ -185,6 +201,12 @@ export async function POST(
           throw new Error("Échec de l'attribution des points de fidélité.");
         }
         paymentHash = `points_ots_${pointsResult.proofBase64.substring(0, 16)}`;
+      } else if (validatedData.creditBalance) {
+        const newBal = await donorService.updateDonorBalance(id, satsAmount);
+        if (newBal === null) {
+          throw new Error("Impossible de créditer le solde du donneur.");
+        }
+        paymentHash = `credit_balance_${Math.random().toString(36).substring(2, 12)}`;
       } else if (validatedData.momoNumber) {
         paymentHash = await izichangeService.cashoutToMoMo(
           validatedData.momoNumber,
@@ -207,6 +229,13 @@ export async function POST(
         rewardLog.id,
         "completed",
         paymentHash,
+      );
+
+      // Enregistrer l'activité de don de sang
+      await donorService.addActivity(
+        id,
+        "blood_donation",
+        `Don de sang physique récompensé (${satsAmount} sats).`,
       );
 
       // 7. Email de récompense (best-effort: n'échoue jamais le paiement).

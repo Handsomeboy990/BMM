@@ -8,6 +8,9 @@ vi.mock("@/modules/donors", () => {
   return {
     donorService: {
       getDonorById: vi.fn(),
+      getActivitiesCount: vi.fn().mockResolvedValue(0),
+      addActivity: vi.fn().mockResolvedValue(true),
+      updateDonorBalance: vi.fn().mockResolvedValue(1000),
     },
   };
 });

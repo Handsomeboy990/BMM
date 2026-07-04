@@ -6,6 +6,57 @@ import { ApiError } from "@/lib/api/errors";
 import { CreateDonorDTO, DonorRecord } from "../types";
 import type { UpdateDonorDTO } from "../schemas";
 
+interface DBDonorRow {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  blood_type: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  city: string;
+  latitude: number;
+  longitude: number;
+  age: number;
+  available: boolean;
+  bitcoin_address: string;
+  profile_hash: string;
+  ots_proof: string | null;
+  validated?: boolean;
+  created_at: string | Date;
+  balance_sats?: number;
+  card_type?: string;
+  physical_card_status?: string;
+  referred_by?: string | null;
+}
+
+/**
+ * Mappe un enregistrement brut de la base de données donors vers le type DonorRecord
+ */
+function mapDonor(donor: DBDonorRow): DonorRecord {
+  return {
+    id: donor.id,
+    firstName: donor.first_name,
+    lastName: donor.last_name,
+    email: donor.email,
+    phoneNumber: donor.phone_number,
+    bloodType: donor.blood_type,
+    city: donor.city,
+    latitude: donor.latitude,
+    longitude: donor.longitude,
+    age: donor.age,
+    available: donor.available,
+    bitcoinAddress: donor.bitcoin_address,
+    profileHash: donor.profile_hash,
+    otsProof: donor.ots_proof,
+    validated: donor.validated ?? false,
+    createdAt: new Date(donor.created_at),
+    balanceSats: donor.balance_sats ?? 0,
+    cardType: donor.card_type ?? "virtual",
+    physicalCardStatus: donor.physical_card_status ?? "none",
+    referredBy: donor.referred_by ?? null,
+  };
+}
+
 export const donorService = {
   /**
    * Enregistre un nouveau donneur dans la base de données Supabase et lui crée un compte Auth
@@ -23,8 +74,6 @@ export const donorService = {
 
     if (authError || !authData.user) {
       console.error("Auth signUp for donor failed:", authError);
-      // Remonte la cause réelle (email déjà utilisé, mot de passe faible,
-      // rate limit…) en 400 explicite au lieu d'un 500 générique opaque.
       const message =
         authError?.message || "Erreur lors de la création du compte donneur";
       if (/already registered|already been registered|exists/i.test(message)) {
@@ -56,14 +105,13 @@ export const donorService = {
           bitcoin_address: data.bitcoinAddress,
           profile_hash: data.profileHash,
           ots_proof: data.otsProof,
+          referred_by: data.referredById || null,
         },
       ])
       .select()
       .single();
 
     if (error) {
-      // On journalise le détail réel (message/code) au lieu d'un objet vide,
-      // et on nettoie l'utilisateur auth créé pour éviter les orphelins.
       console.error(
         "Error creating donor profile:",
         error.message,
@@ -74,8 +122,6 @@ export const donorService = {
       if (adminClient) {
         await adminClient.auth.admin.deleteUser(userId);
       }
-      // 23505 = violation de contrainte d'unicité (email / bitcoin_address /
-      // profile_hash déjà présents) → conflit explicite plutôt qu'un 500.
       if (error.code === "23505") {
         throw ApiError.conflict(
           "Un donneur existe déjà avec ces informations (email ou identité Bitcoin).",
@@ -86,24 +132,16 @@ export const donorService = {
       );
     }
 
-    return {
-      id: newDonor.id,
-      firstName: newDonor.first_name,
-      lastName: newDonor.last_name,
-      email: newDonor.email,
-      phoneNumber: newDonor.phone_number,
-      bloodType: newDonor.blood_type,
-      city: newDonor.city,
-      latitude: newDonor.latitude,
-      longitude: newDonor.longitude,
-      age: newDonor.age,
-      available: newDonor.available,
-      bitcoinAddress: newDonor.bitcoin_address,
-      profileHash: newDonor.profile_hash,
-      otsProof: newDonor.ots_proof,
-      validated: newDonor.validated,
-      createdAt: new Date(newDonor.created_at),
-    };
+    // 3. Si le donneur a été parrainé, ajouter une activité au parrain
+    if (data.referredById) {
+      await donorService.addActivity(
+        data.referredById,
+        "referral",
+        `A parrainé un nouveau donneur : ${data.firstName} ${data.lastName}.`,
+      );
+    }
+
+    return mapDonor(newDonor);
   },
 
   /**
@@ -122,24 +160,7 @@ export const donorService = {
       return null;
     }
 
-    return {
-      id: donor.id,
-      firstName: donor.first_name,
-      lastName: donor.last_name,
-      email: donor.email,
-      phoneNumber: donor.phone_number,
-      bloodType: donor.blood_type,
-      city: donor.city,
-      latitude: donor.latitude,
-      longitude: donor.longitude,
-      age: donor.age,
-      available: donor.available,
-      bitcoinAddress: donor.bitcoin_address,
-      profileHash: donor.profile_hash,
-      otsProof: donor.ots_proof,
-      validated: donor.validated,
-      createdAt: new Date(donor.created_at),
-    };
+    return mapDonor(donor);
   },
 
   /**
@@ -158,24 +179,7 @@ export const donorService = {
       return [];
     }
 
-    return donors.map((donor) => ({
-      id: donor.id,
-      firstName: donor.first_name,
-      lastName: donor.last_name,
-      email: donor.email,
-      phoneNumber: donor.phone_number,
-      bloodType: donor.blood_type,
-      city: donor.city,
-      latitude: donor.latitude,
-      longitude: donor.longitude,
-      age: donor.age,
-      available: donor.available,
-      bitcoinAddress: donor.bitcoin_address,
-      profileHash: donor.profile_hash,
-      otsProof: donor.ots_proof,
-      validated: donor.validated,
-      createdAt: new Date(donor.created_at),
-    }));
+    return donors.map(mapDonor);
   },
 
   /**
@@ -194,24 +198,7 @@ export const donorService = {
       return [];
     }
 
-    return donors.map((donor) => ({
-      id: donor.id,
-      firstName: donor.first_name,
-      lastName: donor.last_name,
-      email: donor.email,
-      phoneNumber: donor.phone_number,
-      bloodType: donor.blood_type,
-      city: donor.city,
-      latitude: donor.latitude,
-      longitude: donor.longitude,
-      age: donor.age,
-      available: donor.available,
-      bitcoinAddress: donor.bitcoin_address,
-      profileHash: donor.profile_hash,
-      otsProof: donor.ots_proof,
-      validated: donor.validated,
-      createdAt: new Date(donor.created_at),
-    }));
+    return donors.map(mapDonor);
   },
 
   /**
@@ -242,24 +229,7 @@ export const donorService = {
       return null;
     }
 
-    return {
-      id: donor.id,
-      firstName: donor.first_name,
-      lastName: donor.last_name,
-      email: donor.email,
-      phoneNumber: donor.phone_number,
-      bloodType: donor.blood_type,
-      city: donor.city,
-      latitude: donor.latitude,
-      longitude: donor.longitude,
-      age: donor.age,
-      available: donor.available,
-      bitcoinAddress: donor.bitcoin_address,
-      profileHash: donor.profile_hash,
-      otsProof: donor.ots_proof,
-      validated: donor.validated,
-      createdAt: new Date(donor.created_at),
-    };
+    return mapDonor(donor);
   },
 
   /**
@@ -291,23 +261,192 @@ export const donorService = {
       throw new Error("Erreur lors de la mise à jour du profil de donneur");
     }
 
-    return {
-      id: donor.id,
-      firstName: donor.first_name,
-      lastName: donor.last_name,
-      email: donor.email,
-      phoneNumber: donor.phone_number,
-      bloodType: donor.blood_type,
-      city: donor.city,
-      latitude: donor.latitude,
-      longitude: donor.longitude,
-      age: donor.age,
-      available: donor.available,
-      bitcoinAddress: donor.bitcoin_address,
-      profileHash: donor.profile_hash,
-      otsProof: donor.ots_proof,
-      validated: donor.validated,
-      createdAt: new Date(donor.created_at),
-    };
+    return mapDonor(donor);
+  },
+
+  /**
+   * Ajoute une activité pour un donneur.
+   */
+  addActivity: async (
+    donorId: string,
+    activityType: "blood_donation" | "referral" | "awareness_session",
+    description?: string,
+  ): Promise<boolean> => {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { error } = await supabase.from("donor_activities").insert([
+        {
+          donor_id: donorId,
+          activity_type: activityType,
+          description: description || null,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error adding donor activity:", error);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Error adding donor activity:", err);
+      return false;
+    }
+  },
+
+  /**
+   * Récupère le nombre d'activités validées d'un donneur
+   */
+  getActivitiesCount: async (donorId: string): Promise<number> => {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { count, error } = await supabase
+        .from("donor_activities")
+        .select("*", { count: "exact", head: true })
+        .eq("donor_id", donorId);
+
+      if (error) throw error;
+      return count || 0;
+    } catch (err) {
+      console.error("Error getting activities count:", err);
+      return 0;
+    }
+  },
+
+  /**
+   * Crée une commande de carte physique
+   */
+  createCardOrder: async (data: {
+    donorId: string;
+    status: "pending" | "paid" | "merited";
+    paymentMethod: "izichange_pay" | "merit";
+    paymentReference?: string;
+    amountPaid?: number;
+  }): Promise<{ id: string; status: string } | null> => {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { data: order, error } = await supabase
+        .from("card_orders")
+        .insert([
+          {
+            donor_id: data.donorId,
+            status: data.status,
+            payment_method: data.paymentMethod,
+            payment_reference: data.paymentReference || null,
+            amount_paid: data.amountPaid || 0,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error || !order) {
+        console.error("Error creating card order:", error);
+        return null;
+      }
+
+      // Si c'est mérité, mettre directement à jour le statut physique de la carte du donneur
+      if (data.status === "merited") {
+        await supabase
+          .from("donors")
+          .update({
+            physical_card_status: "requested_merit",
+            card_type: "physical",
+          })
+          .eq("id", data.donorId);
+      }
+
+      return {
+        id: order.id,
+        status: order.status,
+      };
+    } catch (err) {
+      console.error("Error creating card order:", err);
+      return null;
+    }
+  },
+
+  /**
+   * Confirme le paiement d'une commande et active la carte du donneur
+   */
+  confirmCardOrderPayment: async (
+    orderId: string,
+    donorId: string,
+  ): Promise<boolean> => {
+    try {
+      const supabase = await createSupabaseServerClient();
+
+      const { error: orderError } = await supabase
+        .from("card_orders")
+        .update({ status: "paid" })
+        .eq("id", orderId)
+        .eq("donor_id", donorId);
+
+      if (orderError) {
+        console.error("Error updating card order to paid:", orderError);
+        return false;
+      }
+
+      const { error: donorError } = await supabase
+        .from("donors")
+        .update({
+          physical_card_status: "ordered_paid",
+          card_type: "physical",
+        })
+        .eq("id", donorId);
+
+      if (donorError) {
+        console.error(
+          "Error updating donor card status to ordered_paid:",
+          donorError,
+        );
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Error confirming card payment:", err);
+      return false;
+    }
+  },
+
+  /**
+   * Modifie le solde de satoshis d'un donneur (addition ou soustraction)
+   */
+  updateDonorBalance: async (
+    donorId: string,
+    amountChange: number,
+  ): Promise<number | null> => {
+    try {
+      const supabase = await createSupabaseServerClient();
+
+      const { data: donor, error: fetchError } = await supabase
+        .from("donors")
+        .select("balance_sats")
+        .eq("id", donorId)
+        .single();
+
+      if (fetchError || !donor) {
+        console.error("Error fetching donor balance:", fetchError);
+        return null;
+      }
+
+      const newBalance = Math.max(0, donor.balance_sats + amountChange);
+
+      const { data: updated, error: updateError } = await supabase
+        .from("donors")
+        .update({ balance_sats: newBalance })
+        .eq("id", donorId)
+        .select("balance_sats")
+        .single();
+
+      if (updateError || !updated) {
+        console.error("Error updating donor balance:", updateError);
+        return null;
+      }
+
+      return updated.balance_sats;
+    } catch (err) {
+      console.error("Error updating donor balance:", err);
+      return null;
+    }
   },
 };
