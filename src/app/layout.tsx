@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
+import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";
 import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -67,6 +68,7 @@ export default function RootLayout({
             <AuthProvider>{children}</AuthProvider>
           </QueryProvider>
           <ServiceWorker />
+          <OfflineIndicator />
         </ThemeProvider>
       </body>
     </html>

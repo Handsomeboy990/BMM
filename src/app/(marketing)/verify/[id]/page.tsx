@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { Container } from "@/components/layout/container";
+import { OfflineVerifyTool } from "@/components/verify/offline-verify-tool";
 import { VerifyPanel } from "@/components/verify/verify-panel";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,16 +22,16 @@ export default async function VerifyPage({
 
   return (
     <Container className="py-16 sm:py-24">
-      <div className="mx-auto max-w-4xl space-y-8">
-        <div className="space-y-3 text-center">
-          <Badge variant="primary" className="mx-auto">
+      <div className="space-y-10">
+        <div className="animate-rise-in max-w-2xl space-y-3">
+          <Badge variant="primary">
             <ShieldCheck className="size-3.5" />
             Vérification publique
           </Badge>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Votre carte de donneur souveraine
           </h1>
-          <p className="text-muted-foreground mx-auto max-w-xl text-sm">
+          <p className="text-muted-foreground text-sm">
             Statut d'ancrage du profil sur la blockchain Bitcoin via
             OpenTimestamps.
           </p>
@@ -39,6 +40,7 @@ export default async function VerifyPage({
         <div className="grid items-start gap-8 lg:grid-cols-2">
           <div className="space-y-6">
             <VerifyPanel id={id} />
+            <OfflineVerifyTool defaultMessage={id} />
             <Card>
               <CardContent className="flex items-center gap-4 p-6">
                 <div className="relative size-16 shrink-0 overflow-hidden rounded-full border">

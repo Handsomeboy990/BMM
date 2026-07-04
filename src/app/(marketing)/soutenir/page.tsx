@@ -1,7 +1,9 @@
+import { HeartHandshake, Megaphone, Siren, Wrench, Zap } from "lucide-react";
 import type { Metadata } from "next";
 
 import { Container } from "@/components/layout/container";
 import { DonationForm } from "@/components/donate/donation-form";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
   title: "Soutenir la plateforme",
@@ -9,22 +11,71 @@ export const metadata: Metadata = {
     "Faites un don en Bitcoin Lightning pour soutenir les campagnes, le developpement ou le fonctionnement de Bitcoin Blood.",
 };
 
+const ALLOCATION = [
+  {
+    icon: Megaphone,
+    title: "Campagnes de don",
+    text: "Recrutement de donneurs sur le terrain, cartes physiques, opérations campus.",
+  },
+  {
+    icon: Siren,
+    title: "Fonds d'urgence",
+    text: "Récompenses immédiates pour les donneurs qui répondent aux alertes vitales.",
+  },
+  {
+    icon: Wrench,
+    title: "Développement produit",
+    text: "Amélioration continue de la plateforme, de l'IA de matching et de la sécurité.",
+  },
+];
+
 export default function SupportPage() {
   return (
     <Container className="py-16 sm:py-24">
-      <div className="mx-auto max-w-xl space-y-8">
-        <div className="space-y-3 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Soutenez Bitcoin Blood
-          </h1>
-          <p className="text-muted-foreground">
-            Votre don en sats finance directement le reseau : campagnes de don
-            de sang, developpement du produit, fonctionnement et fonds
-            d&apos;urgence. Paiement instantane via Lightning, sans
-            intermediaire.
-          </p>
+      <div className="grid items-start gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+        <div className="animate-rise-in space-y-8 lg:sticky lg:top-28">
+          <div className="space-y-4">
+            <Badge variant="primary">
+              <HeartHandshake className="size-3.5" />
+              Soutien communautaire
+            </Badge>
+            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              Soutenez <span className="text-primary">Bitcoin Blood</span>
+            </h1>
+            <p className="text-muted-foreground max-w-md text-lg text-balance">
+              Votre don en sats finance directement le réseau. Paiement
+              instantané via Lightning, sans intermédiaire ni frais bancaires.
+            </p>
+          </div>
+
+          <div className="space-y-5">
+            {ALLOCATION.map((a) => (
+              <div key={a.title} className="flex gap-4">
+                <span className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+                  <a.icon className="size-5" />
+                </span>
+                <div className="space-y-1">
+                  <p className="font-medium">{a.title}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {a.text}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-accent/25 bg-accent/5 flex items-center gap-3 rounded-xl border p-4">
+            <Zap className="text-accent size-5 shrink-0" />
+            <p className="text-muted-foreground text-sm">
+              100 % non-dépositaire : chaque satoshi transite par le réseau
+              Lightning, traçable et sans custodian.
+            </p>
+          </div>
         </div>
-        <DonationForm />
+
+        <div className="animate-rise-in [animation-delay:120ms]">
+          <DonationForm />
+        </div>
       </div>
     </Container>
   );

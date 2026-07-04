@@ -1,4 +1,4 @@
-import { BellRing, HeartPulse, MapPin, ShieldCheck } from "lucide-react";
+import { BellRing, HeartPulse, ShieldCheck, Smartphone } from "lucide-react";
 
 export const features = [
   {
@@ -20,10 +20,10 @@ export const features = [
       "Chaque inscription et chaque don historique sont ancrés de façon immuable sur la blockchain Bitcoin.",
   },
   {
-    icon: MapPin,
-    title: "Reconnaissance par Lightning",
+    icon: Smartphone,
+    title: "La récompense invisible",
     description:
-      "Recevez des récompenses en Satoshis directement sur votre portefeuille mobile après chaque don validé.",
+      "Recevez vos récompenses directement sur votre Mobile Money — un simple SMS de dépôt, sans wallet crypto à gérer. Le Bitcoin reste invisible.",
   },
 ] as const;
 

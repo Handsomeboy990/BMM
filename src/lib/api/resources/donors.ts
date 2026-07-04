@@ -56,4 +56,22 @@ export const donorsApi = {
 
   /** Historique des récompenses Lightning d'un donneur. */
   rewards: (id: string) => httpClient.get<RewardLog[]>(`/donors/${id}/rewards`),
+
+  /** Attestation d'identité sanguine signée (BIP-322), vérifiable hors-ligne. */
+  offlineIdentity: (id: string) =>
+    httpClient.get<{ message: string; identity: OfflineIdentityResponse }>(
+      `/donors/${id}/offline-identity`,
+    ),
+};
+
+export type OfflineIdentityResponse = {
+  payload: {
+    donorId: string;
+    bloodType: string;
+    timestamp: string;
+    issuer: string;
+  };
+  profileHash: string;
+  clinicAddress: string;
+  signature: string;
 };

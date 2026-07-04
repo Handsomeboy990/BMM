@@ -43,76 +43,86 @@ export function OrganizationOnboarding() {
   const allUploaded = uploadedCount === ORG_DOCUMENT_TYPES.length;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      {/* Bandeau de statut */}
-      {rejectionReason ? (
-        <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-xl border p-4">
-          <AlertCircle className="text-destructive mt-0.5 size-5 shrink-0" />
-          <div>
-            <p className="text-destructive font-medium">
-              Dossier refusé par l'administrateur
-            </p>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Motif : {rejectionReason}. Corrigez et re-téléversez les
-              justificatifs concernés.
-            </p>
+    <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.25fr] lg:gap-10">
+      <div className="space-y-6 lg:sticky lg:top-24">
+        {/* Bandeau de statut */}
+        {rejectionReason ? (
+          <div className="border-destructive/30 bg-destructive/10 flex items-start gap-3 rounded-xl border p-4">
+            <AlertCircle className="text-destructive mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="text-destructive font-medium">
+                Dossier refusé par l'administrateur
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Motif : {rejectionReason}. Corrigez et re-téléversez les
+                justificatifs concernés.
+              </p>
+            </div>
           </div>
-        </div>
-      ) : allUploaded ? (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-          <Clock className="mt-0.5 size-5 shrink-0 text-amber-500" />
-          <div>
-            <p className="font-medium text-amber-700 dark:text-amber-400">
-              En attente de validation
-            </p>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Vos justificatifs ont bien été reçus. Un administrateur va
-              vérifier votre structure. Vous accéderez au tableau de bord dès
-              son approbation.
-            </p>
+        ) : allUploaded ? (
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <Clock className="mt-0.5 size-5 shrink-0 text-amber-500" />
+            <div>
+              <p className="font-medium text-amber-700 dark:text-amber-400">
+                En attente de validation
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Vos justificatifs ont bien été reçus. Un administrateur va
+                vérifier votre structure. Vous accéderez au tableau de bord dès
+                son approbation.
+              </p>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="border-primary/25 bg-primary/5 flex items-start gap-3 rounded-xl border p-4">
-          <ShieldCheck className="text-primary mt-0.5 size-5 shrink-0" />
-          <div>
-            <p className="font-medium">Finalisez votre inscription</p>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Pour garantir la fiabilité du réseau, téléversez les{" "}
-              {ORG_DOCUMENT_TYPES.length} justificatifs ci-dessous. Votre
-              structure sera ensuite examinée par un administrateur.
-            </p>
+        ) : (
+          <div className="border-primary/25 bg-primary/5 flex items-start gap-3 rounded-xl border p-4">
+            <ShieldCheck className="text-primary mt-0.5 size-5 shrink-0" />
+            <div>
+              <p className="font-medium">Finalisez votre inscription</p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Pour garantir la fiabilité du réseau, téléversez les{" "}
+                {ORG_DOCUMENT_TYPES.length} justificatifs ci-dessous. Votre
+                structure sera ensuite examinée par un administrateur.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Justificatifs de la structure</CardTitle>
-          <Badge variant={allUploaded ? "success" : "neutral"}>
-            {uploadedCount}/{ORG_DOCUMENT_TYPES.length}
-          </Badge>
-        </CardHeader>
-        <CardContent className="space-y-3 pt-0">
-          {isLoading ? (
-            <p className="text-muted-foreground py-6 text-center text-sm">
-              Chargement…
-            </p>
-          ) : (
-            ORG_DOCUMENT_TYPES.map((docType) => (
-              <DocumentRow
-                key={docType}
-                docType={docType}
-                document={byType.get(docType)}
-              />
-            ))
-          )}
-        </CardContent>
-      </Card>
+        <p className="text-muted-foreground hidden text-xs lg:block">
+          Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier. Vos
+          justificatifs sont stockés de façon sécurisée et ne servent qu'à la
+          vérification de votre structure.
+        </p>
+      </div>
 
-      <p className="text-muted-foreground text-center text-xs">
-        Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier.
-      </p>
+      <div className="space-y-3">
+        <Card>
+          <CardHeader className="flex-row items-center justify-between">
+            <CardTitle>Justificatifs de la structure</CardTitle>
+            <Badge variant={allUploaded ? "success" : "neutral"}>
+              {uploadedCount}/{ORG_DOCUMENT_TYPES.length}
+            </Badge>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            {isLoading ? (
+              <p className="text-muted-foreground py-6 text-center text-sm">
+                Chargement…
+              </p>
+            ) : (
+              ORG_DOCUMENT_TYPES.map((docType) => (
+                <DocumentRow
+                  key={docType}
+                  docType={docType}
+                  document={byType.get(docType)}
+                />
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <p className="text-muted-foreground text-center text-xs lg:hidden">
+          Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier.
+        </p>
+      </div>
     </div>
   );
 }

@@ -18,7 +18,9 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+import { OfflineIdentityCard } from "@/components/donor/offline-identity-card";
 import { QrBadge } from "@/components/donor/qr-badge";
+import { RewardChannelCard } from "@/components/donor/reward-channel-card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -353,7 +355,13 @@ export function DonorSpace() {
         </CardContent>
       </Card>
 
-      {/* Récompenses Lightning */}
+      {/* Identité sanguine hors-ligne — attestation BIP-322 */}
+      <OfflineIdentityCard donorId={donor.id} bloodType={donor.bloodType} />
+
+      {/* Canal de récompense — Mobile Money (Izichange) ou Lightning */}
+      <RewardChannelCard donorId={donor.id} defaultPhone={donor.phoneNumber} />
+
+      {/* Récompenses */}
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Mes récompenses</CardTitle>

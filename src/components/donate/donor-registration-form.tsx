@@ -8,6 +8,8 @@ import {
   KeyRound,
   Navigation,
   ShieldCheck,
+  Smartphone,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -25,6 +27,13 @@ import {
   type DonorRecord,
 } from "@/lib/api/resources";
 import { createDonorIdentity } from "@/lib/bitcoin/donor-identity";
+import { cn } from "@/lib/utils";
+import {
+  MOBILE_MONEY_OPERATORS,
+  type MobileMoneyOperator,
+  type RewardMode,
+  saveRewardPreference,
+} from "@/lib/reward-preference";
 
 type Success = { donor: DonorRecord; wif: string };
 
@@ -58,6 +67,8 @@ export function DonorRegistrationForm() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState<Success | null>(null);
+  const [rewardMode, setRewardMode] = useState<RewardMode>("mobile-money");
+  const [consent, setConsent] = useState(false);
   const {
     coords,
     status: geoStatus,
@@ -70,6 +81,12 @@ export function DonorRegistrationForm() {
     if (!coords) {
       setError(
         "Veuillez partager votre position pour être alerté à proximité.",
+      );
+      return;
+    }
+    if (!consent) {
+      setError(
+        "Merci de confirmer votre consentement au traitement de vos données.",
       );
       return;
     }
@@ -108,6 +125,20 @@ export function DonorRegistrationForm() {
         profileHash: identity.profileHash,
         signature: identity.signature,
       });
+
+      // « Récompense Invisible » : on mémorise le canal de versement choisi
+      // (Lightning ou Mobile Money via Izichange) pour l'espace donneur.
+      saveRewardPreference(
+        donor.id,
+        rewardMode === "mobile-money"
+          ? {
+              mode: "mobile-money",
+              operator:
+                (form.get("momoOperator") as MobileMoneyOperator) || undefined,
+              phone: String(form.get("momoPhone") || profile.phoneNumber),
+            }
+          : { mode: "lightning" },
+      );
 
       setSuccess({ donor, wif: identity.wif });
     } catch (err) {
@@ -268,6 +299,60 @@ export function DonorRegistrationForm() {
             </Field>
           </div>
 
+          {/* Mode de récompense — « la Récompense Invisible ». */}
+          <div className="space-y-3">
+            <Label>Comment recevoir vos récompenses ?</Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <RewardModeCard
+                active={rewardMode === "mobile-money"}
+                onClick={() => setRewardMode("mobile-money")}
+                icon={<Smartphone className="size-5" />}
+                title="Mobile Money"
+                subtitle="Reçu par SMS, sans wallet crypto"
+                badge="Recommandé"
+              />
+              <RewardModeCard
+                active={rewardMode === "lightning"}
+                onClick={() => setRewardMode("lightning")}
+                icon={<Zap className="size-5" />}
+                title="Bitcoin Lightning"
+                subtitle="Sur votre propre portefeuille"
+              />
+            </div>
+
+            {rewardMode === "mobile-money" ? (
+              <div className="animate-rise-in grid gap-4 sm:grid-cols-2">
+                <Field label="Opérateur" htmlFor="momoOperator">
+                  <Select
+                    id="momoOperator"
+                    name="momoOperator"
+                    defaultValue="mtn"
+                  >
+                    {MOBILE_MONEY_OPERATORS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </Field>
+                <Field label="Numéro Mobile Money" htmlFor="momoPhone">
+                  <Input
+                    id="momoPhone"
+                    name="momoPhone"
+                    type="tel"
+                    placeholder="+229 01 97 12 34 56"
+                  />
+                </Field>
+                <p className="text-muted-foreground flex items-center gap-2 text-xs sm:col-span-2">
+                  <ShieldCheck className="size-3.5 shrink-0" />
+                  Vos satoshis sont convertis à la volée via Izichange : vous
+                  recevez un dépôt Mobile Money classique. Bitcoin reste
+                  invisible.
+                </p>
+              </div>
+            ) : null}
+          </div>
+
           <Button
             type="button"
             variant="outline"
@@ -282,6 +367,20 @@ export function DonorRegistrationForm() {
                 ? "Localisation…"
                 : "Partager ma position"}
           </Button>
+
+          <label className="text-muted-foreground flex cursor-pointer items-start gap-2.5 text-xs">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="accent-primary mt-0.5 size-4 shrink-0 rounded"
+            />
+            <span>
+              J'autorise Bitcoin Blood à traiter mes données de santé pour être
+              alerté en cas de besoin compatible, conformément à la
+              réglementation sur la protection des données.
+            </span>
+          </label>
 
           <p className="text-muted-foreground flex items-center gap-2 text-xs">
             <ShieldCheck className="size-3.5 shrink-0" />
@@ -314,5 +413,59 @@ function Field({
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
     </div>
+  );
+}
+
+function RewardModeCard({
+  active,
+  onClick,
+  icon,
+  title,
+  subtitle,
+  badge,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  badge?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "group relative flex items-start gap-3 rounded-xl border p-4 text-left transition-all",
+        active
+          ? "border-primary bg-primary/5 ring-primary/20 ring-2"
+          : "hover:border-primary/40 hover:bg-muted/40",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors",
+          active
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-muted-foreground",
+        )}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 space-y-0.5">
+        <span className="flex items-center gap-2">
+          <span className="text-sm font-semibold">{title}</span>
+          {badge ? (
+            <span className="bg-accent/15 text-accent rounded-full px-1.5 py-0.5 text-[10px] font-medium">
+              {badge}
+            </span>
+          ) : null}
+        </span>
+        <span className="text-muted-foreground block text-xs leading-snug">
+          {subtitle}
+        </span>
+      </span>
+    </button>
   );
 }

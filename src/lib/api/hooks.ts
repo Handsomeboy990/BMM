@@ -41,6 +41,7 @@ import {
   type EmergencyRecord,
   type EmergencyStatus,
   type LoginPayload,
+  type OfflineIdentityResponse,
   type Organization,
   type OrgDocument,
   type OrgDocumentType,
@@ -612,6 +613,30 @@ export function useDonorRewardsList(donorId?: string) {
             .rewards(donorId as string)
             .then((r) => r.data.map(toRewardEntry)),
     enabled: AUTH_BYPASS || !!donorId,
+  });
+}
+
+/**
+ * Génère à la demande l'attestation d'identité sanguine signée (BIP-322),
+ * vérifiable hors-ligne. En mode démo, l'attestation est signée côté client.
+ */
+export function useDonorOfflineIdentity() {
+  return useMutation({
+    mutationFn: async ({
+      id,
+      bloodType,
+    }: {
+      id: string;
+      bloodType: string;
+    }): Promise<OfflineIdentityResponse> => {
+      if (AUTH_BYPASS) {
+        const { createOfflineAttestation } =
+          await import("@/lib/bitcoin/donor-identity");
+        return createOfflineAttestation(id, bloodType);
+      }
+      const res = await donorsApi.offlineIdentity(id);
+      return res.data.identity;
+    },
   });
 }
 
