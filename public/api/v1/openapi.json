@@ -424,6 +424,88 @@
         }
       }
     },
+    "/donors/{id}/offline-identity": {
+      "get": {
+        "summary": "Obtenir l'identité souveraine signée du donneur (BIP-322)",
+        "description": "Génère un payload signé par la clinique contenant le groupe sanguin et l'identifiant du donneur, vérifiable hors-ligne.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID du donneur",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identité hors-ligne générée avec succès.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/SuccessEnvelope" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "message": {
+                              "type": "string",
+                              "example": "Identité hors-ligne générée avec succès."
+                            },
+                            "identity": {
+                              "type": "object",
+                              "properties": {
+                                "payload": {
+                                  "type": "object",
+                                  "properties": {
+                                    "donorId": {
+                                      "type": "string",
+                                      "format": "uuid"
+                                    },
+                                    "bloodType": { "type": "string" },
+                                    "timestamp": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    },
+                                    "issuer": { "type": "string" }
+                                  }
+                                },
+                                "profileHash": { "type": "string" },
+                                "clinicAddress": { "type": "string" },
+                                "signature": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Non authentifié.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          },
+          "404": {
+            "description": "Donneur introuvable.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/verify/{id}": {
       "get": {
         "summary": "Vérification publique de la carte donneur",
@@ -466,7 +548,7 @@
       },
       "post": {
         "summary": "Récompenser un donneur",
-        "description": "Envoie une récompense en Satoshis (Lightning Network via Breez) suite à son don de sang. Limite de sécurité : une récompense tous les 60 jours.",
+        "description": "Envoie une récompense suite à son don de sang. Peut être attribué via une facture Lightning (Breez), un numéro Mobile Money (Izichange), ou un système de points immuable. Limite de sécurité : une récompense tous les 60 jours.",
         "parameters": [
           {
             "name": "id",
@@ -482,12 +564,23 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["bolt11Invoice"],
                 "properties": {
                   "bolt11Invoice": {
                     "type": "string",
                     "minLength": 10,
+                    "description": "Facture BOLT11 pour paiement Lightning",
                     "example": "lnbc10u1pvjl..."
+                  },
+                  "momoNumber": {
+                    "type": "string",
+                    "minLength": 8,
+                    "description": "Numéro Mobile Money pour cashout Izichange",
+                    "example": "+22997000000"
+                  },
+                  "awardPoints": {
+                    "type": "boolean",
+                    "description": "Si vrai, attribue des points de fidélité à la place d'un paiement",
+                    "example": true
                   },
                   "satsAmount": {
                     "type": "number",

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ArrowUpRight,
-  Bitcoin,
-  CheckCircle2,
-  Gift,
-  Heart,
-} from "lucide-react";
+import { ArrowUpRight, Bitcoin, CheckCircle2, Gift, Heart } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +39,12 @@ export function DonationsPanel() {
     setFeedback(null);
     try {
       const result = await withdraw.mutateAsync(invoice.trim());
-      setFeedback(`Retrait envoye. Reference: ${result.paymentHash.slice(0, 18)}...`);
+      setFeedback(
+        `Retrait envoye. Reference: ${result.paymentHash.slice(0, 18)}...`,
+      );
       setInvoice("");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Le retrait a echoue.",
-      );
+      setError(err instanceof Error ? err.message : "Le retrait a echoue.");
     }
   }
 
@@ -139,9 +133,7 @@ export function DonationsPanel() {
               {feedback}
             </p>
           ) : null}
-          {error ? (
-            <p className="text-destructive text-xs">{error}</p>
-          ) : null}
+          {error ? <p className="text-destructive text-xs">{error}</p> : null}
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,7 @@
 import { donorService } from "@/modules/donors";
 import { otsService, breezService, rewardService } from "@/modules/bitcoin";
+import { pointsService } from "@/modules/donations/services/points.service";
+import { izichangeService } from "@/modules/bitcoin/services/izichange.service";
 import { authService } from "@/modules/auth";
 import { emailService } from "@/modules/notifications";
 import { serverPublicUrl } from "@/lib/url.server";
@@ -7,13 +9,23 @@ import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 import { z } from "zod";
 
-const rewardPayloadSchema = z.object({
-  bolt11Invoice: z.string().min(10, "La facture BOLT11 est invalide"),
-  satsAmount: z
-    .number()
-    .min(1, "Le montant doit être supérieur à 0")
-    .optional(),
-});
+const rewardPayloadSchema = z
+  .object({
+    bolt11Invoice: z
+      .string()
+      .min(10, "La facture BOLT11 est invalide")
+      .optional(),
+    momoNumber: z.string().min(8, "Le numéro MoMo est invalide").optional(),
+    awardPoints: z.boolean().optional(),
+    satsAmount: z
+      .number()
+      .min(1, "Le montant doit être supérieur à 0")
+      .optional(),
+  })
+  .refine((data) => data.bolt11Invoice || data.momoNumber || data.awardPoints, {
+    message:
+      "Vous devez fournir soit une facture BOLT11, soit un numéro MoMo, soit choisir l'attribution de points",
+  });
 
 /**
  * GET /api/v1/verify/[id]
@@ -144,28 +156,57 @@ export async function POST(
     const satsAmount = validatedData.satsAmount || 1000;
 
     // 4. Initialisation d'une trace de paiement en statut 'pending'
+    // Pour MoMo, on stocke "momo:<numero>" dans bolt11Invoice
+    // Pour les points, on stocke "points"
+    const invoiceOrMomo = validatedData.awardPoints
+      ? "points"
+      : validatedData.momoNumber
+        ? `momo:${validatedData.momoNumber}`
+        : validatedData.bolt11Invoice || "";
+
     const rewardLog = await rewardService.createRewardLog({
       donorId: id,
       hospitalId: user.organizationId,
       satsAmount,
-      bolt11Invoice: validatedData.bolt11Invoice,
+      bolt11Invoice: invoiceOrMomo,
     });
 
     try {
-      // 5. Exécution du paiement Lightning via Breez
-      const payoutResult = await breezService.payInvoice(
-        validatedData.bolt11Invoice,
-      );
+      // 5. Exécution du paiement Lightning via Breez, ou MoMo via Izichange, ou attribution de points
+      let paymentHash: string;
 
-      if (!payoutResult || !payoutResult.paymentHash) {
-        throw new Error("Paiement échoué. Aucun hash de transaction retourné.");
+      if (validatedData.awardPoints) {
+        const pointsResult = await pointsService.awardPoints(
+          id,
+          satsAmount,
+          user.organizationId || undefined,
+        );
+        if (!pointsResult.success || !pointsResult.proofBase64) {
+          throw new Error("Échec de l'attribution des points de fidélité.");
+        }
+        paymentHash = `points_ots_${pointsResult.proofBase64.substring(0, 16)}`;
+      } else if (validatedData.momoNumber) {
+        paymentHash = await izichangeService.cashoutToMoMo(
+          validatedData.momoNumber,
+          satsAmount,
+        );
+      } else {
+        const payoutResult = await breezService.payInvoice(
+          validatedData.bolt11Invoice as string,
+        );
+        if (!payoutResult || !payoutResult.paymentHash) {
+          throw new Error(
+            "Paiement échoué. Aucun hash de transaction retourné.",
+          );
+        }
+        paymentHash = payoutResult.paymentHash;
       }
 
       // 6. Mise à jour de la trace en succès
       const updatedLog = await rewardService.updateRewardStatus(
         rewardLog.id,
         "completed",
-        payoutResult.paymentHash,
+        paymentHash,
       );
 
       // 7. Email de récompense (best-effort: n'échoue jamais le paiement).

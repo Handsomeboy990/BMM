@@ -1,4 +1,5 @@
 import { createEmergencySchema, emergencyService } from "@/modules/emergencies";
+import { nostrService } from "@/modules/notifications/services/nostr.service";
 import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
@@ -25,6 +26,17 @@ export async function POST(req: Request) {
 
     const validatedData = createEmergencySchema.parse(body);
     const emergency = await emergencyService.createEmergency(validatedData);
+
+    // Publication asynchrone sur Nostr
+    void nostrService
+      .publishEmergencyAlert({
+        hospitalName: user.organization?.name ?? "Centre Partenaire",
+        hospitalId: user.organizationId,
+        bloodType: validatedData.bloodType,
+        quantity: validatedData.quantityNeeded,
+        city: validatedData.city,
+      })
+      .catch((e) => console.error("Nostr publish failed:", e));
 
     return success(emergency, { status: 201 });
   } catch (error) {

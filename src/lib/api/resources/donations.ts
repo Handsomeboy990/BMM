@@ -1,10 +1,7 @@
 import { httpClient } from "@/lib/api/http-client";
 
 export type DonationPurpose =
-  | "campaign"
-  | "development"
-  | "operations"
-  | "emergency";
+  "campaign" | "development" | "operations" | "emergency";
 
 export const DONATION_PURPOSE_LABELS: Record<DonationPurpose, string> = {
   campaign: "Campagne de don",

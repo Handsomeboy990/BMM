@@ -23,9 +23,13 @@ export async function POST(req: Request) {
       });
     }
     if (user.role !== "super_admin") {
-      return failure(API_ERROR_CODE.FORBIDDEN, "Acces reserve au super-admin.", {
-        status: 403,
-      });
+      return failure(
+        API_ERROR_CODE.FORBIDDEN,
+        "Acces reserve au super-admin.",
+        {
+          status: 403,
+        },
+      );
     }
 
     const body = await req.json();
