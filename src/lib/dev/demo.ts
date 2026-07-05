@@ -25,7 +25,7 @@ export type {
  *
  * Activé via `NEXT_PUBLIC_AUTH_BYPASS=true` dans `.env`. Quand il est actif,
  * l'espace applicatif s'ouvre sans session et les écrans sont alimentés par
- * des données simulées — utile pour parcourir l'UI tant que l'authentification
+ * des données simulées - utile pour parcourir l'UI tant que l'authentification
  * Supabase n'est pas opérationnelle. À laisser désactivé en production.
  */
 export const AUTH_BYPASS = process.env.NEXT_PUBLIC_AUTH_BYPASS === "true";
@@ -109,7 +109,7 @@ export const demoCampaigns: CampaignRecord[] = [
   {
     id: "bbbbbbb1-0000-4000-8000-000000000002",
     hospitalId: DEMO_ORG_ID,
-    title: "Urgence O- — appel ciblé",
+    title: "Urgence O- - appel ciblé",
     type: "targeted",
     targetBloodType: "O-",
     city: "Cotonou",
@@ -320,21 +320,21 @@ export const demoRewards: RewardEntry[] = [
     date: day(96),
     sats: 2000,
     status: "Envoyée",
-    label: "Don validé — CNHU Cotonou",
+    label: "Don validé - CNHU Cotonou",
   },
   {
     id: "rw-2",
     date: day(210),
     sats: 1500,
     status: "Envoyée",
-    label: "Don validé — Porto-Novo",
+    label: "Don validé - Porto-Novo",
   },
   {
     id: "rw-3",
     date: day(320),
     sats: 1500,
     status: "Envoyée",
-    label: "Don plasma — Abomey-Calavi",
+    label: "Don plasma - Abomey-Calavi",
   },
 ];
 
@@ -405,7 +405,7 @@ export const demoTransfers: TransferRequest[] = [
     requesterName: "CNHU-HKM de Cotonou",
     requesterCity: "Cotonou",
     responderId: "ddddddd1-0000-4000-8000-000000000003",
-    responderName: "Croix-Rouge Béninoise — Abomey-Calavi",
+    responderName: "Croix-Rouge Béninoise - Abomey-Calavi",
     status: "en_transit",
     createdAt: iso(300),
   },
@@ -454,7 +454,7 @@ export const demoOrganizations: Organization[] = [
   },
   {
     id: "ddddddd1-0000-4000-8000-000000000003",
-    name: "Croix-Rouge Béninoise — Abomey-Calavi",
+    name: "Croix-Rouge Béninoise - Abomey-Calavi",
     type: "ngo",
     latitude: 6.4486,
     longitude: 2.3556,

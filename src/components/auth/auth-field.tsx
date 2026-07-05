@@ -12,7 +12,7 @@ type AuthFieldProps = ComponentProps<"input"> & {
 
 /**
  * Champ texte premium: libellé, icône en tête, hauteur confortable.
- * Composant serveur — l'icône est rendue ici, jamais transmise à un
+ * Composant serveur - l'icône est rendue ici, jamais transmise à un
  * composant client (contrainte RSC).
  */
 export function AuthField({

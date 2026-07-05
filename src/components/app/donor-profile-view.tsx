@@ -140,12 +140,12 @@ export function DonorProfileView({ id }: { id: string }) {
           {verification.isTimestampVerified ? (
             <Badge variant="success">
               <Bitcoin className="size-3.5" />
-              Profil ancré sur Bitcoin
+              Carte authentique
             </Badge>
           ) : (
             <Badge variant="warning">
               <Clock className="size-3.5" />
-              Ancrage en attente
+              En cours de validation
             </Badge>
           )}
           {cardLabel ? (
@@ -185,19 +185,21 @@ export function DonorProfileView({ id }: { id: string }) {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Intégrité du profil</CardTitle>
+          <CardTitle>Authenticité de la carte</CardTitle>
           <Droplet className="text-primary size-5" />
         </CardHeader>
         <CardContent className="space-y-4 pt-0 text-sm">
           <div className="space-y-1">
-            <p className="text-muted-foreground text-xs">Adresse Bitcoin</p>
+            <p className="text-muted-foreground text-xs">
+              Identifiant de récompense
+            </p>
             <p className="font-mono text-xs break-all">
               {donor.bitcoinAddress}
             </p>
           </div>
           <div className="space-y-1">
             <p className="text-muted-foreground text-xs">
-              Empreinte du profil (SHA-256)
+              Empreinte de sécurité du profil
             </p>
             <p className="font-mono text-xs break-all">{donor.profileHash}</p>
           </div>
@@ -206,10 +208,10 @@ export function DonorProfileView({ id }: { id: string }) {
               <Bitcoin className="mt-0.5 size-5 text-amber-500" />
               <div className="space-y-1">
                 <p className="font-medium text-emerald-600 dark:text-emerald-400">
-                  Ancré sur Bitcoin
+                  Carte authentique et confirmée
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  Bloc {verification.details.height.toLocaleString("fr-FR")} le{" "}
+                  Confirmée le{" "}
                   {dateFmt.format(
                     new Date(verification.details.timestamp * 1000),
                   )}
@@ -218,7 +220,7 @@ export function DonorProfileView({ id }: { id: string }) {
             </div>
           ) : null}
           <Button asChild variant="outline" size="sm">
-            <Link href={`/verify/${donor.id}`}>Ouvrir la preuve publique</Link>
+            <Link href={`/verify/${donor.id}`}>Voir la preuve publique</Link>
           </Button>
         </CardContent>
       </Card>

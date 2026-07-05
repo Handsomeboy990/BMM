@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/app/app-sidebar";
 import { AppTopbar } from "@/components/app/app-topbar";
 
 /**
- * Espace applicatif (authentifié). Chrome dédié — barre latérale et bandeau —
+ * Espace applicatif (authentifié). Chrome dédié - barre latérale et bandeau -
  * indépendant du layout marketing. L'accès est protégé par la session.
  */
 export default function AppLayout({

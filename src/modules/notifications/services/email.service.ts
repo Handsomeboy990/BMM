@@ -27,7 +27,7 @@ async function send(
 
   if (!serviceId || !templateId || !publicKey || !privateKey) {
     console.warn(
-      `[EMAIL] Configuration EmailJS incomplète — email simulé vers ${toEmail} (« ${subject} »)`,
+      `[EMAIL] Configuration EmailJS incomplète - email simulé vers ${toEmail} (« ${subject} »)`,
     );
     return { sent: false };
   }

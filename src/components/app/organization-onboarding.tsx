@@ -88,7 +88,7 @@ export function OrganizationOnboarding() {
         )}
 
         <p className="text-muted-foreground hidden text-xs lg:block">
-          Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier. Vos
+          Formats acceptés : PDF, PNG, JPG - 25 Mo maximum par fichier. Vos
           justificatifs sont stockés de façon sécurisée et ne servent qu'à la
           vérification de votre structure.
         </p>
@@ -120,7 +120,7 @@ export function OrganizationOnboarding() {
         </Card>
 
         <p className="text-muted-foreground text-center text-xs lg:hidden">
-          Formats acceptés : PDF, PNG, JPG — 25 Mo maximum par fichier.
+          Formats acceptés : PDF, PNG, JPG - 25 Mo maximum par fichier.
         </p>
       </div>
     </div>

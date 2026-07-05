@@ -75,7 +75,7 @@ export function AppTopbar() {
 
         <div className="hidden flex-1 lg:block" />
 
-        {/* Bascule de rôle — visible uniquement en mode démo */}
+        {/* Bascule de rôle - visible uniquement en mode démo */}
         {isDemo && setDemoRole ? (
           <div className="bg-muted/60 hidden items-center gap-0.5 rounded-lg p-0.5 md:flex">
             {demoRoles.map((r) => (

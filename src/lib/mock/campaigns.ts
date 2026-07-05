@@ -38,7 +38,7 @@ export const campaignStateBadge: Record<
 export const campaigns: Campaign[] = [
   {
     id: "cmp_512",
-    title: "Marathon du don — Dakar",
+    title: "Marathon du don - Dakar",
     organizer: "Croix-Rouge sénégalaise",
     city: "Dakar",
     country: "Sénégal",
@@ -54,7 +54,7 @@ export const campaigns: Campaign[] = [
   },
   {
     id: "cmp_511",
-    title: "Campus solidaire — Accra",
+    title: "Campus solidaire - Accra",
     organizer: "Université du Ghana",
     city: "Accra",
     country: "Ghana",
@@ -70,7 +70,7 @@ export const campaigns: Campaign[] = [
   },
   {
     id: "cmp_510",
-    title: "Don entreprises — Abidjan",
+    title: "Don entreprises - Abidjan",
     organizer: "Réseau Santé Abidjan",
     city: "Abidjan",
     country: "Côte d'Ivoire",

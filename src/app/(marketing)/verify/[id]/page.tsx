@@ -26,14 +26,14 @@ export default async function VerifyPage({
         <div className="animate-rise-in max-w-2xl space-y-3">
           <Badge variant="primary">
             <ShieldCheck className="size-3.5" />
-            Vérification publique
+            Carte vérifiée
           </Badge>
           <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Votre carte de donneur souveraine
+            Votre carte de donneur
           </h1>
           <p className="text-muted-foreground text-sm">
-            Statut d'ancrage du profil sur la blockchain Bitcoin via
-            OpenTimestamps.
+            Vérifiez en un instant que cette carte est authentique et n'a pas
+            été modifiée.
           </p>
         </div>
 
@@ -53,12 +53,10 @@ export default async function VerifyPage({
                   />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-semibold">
-                    Badge de Certification
-                  </h4>
+                  <h4 className="text-sm font-semibold">Carte certifiée</h4>
                   <p className="text-muted-foreground text-xs leading-relaxed">
-                    Ce profil dispose d'une preuve d'existence mathématique
-                    vérifiable de façon décentralisée sur le réseau Bitcoin.
+                    Cette carte de donneur est authentique et sa validité peut
+                    être vérifiée par n'importe qui, à tout moment.
                   </p>
                 </div>
               </CardContent>
@@ -83,29 +81,22 @@ export default async function VerifyPage({
 
               <div className="space-y-4 text-sm">
                 <div className="space-y-1">
-                  <h3 className="text-base font-semibold">
-                    Vérification de la Carte
-                  </h3>
+                  <h3 className="text-base font-semibold">Comment ça marche</h3>
                   <p className="text-muted-foreground text-xs leading-relaxed">
-                    Ce code QR contient la signature cryptographique unique de
-                    votre profil. Les hôpitaux et centres de transfusion peuvent
-                    le scanner pour vérifier instantanément votre groupe sanguin
-                    et l'authenticité de votre enregistrement sans avoir besoin
-                    d'accéder à vos informations privées.
+                    Les centres de don et hôpitaux scannent ce QR code pour
+                    confirmer votre groupe sanguin et que votre carte est bien
+                    la vôtre, sans jamais voir vos informations privées.
                   </p>
                 </div>
 
                 <div className="space-y-1 border-t pt-4">
                   <h3 className="text-base font-semibold">
-                    Technologie OpenTimestamps (OTS)
+                    Une carte inviolable
                   </h3>
                   <p className="text-muted-foreground text-xs leading-relaxed">
-                    Chaque don et enregistrement est horodaté par OpenTimestamps
-                    (OTS). Cette technologie lie mathématiquement vos données de
-                    santé à un bloc précis de la blockchain Bitcoin. Elle
-                    fournit une preuve infalsifiable et vérifiable publiquement
-                    que votre profil existait à cette date précise et n'a jamais
-                    été altéré depuis.
+                    Chaque don est enregistré de façon permanente. Personne ne
+                    peut modifier votre carte ou vos données après coup :
+                    l'historique reste fiable et vérifiable dans le temps.
                   </p>
                 </div>
               </div>

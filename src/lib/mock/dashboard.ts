@@ -75,7 +75,7 @@ export const recentActivity: ActivityItem[] = [
   {
     id: "act_1",
     kind: "alerte",
-    text: "Alerte vitale O- déclenchée — Hôpital Principal, Dakar",
+    text: "Alerte vitale O- déclenchée - Hôpital Principal, Dakar",
     time: "Il y a 8 min",
   },
   {
@@ -93,7 +93,7 @@ export const recentActivity: ActivityItem[] = [
   {
     id: "act_4",
     kind: "campagne",
-    text: "Campus solidaire — Accra a dépassé 60 % de son objectif",
+    text: "Campus solidaire - Accra a dépassé 60 % de son objectif",
     time: "Il y a 3 h",
   },
   {

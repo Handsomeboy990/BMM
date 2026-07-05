@@ -66,7 +66,7 @@ export function AuthBrandPanel() {
         </h2>
 
         <p className="max-w-sm text-sm leading-relaxed text-white/60">
-          Le réseau qui relie donneurs et urgences à travers le continent — et
+          Le réseau qui relie donneurs et urgences à travers le continent - et
           ancre chaque don sur Bitcoin pour des preuves inaltérables.
         </p>
 

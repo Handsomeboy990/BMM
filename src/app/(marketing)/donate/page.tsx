@@ -21,13 +21,13 @@ const BENEFITS = [
   },
   {
     icon: Smartphone,
-    title: "Récompensé sans crypto",
-    text: "Recevez votre récompense directement sur votre Mobile Money — un simple SMS de dépôt, sans wallet à gérer.",
+    title: "Récompensé simplement",
+    text: "Recevez votre récompense directement sur votre Mobile Money, par un simple dépôt, sans rien à installer.",
   },
   {
     icon: ShieldCheck,
-    title: "Un profil infalsifiable",
-    text: "Votre carte de donneur est signée (BIP-322) et ancrée sur Bitcoin. Vos données médicales restent privées.",
+    title: "Une carte de confiance",
+    text: "Votre carte de donneur ne peut pas être falsifiée et vos informations médicales restent privées.",
   },
   {
     icon: MapPin,
@@ -40,7 +40,7 @@ export default function DonatePage() {
   return (
     <Container className="py-16 sm:py-24">
       <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
-        {/* Volet valeur — reste visible pendant le remplissage du formulaire. */}
+        {/* Volet valeur - reste visible pendant le remplissage du formulaire. */}
         <div className="animate-rise-in space-y-8 lg:sticky lg:top-28">
           <div className="space-y-4">
             <Badge variant="primary">
@@ -84,7 +84,7 @@ export default function DonatePage() {
           </p>
         </div>
 
-        {/* Volet action — formulaire d'inscription. */}
+        {/* Volet action - formulaire d'inscription. */}
         <div className="animate-rise-in [animation-delay:120ms]">
           <Suspense fallback={null}>
             <DonorRegistrationForm />

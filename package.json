@@ -50,6 +50,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "ecpair": "^3.0.1",
+    "html5-qrcode": "^2.3.8",
     "javascript-opentimestamps": "^0.4.5",
     "js-sha256": "^0.11.1",
     "lucide-react": "^1.22.0",

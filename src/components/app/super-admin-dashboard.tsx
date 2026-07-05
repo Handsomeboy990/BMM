@@ -249,7 +249,7 @@ function OrgReviewRow({ org }: { org: Organization }) {
 
       {org.rejectionReason ? (
         <p className="text-destructive mt-3 text-xs">
-          Rejetée — motif : {org.rejectionReason}
+          Rejetée - motif : {org.rejectionReason}
         </p>
       ) : null}
 

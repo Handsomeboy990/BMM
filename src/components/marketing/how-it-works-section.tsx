@@ -12,7 +12,7 @@ export function HowItWorksSection() {
           <SectionHeading
             eyebrow="Comment ça marche"
             title="Quatre étapes simples pour sauver des vies"
-            description="De l'inscription sécurisée à la réception de vos Satoshis, découvrez le parcours d'un donneur engagé."
+            description="De l'inscription à la récompense, voici le parcours simple d'un donneur."
           />
 
           <ol className="border-primary/20 relative flex flex-col gap-8 border-l pl-4">

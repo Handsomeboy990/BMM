@@ -29,7 +29,7 @@ export function VerifyPanel({ id }: { id: string }) {
         <CardContent className="flex items-center justify-center gap-2 py-16">
           <Loader2 className="text-primary size-5 animate-spin" />
           <span className="text-muted-foreground text-sm">
-            Vérification sur la blockchain…
+            Vérification en cours…
           </span>
         </CardContent>
       </Card>
@@ -80,12 +80,12 @@ export function VerifyPanel({ id }: { id: string }) {
           ) : donor.hasOtsProof ? (
             <Badge variant="warning">
               <Clock className="size-3.5" />
-              En attente de confirmation
+              En cours de validation
             </Badge>
           ) : (
             <Badge variant="neutral">
               <AlertCircle className="size-3.5" />
-              Sans ancrage
+              Non confirmée
             </Badge>
           )}
         </div>
@@ -98,14 +98,16 @@ export function VerifyPanel({ id }: { id: string }) {
             {dateFmt.format(new Date(donor.createdAt))}
           </Detail>
           <div className="space-y-1 sm:col-span-2">
-            <dt className="text-muted-foreground text-xs">Adresse Bitcoin</dt>
+            <dt className="text-muted-foreground text-xs">
+              Identifiant de récompense
+            </dt>
             <dd className="font-mono text-xs break-all">
               {donor.bitcoinAddress}
             </dd>
           </div>
           <div className="space-y-1 sm:col-span-2">
             <dt className="text-muted-foreground text-xs">
-              Empreinte du profil (SHA-256)
+              Empreinte de sécurité du profil
             </dt>
             <dd className="font-mono text-xs break-all">{donor.profileHash}</dd>
           </div>
@@ -116,10 +118,10 @@ export function VerifyPanel({ id }: { id: string }) {
             <Bitcoin className="mt-0.5 size-5 text-amber-500" />
             <div className="space-y-1 text-sm">
               <p className="font-medium text-emerald-600 dark:text-emerald-400">
-                Ancré sur Bitcoin
+                Carte authentique et confirmée
               </p>
               <p className="text-muted-foreground text-xs">
-                Bloc {verification.details.height.toLocaleString("fr-FR")} ·{" "}
+                Confirmée le{" "}
                 {dateFmt.format(
                   new Date(verification.details.timestamp * 1000),
                 )}

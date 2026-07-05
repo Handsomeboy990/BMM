@@ -185,8 +185,8 @@ export function DonorRegistrationForm({
               </h2>
               <p className="text-muted-foreground text-sm">
                 {isAdmin
-                  ? "Le profil du donneur a été signé et ancré sur Bitcoin. Remettez-lui sa clé privée ci-dessous : elle lui servira à accéder à son espace."
-                  : "Votre profil de donneur a été signé et sa preuve d'ancrage est en cours de traitement sur la blockchain Bitcoin. Un email de bienvenue vient de vous être envoyé."}
+                  ? "Le donneur est bien inscrit. Remettez-lui sa clé ci-dessous : elle lui servira à se connecter à son espace."
+                  : "Bienvenue dans le réseau. Votre carte de donneur est prête et un email de bienvenue vient de vous être envoyé."}
               </p>
             </div>
           </div>
@@ -194,14 +194,12 @@ export function DonorRegistrationForm({
           <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
               <KeyRound className="size-4" />
-              {isAdmin
-                ? "Clé privée à remettre au donneur"
-                : "Conservez précieusement votre clé privée"}
+              {isAdmin ? "Clé à remettre au donneur" : "Gardez bien votre clé"}
             </p>
             <p className="text-muted-foreground text-xs">
               {isAdmin
-                ? "Elle prouve la propriété du profil. Elle n'est pas stockée et n'est jamais envoyée par email : téléchargez-la et transmettez-la au donneur."
-                : "Elle prouve la propriété de votre profil et vous permet de vous authentifier de manière souveraine. Nous ne la stockons pas et ne l'envoyons jamais par email : copiez-la ou téléchargez-la et gardez-la en lieu sûr."}
+                ? "C'est le mot de passe qui permet au donneur de se connecter. Nous ne la gardons pas : téléchargez-la et remettez-la lui."
+                : "C'est elle qui vous permet de vous connecter à votre espace. Nous ne la gardons pas et ne l'envoyons jamais par email : copiez-la ou téléchargez-la et gardez-la en lieu sûr."}
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-background flex-1 truncate rounded border px-2 py-1.5 font-mono text-xs">
@@ -275,7 +273,7 @@ export function DonorRegistrationForm({
           {referredById ? (
             <p className="border-primary/25 bg-primary/5 text-primary flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <Users className="size-4 shrink-0" />
-              Vous avez été parrainé — votre parrain sera crédité d'une
+              Vous avez été parrainé - votre parrain sera crédité d'une
               activité.
             </p>
           ) : null}
@@ -356,7 +354,7 @@ export function DonorRegistrationForm({
             </Field>
           </div>
 
-          {/* Mode de récompense — « la Récompense Invisible ».
+          {/* Mode de récompense - « la Récompense Invisible ».
               Masqué en inscription par une structure (non obligatoire ici :
               le donneur choisira son canal depuis son espace). */}
           {isAdmin ? null : (
@@ -368,15 +366,14 @@ export function DonorRegistrationForm({
                   onClick={() => setRewardMode("mobile-money")}
                   icon={<Smartphone className="size-5" />}
                   title="Mobile Money"
-                  subtitle="Reçu par SMS, sans wallet crypto"
-                  badge="Recommandé"
+                  subtitle="Reçu par SMS, sur votre numéro"
                 />
                 <RewardModeCard
                   active={rewardMode === "lightning"}
                   onClick={() => setRewardMode("lightning")}
                   icon={<Zap className="size-5" />}
-                  title="Bitcoin Lightning"
-                  subtitle="Sur votre propre portefeuille"
+                  title="Bitcoin"
+                  subtitle="Si vous avez déjà un portefeuille"
                 />
               </div>
 
@@ -400,9 +397,8 @@ export function DonorRegistrationForm({
                   </Field>
                   <p className="text-muted-foreground flex items-center gap-2 text-xs sm:col-span-2">
                     <ShieldCheck className="size-3.5 shrink-0" />
-                    Vos satoshis sont convertis à la volée via Izichange : vous
-                    recevez un dépôt Mobile Money classique. Bitcoin reste
-                    invisible.
+                    Vous recevez votre récompense par un simple dépôt Mobile
+                    Money, comme un transfert d'argent habituel.
                   </p>
                 </div>
               ) : null}
@@ -442,16 +438,16 @@ export function DonorRegistrationForm({
 
           <p className="text-muted-foreground flex items-center gap-2 text-xs">
             <ShieldCheck className="size-3.5 shrink-0" />
-            Le profil est signé cryptographiquement (BIP-322) puis ancré sur
-            Bitcoin. Aucune clé privée n'est transmise.
+            Vos données sont protégées et vos informations médicales restent
+            privées.
           </p>
 
           <Button type="submit" size="lg" className="w-full" disabled={busy}>
             {busy
-              ? "Signature et enregistrement en cours"
+              ? "Inscription en cours"
               : isAdmin
                 ? "Inscrire le donneur"
-                : "Devenir donneur maintenant"}
+                : "Devenir donneur"}
           </Button>
         </form>
       </CardContent>

@@ -27,20 +27,17 @@ export function SecuritySection() {
           />
           <Reveal delay={120} direction="up">
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Bitcoin Blood utilise la technologie{" "}
-              <strong>OpenTimestamps (OTS)</strong> et la norme de signature{" "}
-              <strong>BIP-322</strong>. Cela signifie que vos informations
-              médicales et vos dons sont horodatés et gravés de manière
-              permanente sur la blockchain Bitcoin.
+              Chez Bitcoin Blood, votre carte de donneur et l'historique de vos
+              dons sont enregistrés une fois pour toutes. Une fois créés, ils ne
+              peuvent plus être modifiés ni falsifiés.
             </p>
           </Reveal>
           <Reveal delay={200} direction="up">
             <p className="text-muted-foreground text-lg leading-relaxed">
               Personne, pas même un gouvernement ou un administrateur, ne peut
-              modifier votre historique ou usurper votre identité. Votre vie
-              privée est protégée par de la cryptographie de niveau militaire,
-              garantissant que vous restez le seul maître de vos données de
-              santé.
+              changer votre historique ou se faire passer pour vous. Vos
+              informations de santé sont bien protégées, et vous en restez le
+              seul maître.
             </p>
           </Reveal>
         </div>

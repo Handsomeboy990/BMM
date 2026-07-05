@@ -197,9 +197,8 @@ export function AlertsBoard() {
                   </div>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  Chaque alerte est aussi diffusée sur des relais Nostr
-                  décentralisés — gratuit et résilient même en cas de panne des
-                  opérateurs télécoms.
+                  Chaque alerte est aussi diffusée sur un réseau public, gratuit
+                  et fiable même en cas de panne des opérateurs télécoms.
                 </p>
               </div>
 

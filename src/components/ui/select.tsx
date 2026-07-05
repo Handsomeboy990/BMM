@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Select premium basé sur Radix: déclencheur stylé, menu flottant animé,
- * navigation clavier et coche sur l'option active. API proche du natif —
+ * navigation clavier et coche sur l'option active. API proche du natif -
  * `value` / `onValueChange`, et `name` pour la soumission de formulaire.
  */
 

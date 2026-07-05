@@ -104,8 +104,8 @@ export function PhysicalCardOrder({
               <div>
                 <p className="font-medium">Paiement en attente</p>
                 <p className="text-muted-foreground text-sm">
-                  Réglez {CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF via
-                  Izichange Pay, puis confirmez.
+                  Réglez {CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF par
+                  paiement mobile, puis confirmez.
                 </p>
               </div>
             </div>
@@ -160,8 +160,8 @@ export function PhysicalCardOrder({
                   <CreditCard className="text-primary size-4" />À l'achat
                 </span>
                 <span className="text-muted-foreground text-xs">
-                  {CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF via Izichange
-                  Pay, livraison immédiate.
+                  {CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF par paiement
+                  mobile, livraison immédiate.
                 </span>
               </button>
             </div>

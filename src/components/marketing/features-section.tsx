@@ -16,9 +16,9 @@ export function FeaturesSection() {
       <Container className="flex flex-col gap-14">
         <div className="flex flex-col gap-6">
           <SectionHeading
-            eyebrow="Proposition de valeur"
-            title="Une révolution humanitaire guidée par la solidarité et la technologie."
-            description="Découvrez comment Bitcoin Blood combine la preuve cryptographique et le réseau Lightning pour sauver des vies."
+            eyebrow="Pourquoi Bitcoin Blood"
+            title="La solidarité, rendue simple et fiable."
+            description="Un réseau qui relie donneurs et hôpitaux, récompense les gestes qui sauvent et protège vos données."
           />
           <Reveal delay={220}>
             <PulseLine />

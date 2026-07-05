@@ -10,7 +10,7 @@ const ECPair = ECPairFactory(ecc);
 export type DonorIdentity = {
   /** Adresse Bitcoin P2WPKH dérivée de la clé du donneur. */
   bitcoinAddress: string;
-  /** SHA-256 (64 hex) du profil canonique — ancré ensuite sur Bitcoin. */
+  /** SHA-256 (64 hex) du profil canonique - ancré ensuite sur Bitcoin. */
   profileHash: string;
   /** Signature BIP-322 du profileHash par l'adresse. */
   signature: string;
@@ -29,7 +29,7 @@ async function sha256Hex(input: string): Promise<string> {
 /**
  * Produit l'identité cryptographique d'un donneur côté navigateur:
  * une paire de clés, l'empreinte SHA-256 de son profil et la signature
- * BIP-322 correspondante — exactement ce que vérifie le backend
+ * BIP-322 correspondante - exactement ce que vérifie le backend
  * (`walletService.verifySignature`).
  */
 export async function createDonorIdentity(
@@ -73,7 +73,7 @@ export type OfflineAttestation = {
 };
 
 /**
- * Produit une attestation d'identité sanguine signée (BIP-322) côté client —
+ * Produit une attestation d'identité sanguine signée (BIP-322) côté client -
  * repli de démonstration quand le backend n'est pas joignable (mode démo).
  * Structure identique à celle du service serveur `offlineIdentityService`.
  */
@@ -106,7 +106,7 @@ export async function createOfflineAttestation(
 /**
  * Vérifie une signature BIP-322 **entièrement côté navigateur**, sans aucun
  * appel réseau. C'est le cœur de « l'Identité Sanguine Souveraine » : une
- * clinique — même hors-ligne — peut confirmer qu'une attestation (groupe
+ * clinique - même hors-ligne - peut confirmer qu'une attestation (groupe
  * sanguin, empreinte de profil…) a bien été signée par l'adresse indiquée.
  */
 export function verifyDonorSignature(

@@ -3,49 +3,49 @@ import { BellRing, HeartPulse, ShieldCheck, Smartphone } from "lucide-react";
 export const features = [
   {
     icon: BellRing,
-    title: "Alerte de proximité instantanée",
+    title: "Alerté près de chez vous",
     description:
-      "Recevez des notifications uniquement lorsque votre groupe sanguin est requis d'urgence près de chez vous.",
+      "Vous n'êtes prévenu que lorsque votre groupe sanguin est vraiment nécessaire, à proximité.",
   },
   {
     icon: ShieldCheck,
-    title: "Identité souveraine et privée",
+    title: "Vos données restent à vous",
     description:
-      "Vos données personnelles sont signées et contrôlées par vous seul grâce à des clés cryptographiques privées.",
+      "Vos informations médicales sont protégées et ne sont partagées qu'avec votre accord.",
   },
   {
     icon: HeartPulse,
-    title: "Preuve d'intégrité transparente",
+    title: "Une carte de confiance",
     description:
-      "Chaque inscription et chaque don historique sont ancrés de façon immuable sur la blockchain Bitcoin.",
+      "Votre carte de donneur et l'historique de vos dons ne peuvent pas être falsifiés.",
   },
   {
     icon: Smartphone,
-    title: "La récompense invisible",
+    title: "Récompensé simplement",
     description:
-      "Recevez vos récompenses directement sur votre Mobile Money — un simple SMS de dépôt, sans wallet crypto à gérer. Le Bitcoin reste invisible.",
+      "Recevez votre récompense directement sur votre Mobile Money, par un simple dépôt, sans rien à installer.",
   },
 ] as const;
 
 export const steps = [
   {
-    title: "Créez votre profil sécurisé",
+    title: "Créez votre profil",
     description:
-      "Renseignez votre groupe sanguin et partagez votre position pour être répertorié dans votre région.",
+      "Indiquez votre groupe sanguin et votre ville pour rejoindre le réseau de votre région.",
   },
   {
-    title: "Sécurisez vos données sur Bitcoin",
+    title: "Recevez votre carte de donneur",
     description:
-      "Votre profil génère une identité souveraine et sa preuve d'intégrité est ancrée de manière transparente.",
+      "Une carte de confiance est créée pour vous : elle prouve votre identité de donneur en toute sécurité.",
   },
   {
-    title: "Répondez aux appels urgents",
+    title: "Répondez aux urgences",
     description:
-      "Lorsqu'une alerte compatible retentit près de vous, présentez-vous au centre de collecte pour faire votre don.",
+      "Quand un besoin proche correspond à votre groupe, rendez-vous au centre de don le plus proche.",
   },
   {
-    title: "Recevez vos Satoshis de soutien",
+    title: "Recevez votre récompense",
     description:
-      "Dès votre don validé par l'hôpital, votre portefeuille Lightning reçoit automatiquement des Satoshis.",
+      "Dès votre don confirmé, vous recevez une récompense, sur votre Mobile Money ou en Bitcoin.",
   },
 ] as const;

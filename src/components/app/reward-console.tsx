@@ -5,6 +5,7 @@ import {
   Award,
   Bitcoin,
   CheckCircle2,
+  QrCode,
   Search,
   Smartphone,
   Wallet,
@@ -18,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneField } from "@/components/ui/phone-field";
+import { QrScanner } from "@/components/ui/qr-scanner";
 import { useRewardDonor, useVerifyDonor } from "@/lib/api/hooks";
 import { type RewardMode, loadRewardPreference } from "@/lib/reward-preference";
 import { cn } from "@/lib/utils";
@@ -31,9 +33,21 @@ export function RewardConsole() {
   const [payoutModeOverride, setPayoutModeOverride] =
     useState<PayoutMode | null>(null);
   const [rewardError, setRewardError] = useState<string | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const verify = useVerifyDonor(donorId, donorId.length > 0);
   const reward = useRewardDonor();
+
+  // Récupère l'identifiant du donneur depuis le QR scanné (URL, code brut ou
+  // carte hors-ligne) puis lance la vérification.
+  function onScanDonor(text: string) {
+    const uuid = text.match(
+      /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i,
+    )?.[0];
+    const id = uuid ?? text.trim();
+    setQuery(id);
+    setDonorId(id);
+  }
 
   // Canal de versement : choix explicite de l'utilisateur, sinon préférence
   // exprimée par le donneur à l'inscription (même navigateur), sinon Lightning.
@@ -130,12 +144,21 @@ export function RewardConsole() {
         <CardContent className="space-y-4 p-6">
           <div className="space-y-2">
             <Label htmlFor="donorId">Identifiant du donneur</Label>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setScanOpen(true)}
+            >
+              <QrCode className="size-4" />
+              Scanner la carte du donneur
+            </Button>
             <div className="flex gap-2">
               <Input
                 id="donorId"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="UUID du donneur"
+                placeholder="Ou coller l'identifiant"
                 className="font-mono"
               />
               <Button
@@ -147,9 +170,16 @@ export function RewardConsole() {
                 Vérifier
               </Button>
             </div>
+            <QrScanner
+              open={scanOpen}
+              onClose={() => setScanOpen(false)}
+              onResult={onScanDonor}
+              title="Scanner la carte du donneur"
+              description="Placez le QR code de la carte devant la caméra."
+            />
             <p className="text-muted-foreground text-xs">
-              Saisissez l'identifiant figurant sur la carte du donneur après un
-              don validé physiquement.
+              Scannez ou saisissez l'identifiant de la carte, après un don
+              validé.
             </p>
           </div>
 
@@ -180,7 +210,7 @@ export function RewardConsole() {
                     Vérifié
                   </Badge>
                 ) : (
-                  <Badge variant="warning">Non ancré</Badge>
+                  <Badge variant="warning">Non confirmée</Badge>
                 )}
               </div>
             )
@@ -202,12 +232,12 @@ export function RewardConsole() {
                 </h2>
                 <p className="text-muted-foreground text-sm">
                   {payoutMode === "mobile-money"
-                    ? "Le dépôt Mobile Money a été initié via Izichange. Le donneur reçoit un SMS de confirmation."
+                    ? "Le dépôt Mobile Money a été envoyé. Le donneur reçoit un SMS de confirmation."
                     : payoutMode === "points"
-                      ? "Les points de fidélité ont été attribués et ancrés sur Bitcoin (OTS)."
+                      ? "Les points de fidélité ont bien été attribués au donneur."
                       : payoutMode === "credit"
-                        ? "Le solde plateforme du donneur a été crédité. Il pourra le retirer lui-même."
-                        : "Le paiement Lightning a été transmis au donneur."}
+                        ? "Le solde du donneur a été crédité. Il pourra le retirer lui-même."
+                        : "Le paiement Bitcoin a été envoyé au donneur."}
                 </p>
               </div>
               <Button
@@ -229,7 +259,7 @@ export function RewardConsole() {
                 <h2 className="font-semibold">Verser la récompense</h2>
               </div>
 
-              {/* Canal de versement — « la Récompense Invisible ». */}
+              {/* Canal de versement - « la Récompense Invisible ». */}
               <div className="bg-muted/50 grid grid-cols-2 gap-1 rounded-lg p-1 sm:grid-cols-4">
                 <ModeTab
                   active={payoutMode === "mobile-money"}
@@ -241,7 +271,7 @@ export function RewardConsole() {
                   active={payoutMode === "lightning"}
                   onClick={() => setPayoutMode("lightning")}
                   icon={<Zap className="size-4" />}
-                  label="Lightning"
+                  label="Bitcoin"
                 />
                 <ModeTab
                   active={payoutMode === "credit"}
@@ -268,14 +298,14 @@ export function RewardConsole() {
                 <form onSubmit={onReward} className="animate-rise-in space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="bolt11Invoice">
-                      Facture BOLT11 du donneur
+                      Facture Bitcoin du donneur
                     </Label>
                     <Input
                       id="bolt11Invoice"
                       name="bolt11Invoice"
                       required
                       minLength={10}
-                      placeholder="lnbc…"
+                      placeholder="Collée depuis le portefeuille du donneur"
                       className="font-mono"
                     />
                   </div>
@@ -323,9 +353,8 @@ export function RewardConsole() {
                   </div>
                   <p className="text-muted-foreground flex items-start gap-2 text-xs">
                     <Smartphone className="mt-0.5 size-3.5 shrink-0" />
-                    Les satoshis sont convertis à la volée via Izichange et
-                    déposés sur le Mobile Money du donneur. Bitcoin reste
-                    invisible pour lui.
+                    Le donneur reçoit directement un dépôt sur son Mobile Money,
+                    sans avoir à gérer de portefeuille Bitcoin.
                   </p>
                   <Button
                     type="submit"
@@ -386,8 +415,8 @@ export function RewardConsole() {
                   <p className="text-muted-foreground flex items-start gap-2 text-xs">
                     <Award className="mt-0.5 size-3.5 shrink-0" />
                     Idéal quand la structure n'a pas de budget immédiat : les
-                    points de fidélité sont ancrés sur Bitcoin (OTS) et
-                    convertibles plus tard en récompense.
+                    points sont enregistrés de façon sûre et convertibles plus
+                    tard en récompense.
                   </p>
                   <Button
                     type="submit"

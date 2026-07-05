@@ -53,7 +53,7 @@ export function OfflineIdentityCard({
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Fingerprint className="text-accent size-5" />
-          Carte d'identité sanguine hors-ligne
+          Ma carte groupe sanguin
         </CardTitle>
         <span className="bg-accent/15 text-accent flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium">
           <WifiOff className="size-3" />
@@ -62,9 +62,9 @@ export function OfflineIdentityCard({
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
         <p className="text-muted-foreground text-sm">
-          Générez une attestation signée (BIP-322) de votre groupe sanguin.
-          Toute clinique - même sans connexion - peut scanner ce QR Code pour
-          confirmer votre groupe {bloodType}, sans repayer de test.
+          Créez un QR code qui prouve votre groupe sanguin. N'importe quel
+          centre de don peut le scanner pour confirmer votre groupe {bloodType},
+          même sans connexion et sans refaire de test.
         </p>
 
         {error ? (
@@ -79,8 +79,8 @@ export function OfflineIdentityCard({
             <div className="flex justify-center">
               <QrBadge
                 value={qrValue}
-                label={`Attestation signée · Groupe ${identity.payload.bloodType}`}
-                caption="Vérifiable hors-ligne (BIP-322)"
+                label={`Groupe ${identity.payload.bloodType}`}
+                caption="Vérifiable sans internet"
                 size={168}
               />
             </div>
@@ -90,7 +90,7 @@ export function OfflineIdentityCard({
               onClick={onGenerate}
               disabled={generate.isPending}
             >
-              {generate.isPending ? "Génération…" : "Régénérer l'attestation"}
+              {generate.isPending ? "Génération…" : "Régénérer le QR code"}
             </Button>
           </div>
         ) : (
@@ -100,7 +100,7 @@ export function OfflineIdentityCard({
             disabled={generate.isPending}
           >
             <Fingerprint className="size-4" />
-            {generate.isPending ? "Génération…" : "Générer ma carte hors-ligne"}
+            {generate.isPending ? "Génération…" : "Créer mon QR groupe sanguin"}
           </Button>
         )}
       </CardContent>

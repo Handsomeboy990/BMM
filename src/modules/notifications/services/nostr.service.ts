@@ -75,7 +75,7 @@ export const nostrService = {
       // En développement, on simule la publication pour ne pas spammer les relais publics.
       if (process.env.NODE_ENV !== "production") {
         console.warn(
-          `[Nostr] Simulation mode — Événement ID: ${signedEvent.id} (non publié en dev).`,
+          `[Nostr] Simulation mode - Événement ID: ${signedEvent.id} (non publié en dev).`,
         );
         return signedEvent.id;
       }

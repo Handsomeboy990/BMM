@@ -86,14 +86,14 @@ export function RewardChannelCard({
                     {operatorLabel(operator)}
                   </p>
                   <p className="text-muted-foreground truncate text-xs">
-                    {phone || "Numéro non renseigné"} · conversion via Izichange
+                    {phone || "Numéro non renseigné"} · dépôt sur votre compte
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-medium">Bitcoin Lightning</p>
+                  <p className="text-sm font-medium">Bitcoin</p>
                   <p className="text-muted-foreground text-xs">
-                    Sur votre propre portefeuille, via facture BOLT11
+                    Sur votre portefeuille Bitcoin
                   </p>
                 </>
               )}
@@ -119,7 +119,7 @@ export function RewardChannelCard({
                 active={mode === "lightning"}
                 onClick={() => setMode("lightning")}
                 icon={<Zap className="size-4" />}
-                label="Lightning"
+                label="Bitcoin"
               />
             </div>
 
@@ -150,8 +150,8 @@ export function RewardChannelCard({
               </div>
             ) : (
               <p className="text-muted-foreground animate-rise-in text-xs">
-                Vous présenterez une facture Lightning (BOLT11) à la structure
-                lors du versement.
+                Vous présenterez votre portefeuille Bitcoin au centre de don au
+                moment de la récompense.
               </p>
             )}
 

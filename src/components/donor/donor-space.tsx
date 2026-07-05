@@ -209,35 +209,34 @@ export function DonorSpace() {
 
       {/* Cartes fonctionnelles en disposition masonry pleine largeur. */}
       <div className="gap-6 *:mb-6 *:break-inside-avoid xl:columns-2">
-        {/* Vérification & clés — via QR codes plutôt qu'affichage brut */}
+        {/* Ma carte de donneur - QR codes à faire scanner */}
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Vérification & clés</CardTitle>
+            <CardTitle>Ma carte de donneur</CardTitle>
             <ScanLine className="text-primary size-5" />
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-muted-foreground mb-4 text-sm">
-              Faites scanner ces QR codes pour prouver votre identité de
-              donneur. Votre clé privée n'est jamais exposée : elle reste sur
-              votre appareil.
+              Faites scanner ces QR codes en centre de don pour prouver votre
+              identité. Vos informations sensibles ne sont jamais partagées.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <QrBadge
                 value={publicUrl(`/verify/${donor.id}`)}
-                label="Preuve de don (vérification publique)"
+                label="Ma preuve de donneur"
                 caption={truncateMiddle(donor.id, 8, 6)}
               />
               <QrBadge
                 value={donor.bitcoinAddress}
-                label="Adresse Bitcoin (clé publique)"
+                label="Mon identifiant de récompense"
                 caption={truncateMiddle(donor.bitcoinAddress)}
                 copyable
               />
             </div>
             <p className="text-muted-foreground mt-4 flex items-center gap-1.5 text-xs">
               <KeyRound className="size-3.5" />
-              Conservez précieusement le fichier de clé téléchargé lors de votre
-              inscription : il est nécessaire pour signer vos futurs dons.
+              Gardez bien la clé téléchargée à votre inscription : elle vous
+              sert à vous reconnecter.
             </p>
           </CardContent>
         </Card>
@@ -376,10 +375,10 @@ export function DonorSpace() {
         {/* Parrainage */}
         <ReferralCard donorId={donor.id} />
 
-        {/* Identité sanguine hors-ligne — attestation BIP-322 */}
+        {/* Identité sanguine hors-ligne - attestation BIP-322 */}
         <OfflineIdentityCard donorId={donor.id} bloodType={donor.bloodType} />
 
-        {/* Canal de récompense — Mobile Money (Izichange) ou Lightning */}
+        {/* Canal de récompense - Mobile Money (Izichange) ou Lightning */}
         <RewardChannelCard
           donorId={donor.id}
           defaultPhone={donor.phoneNumber}
@@ -400,7 +399,7 @@ export function DonorSpace() {
                   <span className="text-base font-medium">sats</span>
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  Reçus via Lightning après vos dons validés
+                  Gagnés grâce à vos dons
                 </p>
               </div>
             </div>
