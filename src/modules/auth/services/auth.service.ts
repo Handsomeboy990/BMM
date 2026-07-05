@@ -151,36 +151,18 @@ export const authService = {
     // défauts de politiques RLS sur user_profiles (ex: récursion). On ne lit
     // que la ligne de l'utilisateur courant, identifiée par son id vérifié.
     const db = createSupabaseAdminClient() ?? supabase;
-    const { data: profile, error: profileError } = await db
-      .from("user_profiles")
-      .select("*, organization:organizations(*)")
+
+    // Détection du rôle : un compte présent dans `donors` est un donneur, même
+    // s'il possède par ailleurs une ligne user_profiles (créée par un trigger).
+    // On vérifie donc `donors` en premier, ce qui évite qu'un donneur soit pris
+    // pour un membre d'organisation et accède aux espaces d'administration.
+    const { data: donor } = await db
+      .from("donors")
+      .select("*")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (!profile) {
-      // Si l'utilisateur n'est pas dans user_profiles, vérifier s'il est dans la table donors
-      const { data: donor, error: donorError } = await db
-        .from("donors")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (!donor) {
-        if (profileError) {
-          console.error(
-            "getCurrentUser: lecture du profil utilisateur échouée:",
-            profileError,
-          );
-        }
-        if (donorError) {
-          console.error(
-            "getCurrentUser: lecture du profil donneur échouée:",
-            donorError,
-          );
-        }
-        return null;
-      }
-
+    if (donor) {
       return {
         id: user.id,
         email: user.email || undefined,
@@ -208,6 +190,22 @@ export const authService = {
           referredBy: donor.referred_by,
         },
       };
+    }
+
+    const { data: profile, error: profileError } = await db
+      .from("user_profiles")
+      .select("*, organization:organizations(*)")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      if (profileError) {
+        console.error(
+          "getCurrentUser: lecture du profil utilisateur échouée:",
+          profileError,
+        );
+      }
+      return null;
     }
 
     const org = profile.organization;

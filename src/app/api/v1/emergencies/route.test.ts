@@ -80,7 +80,7 @@ describe("POST /api/v1/emergencies", () => {
     });
   });
 
-  it("should return 403 when user is not associated with an organization", async () => {
+  it("should allow creating an emergency without an organization (hospitalId null)", async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue({
       id: "u1",
       email: "hospital@blood.org",
@@ -88,15 +88,37 @@ describe("POST /api/v1/emergencies", () => {
       organizationId: null,
     } as unknown as UserProfile);
 
+    vi.mocked(emergencyService.createEmergency).mockResolvedValue({
+      id: "e2-uuid",
+      hospitalId: null,
+      bloodType: "O-",
+      quantityNeeded: 1,
+      city: "Cotonou",
+      latitude: 6.37,
+      longitude: 2.42,
+      status: "active",
+      createdAt: new Date("2026-06-30T12:00:00.000Z"),
+    } as unknown as EmergencyRecord);
+
+    const body = {
+      bloodType: "O-",
+      quantityNeeded: 1,
+      city: "Cotonou",
+      latitude: 6.37,
+      longitude: 2.42,
+    };
+
     const req = new Request("http://localhost/api/v1/emergencies", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify(body),
     });
 
     const response = await POST(req);
-    expect(response.status).toBe(403);
-    const json = await response.json();
-    expect(json.error.code).toBe("forbidden");
+    expect(response.status).toBe(201);
+    expect(emergencyService.createEmergency).toHaveBeenCalledWith({
+      ...body,
+      hospitalId: null,
+    });
   });
 });
 

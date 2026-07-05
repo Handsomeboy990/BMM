@@ -80,7 +80,7 @@ describe("PATCH /api/v1/donors/[id]/validate", () => {
     );
   });
 
-  it("should return 403 if user is not associated with an organization", async () => {
+  it("should validate a donor even without an organization link", async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue({
       id: "u1",
       email: "hospital@blood.org",
@@ -88,6 +88,24 @@ describe("PATCH /api/v1/donors/[id]/validate", () => {
       organizationId: null,
       organization: null,
     } as unknown as Awaited<ReturnType<typeof authService.getCurrentUser>>);
+
+    const mockDonor = {
+      id: VALID_UUID,
+      firstName: "Kofi",
+      validated: false,
+      profileHash: "hash...",
+    };
+    vi.mocked(otsService.stampHash).mockResolvedValue("ots-proof-xyz");
+    vi.mocked(donorService.getDonorById).mockResolvedValue(
+      mockDonor as unknown as Awaited<
+        ReturnType<typeof donorService.getDonorById>
+      >,
+    );
+    vi.mocked(donorService.validateDonor).mockResolvedValue({
+      ...mockDonor,
+      validated: true,
+      otsProof: "ots-proof-xyz",
+    } as unknown as Awaited<ReturnType<typeof donorService.validateDonor>>);
 
     const req = new Request(
       `http://localhost/api/v1/donors/${VALID_UUID}/validate`,
@@ -100,7 +118,7 @@ describe("PATCH /api/v1/donors/[id]/validate", () => {
       params: Promise.resolve({ id: VALID_UUID }),
     });
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(200);
   });
 
   it("should return 404 if donor is not found", async () => {

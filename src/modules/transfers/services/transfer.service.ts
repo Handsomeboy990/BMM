@@ -70,7 +70,7 @@ export const transferService = {
 
   createTransfer: async (
     data: CreateTransferDTO & {
-      requesterId: string;
+      requesterId: string | null;
       requesterName: string;
       requesterCity: string;
     },
@@ -114,7 +114,7 @@ export const transferService = {
   /** Un centre s'engage à fournir la demande (statut → acceptée). */
   respondTransfer: async (
     id: string,
-    responderId: string,
+    responderId: string | null,
     responderName: string,
   ): Promise<TransferRecord | null> => {
     const supabase = await createSupabaseServerClient();

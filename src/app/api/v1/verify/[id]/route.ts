@@ -124,14 +124,6 @@ export async function POST(
       });
     }
 
-    if (!user.organizationId) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
-    }
-
     const id = (await params).id;
 
     // Validation du format UUID
@@ -182,7 +174,7 @@ export async function POST(
 
     const rewardLog = await rewardService.createRewardLog({
       donorId: id,
-      hospitalId: user.organizationId,
+      hospitalId: user.organizationId ?? null,
       satsAmount,
       bolt11Invoice: invoiceOrMomo,
     });

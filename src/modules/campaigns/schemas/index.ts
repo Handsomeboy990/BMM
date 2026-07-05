@@ -4,7 +4,7 @@ const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
 export const createCampaignSchema = z
   .object({
-    hospitalId: z.string().uuid(),
+    hospitalId: z.string().uuid().nullable(),
     title: z.string().min(5).max(255),
     type: z.enum(["targeted", "general"]),
     targetBloodType: z.enum(BLOOD_TYPES).optional(),

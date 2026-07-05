@@ -3,6 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  setCardStatus as localDecideCardRequest,
+  upsertCardRequest as localUpsertCardRequest,
+  useCardRequest as useLocalCardRequest,
+  useCardRequests as useLocalCardRequests,
+  type CardRequest as LocalCardRequest,
+} from "@/lib/card-request";
+import {
   AUTH_BYPASS,
   DEMO_CURRENT_ORG_ID,
   demoCampaigns,
@@ -24,6 +31,7 @@ import {
 import {
   authApi,
   campaignsApi,
+  cardRequestsApi,
   donationsApi,
   donorsApi,
   emergenciesApi,
@@ -36,6 +44,8 @@ import {
   type CampaignRecord,
   type CardOrderMethod,
   type CardOrderResult,
+  type CardRequestRecord,
+  type SubmitCardRequestPayload,
   type CreateCampaignPayload,
   type CreateDonationPayload,
   type CreateDonorPayload,
@@ -769,6 +779,112 @@ export function useAddDonorActivity() {
         : donorsApi
             .addActivity(id, { activityType, description })
             .then((r) => r.data),
+  });
+}
+
+/* -------------------------- Cartes de donneur ------------------------- */
+
+function localToCardRecord(r: LocalCardRequest): CardRequestRecord {
+  return {
+    id: r.donorId,
+    donorId: r.donorId,
+    donorName: r.donorName,
+    bloodType: r.bloodType ?? null,
+    photo: r.photo ?? null,
+    format: r.format,
+    status: r.status === "none" ? "requested" : r.status,
+    updatedAt: r.updatedAt,
+  };
+}
+
+/** Demande de carte du donneur connecté (repli démo localStorage). */
+export function useMyCardRequest(donorId: string): CardRequestRecord | null {
+  const local = useLocalCardRequest(donorId);
+  const query = useQuery({
+    queryKey: ["card-request", "me"],
+    enabled: !AUTH_BYPASS && donorId.length > 0,
+    queryFn: () => cardRequestsApi.mine().then((r) => r.data.request),
+  });
+  if (AUTH_BYPASS) return local ? localToCardRecord(local) : null;
+  return query.data ?? null;
+}
+
+/** Soumet la demande de carte (photo + format). */
+export function useSubmitCardRequest(donorId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (
+      vars: SubmitCardRequestPayload & {
+        donorName?: string;
+        bloodType?: string;
+      },
+    ) => {
+      if (AUTH_BYPASS) {
+        localUpsertCardRequest({
+          donorId,
+          donorName: vars.donorName ?? "",
+          bloodType: vars.bloodType,
+          photo: vars.photo ?? undefined,
+          format: vars.format,
+          status: "requested",
+          requestedAt: new Date().toISOString(),
+        });
+        return Promise.resolve(null);
+      }
+      return cardRequestsApi
+        .submit({ format: vars.format, photo: vars.photo })
+        .then((r) => r.data.request);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS)
+        qc.invalidateQueries({ queryKey: ["card-request", "me"] });
+    },
+  });
+}
+
+/** Liste des demandes de carte (admin ; repli démo localStorage). */
+export function useCardRequestsList(): CardRequestRecord[] {
+  const local = useLocalCardRequests();
+  const query = useQuery({
+    queryKey: ["card-requests"],
+    enabled: !AUTH_BYPASS,
+    queryFn: () => cardRequestsApi.list().then((r) => r.data),
+  });
+  if (AUTH_BYPASS) return local.map(localToCardRecord);
+  return query.data ?? [];
+}
+
+/** Valide ou refuse une demande de carte (admin). */
+export function useDecideCardRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      request,
+      status,
+    }: {
+      request: CardRequestRecord;
+      status: "approved" | "rejected";
+    }) => {
+      if (AUTH_BYPASS) {
+        localUpsertCardRequest({
+          donorId: request.donorId,
+          donorName: request.donorName,
+          bloodType: request.bloodType ?? undefined,
+          photo: request.photo ?? undefined,
+          format: request.format,
+          status,
+        });
+        // Sécurité : garantit le statut même si la demande existait déjà.
+        localDecideCardRequest(request.donorId, status);
+        return Promise.resolve(null);
+      }
+      return cardRequestsApi
+        .decide(request.id, status)
+        .then((r) => r.data.request);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["card-requests"] });
+    },
   });
 }
 

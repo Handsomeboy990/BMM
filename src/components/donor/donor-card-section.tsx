@@ -15,12 +15,8 @@ import { DonorCard } from "@/components/donor/donor-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  fileToPhotoDataUrl,
-  setCardStatus,
-  upsertCardRequest,
-  useCardRequest,
-} from "@/lib/card-request";
+import { useMyCardRequest, useSubmitCardRequest } from "@/lib/api/hooks";
+import { fileToPhotoDataUrl } from "@/lib/card-request";
 import { publicUrl } from "@/lib/url";
 
 type Donor = {
@@ -32,13 +28,15 @@ type Donor = {
 };
 
 export function DonorCardSection({ donor }: { donor: Donor }) {
-  const request = useCardRequest(donor.id);
+  const request = useMyCardRequest(donor.id);
+  const submit = useSubmitCardRequest(donor.id);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [photoDraft, setPhotoDraft] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const name = `${donor.firstName} ${donor.lastName}`;
-  const photo = request?.photo;
+  const photo = request?.photo ?? photoDraft;
   const status = request?.status ?? "none";
   const verifyUrl = publicUrl(`/verify/${donor.id}`);
 
@@ -48,13 +46,7 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
     setError(null);
     setBusy(true);
     try {
-      const dataUrl = await fileToPhotoDataUrl(file);
-      upsertCardRequest({
-        donorId: donor.id,
-        donorName: name,
-        bloodType: donor.bloodType,
-        photo: dataUrl,
-      });
+      setPhotoDraft(await fileToPhotoDataUrl(file));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Photo invalide.");
     } finally {
@@ -63,20 +55,23 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
     }
   }
 
-  function requestCard(format: "physical" | "digital") {
-    if (!photo) {
+  async function requestCard(format: "physical" | "digital") {
+    const currentPhoto = photo;
+    if (!currentPhoto) {
       setError("Ajoutez d'abord votre photo.");
       return;
     }
     setError(null);
-    upsertCardRequest({
-      donorId: donor.id,
-      donorName: name,
-      bloodType: donor.bloodType,
-      format,
-      status: "requested",
-      requestedAt: new Date().toISOString(),
-    });
+    try {
+      await submit.mutateAsync({
+        format,
+        photo: currentPhoto,
+        donorName: name,
+        bloodType: donor.bloodType,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Demande impossible.");
+    }
   }
 
   return (
@@ -92,7 +87,7 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
             bloodType={donor.bloodType}
             donorId={donor.id}
             city={donor.city}
-            photo={photo}
+            photo={photo ?? undefined}
             verifyUrl={verifyUrl}
           />
         </div>
@@ -105,47 +100,50 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
         ) : null}
 
         <div className="no-print space-y-3">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy}
-          >
-            <Camera className="size-4" />
-            {busy
-              ? "Traitement…"
-              : photo
-                ? "Changer ma photo"
-                : "Ajouter ma photo"}
-          </Button>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={onPhoto}
-          />
-
           {status === "none" ? (
-            <div className="space-y-2">
+            <>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => inputRef.current?.click()}
+                disabled={busy}
+              >
+                <Camera className="size-4" />
+                {busy
+                  ? "Traitement…"
+                  : photo
+                    ? "Changer ma photo"
+                    : "Ajouter ma photo"}
+              </Button>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={onPhoto}
+              />
               <p className="text-muted-foreground text-sm">
                 Demandez votre carte. Un administrateur la validera avant
                 émission.
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Button onClick={() => requestCard("digital")}>
+                <Button
+                  onClick={() => requestCard("digital")}
+                  disabled={submit.isPending}
+                >
                   <Smartphone className="size-4" />
                   Carte numérique
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => requestCard("physical")}
+                  disabled={submit.isPending}
                 >
                   <CreditCard className="size-4" />
                   Carte physique
                 </Button>
               </div>
-            </div>
+            </>
           ) : status === "requested" ? (
             <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
               <Clock className="size-5 shrink-0 text-amber-500" />
@@ -163,14 +161,23 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
               <div className="border-destructive/30 bg-destructive/10 flex items-center gap-3 rounded-lg border p-4">
                 <AlertCircle className="text-destructive size-5 shrink-0" />
                 <p className="text-sm">
-                  Votre demande a été refusée. Vérifiez votre photo et
-                  renouvelez la demande.
+                  Votre demande a été refusée. Vous pouvez la renouveler.
                 </p>
               </div>
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => setCardStatus(donor.id, "requested")}
+                disabled={submit.isPending}
+                onClick={() =>
+                  request
+                    ? submit.mutate({
+                        format: request.format,
+                        photo: request.photo,
+                        donorName: name,
+                        bloodType: donor.bloodType,
+                      })
+                    : undefined
+                }
               >
                 Renouveler ma demande
               </Button>
@@ -196,9 +203,9 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
             </div>
           )}
 
-          {status !== "none" ? (
+          {status !== "none" && request ? (
             <Badge variant="neutral" className="w-full justify-center">
-              {request?.format === "physical"
+              {request.format === "physical"
                 ? "Carte physique"
                 : "Carte numérique"}
             </Badge>

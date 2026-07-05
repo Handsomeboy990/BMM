@@ -10,18 +10,16 @@ import { handleApiError, success, failure } from "@/lib/api/response";
 export async function POST(req: Request) {
   try {
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
     }
 
     const body = await req.json();
 
-    // Sécurité: Forcer l'injection du hospitalId de la session de confiance
-    body.hospitalId = user.organizationId;
+    // Rattachement à l'organisation de la session si elle existe (facultatif).
+    body.hospitalId = user.organizationId ?? null;
 
     const validatedData = createCampaignSchema.parse(body);
     const campaign = await campaignService.createCampaign(validatedData);
@@ -51,12 +49,9 @@ export async function GET(req: Request) {
         ? new URL(req.url).searchParams.get("hospitalId") || user.organizationId
         : user.organizationId;
 
+    // Sans organisation liée, il n'y a pas de campagne à lister.
     if (!targetHospitalId) {
-      return failure(
-        API_ERROR_CODE.BAD_REQUEST,
-        "hospitalId manquant ou l'utilisateur n'est associé à aucune organisation.",
-        { status: 400 },
-      );
+      return success([]);
     }
 
     const campaigns =

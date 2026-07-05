@@ -15,45 +15,46 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
-import {
-  DEMO_CARD_REQUESTS,
-  upsertCardRequest,
-  useCardRequests,
-  type CardRequest,
-} from "@/lib/card-request";
+import { useCardRequestsList, useDecideCardRequest } from "@/lib/api/hooks";
+import type { CardRequestRecord } from "@/lib/api/resources";
+import { DEMO_CARD_REQUESTS } from "@/lib/card-request";
 import { publicUrl } from "@/lib/url";
 import { useAuth } from "@/providers/auth-provider";
 
 const statusBadge: Record<
-  CardRequest["status"],
-  { variant: "warning" | "success" | "danger" | "neutral"; label: string }
+  CardRequestRecord["status"],
+  { variant: "warning" | "success" | "danger"; label: string }
 > = {
-  none: { variant: "neutral", label: "Brouillon" },
   requested: { variant: "warning", label: "À valider" },
   approved: { variant: "success", label: "Validée" },
   rejected: { variant: "danger", label: "Refusée" },
 };
 
+const demoRecords: CardRequestRecord[] = DEMO_CARD_REQUESTS.map((r) => ({
+  id: r.donorId,
+  donorId: r.donorId,
+  donorName: r.donorName,
+  bloodType: r.bloodType ?? null,
+  photo: r.photo ?? null,
+  format: r.format,
+  status: r.status === "none" ? "requested" : r.status,
+  updatedAt: r.updatedAt,
+}));
+
 export function CardRequestsPanel() {
-  const stored = useCardRequests();
+  const stored = useCardRequestsList();
+  const decide = useDecideCardRequest();
   const { isDemo } = useAuth();
-  const [printing, setPrinting] = useState<CardRequest | null>(null);
+  const [printing, setPrinting] = useState<CardRequestRecord | null>(null);
 
   // En démo, on complète avec des demandes d'exemple pour montrer le parcours.
   const requests = useMemo(() => {
     if (!isDemo) return stored;
     const ids = new Set(stored.map((r) => r.donorId));
-    return [
-      ...stored,
-      ...DEMO_CARD_REQUESTS.filter((r) => !ids.has(r.donorId)),
-    ];
+    return [...stored, ...demoRecords.filter((r) => !ids.has(r.donorId))];
   }, [stored, isDemo]);
 
   const pending = requests.filter((r) => r.status === "requested");
-
-  function decide(req: CardRequest, status: "approved" | "rejected") {
-    upsertCardRequest({ ...req, status });
-  }
 
   return (
     <Card>
@@ -113,14 +114,23 @@ export function CardRequestsPanel() {
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                   {req.status === "requested" ? (
                     <>
-                      <Button size="sm" onClick={() => decide(req, "approved")}>
+                      <Button
+                        size="sm"
+                        disabled={decide.isPending}
+                        onClick={() =>
+                          decide.mutate({ request: req, status: "approved" })
+                        }
+                      >
                         <Check className="size-4" />
                         Valider
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => decide(req, "rejected")}
+                        disabled={decide.isPending}
+                        onClick={() =>
+                          decide.mutate({ request: req, status: "rejected" })
+                        }
                       >
                         <X className="size-4" />
                         Refuser
@@ -155,9 +165,9 @@ export function CardRequestsPanel() {
             <div className="print-area flex justify-center">
               <DonorCard
                 name={printing.donorName || "Donneur"}
-                bloodType={printing.bloodType}
+                bloodType={printing.bloodType ?? undefined}
                 donorId={printing.donorId}
-                photo={printing.photo}
+                photo={printing.photo ?? undefined}
                 verifyUrl={publicUrl(`/verify/${printing.donorId}`)}
               />
             </div>

@@ -489,4 +489,132 @@ export const donorService = {
       return null;
     }
   },
+
+  /* ------------------------- Demandes de carte ------------------------- */
+
+  /** Demande de carte d'un donneur (ou null). */
+  getCardRequest: async (
+    donorId: string,
+  ): Promise<CardRequestRecord | null> => {
+    const admin = createSupabaseAdminClient();
+    if (!admin) return null;
+    const { data, error } = await admin
+      .from("card_requests")
+      .select("*")
+      .eq("donor_id", donorId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return mapCardRequest(data);
+  },
+
+  /** Crée ou met à jour la demande de carte d'un donneur (statut 'requested'). */
+  upsertCardRequest: async (data: {
+    donorId: string;
+    photo?: string | null;
+    format: "physical" | "digital";
+  }): Promise<CardRequestRecord | null> => {
+    const admin = createSupabaseAdminClient();
+    if (!admin) return null;
+    const { data: row, error } = await admin
+      .from("card_requests")
+      .upsert(
+        {
+          donor_id: data.donorId,
+          photo: data.photo ?? null,
+          format: data.format,
+          status: "requested",
+          reviewed_by: null,
+          reviewed_at: null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "donor_id" },
+      )
+      .select("*")
+      .single();
+    if (error || !row) {
+      console.error("Error upserting card request:", error);
+      return null;
+    }
+    return mapCardRequest(row);
+  },
+
+  /** Toutes les demandes de carte, enrichies du nom et du groupe (admin). */
+  listCardRequests: async (): Promise<CardRequestRecord[]> => {
+    const admin = createSupabaseAdminClient();
+    if (!admin) return [];
+    const { data, error } = await admin
+      .from("card_requests")
+      .select("*, donors(first_name, last_name, blood_type)")
+      .order("updated_at", { ascending: false });
+    if (error || !data) return [];
+    return data.map(mapCardRequest);
+  },
+
+  /** Valide ou refuse une demande de carte (admin). */
+  updateCardRequestStatus: async (
+    id: string,
+    status: "approved" | "rejected",
+    reviewerId: string,
+  ): Promise<CardRequestRecord | null> => {
+    const admin = createSupabaseAdminClient();
+    if (!admin) return null;
+    const { data, error } = await admin
+      .from("card_requests")
+      .update({
+        status,
+        reviewed_by: reviewerId,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select("*, donors(first_name, last_name, blood_type)")
+      .single();
+    if (error || !data) {
+      console.error("Error updating card request status:", error);
+      return null;
+    }
+    return mapCardRequest(data);
+  },
 };
+
+export type CardRequestRecord = {
+  id: string;
+  donorId: string;
+  donorName: string;
+  bloodType: string | null;
+  photo: string | null;
+  format: "physical" | "digital";
+  status: "requested" | "approved" | "rejected";
+  updatedAt: string;
+};
+
+type DBCardRequestRow = {
+  id: string;
+  donor_id: string;
+  photo: string | null;
+  format: "physical" | "digital";
+  status: "requested" | "approved" | "rejected";
+  updated_at: string | Date;
+  donors?: {
+    first_name?: string;
+    last_name?: string;
+    blood_type?: string | null;
+  } | null;
+};
+
+function mapCardRequest(row: DBCardRequestRow): CardRequestRecord {
+  const name = [row.donors?.first_name, row.donors?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return {
+    id: row.id,
+    donorId: row.donor_id,
+    donorName: name,
+    bloodType: row.donors?.blood_type ?? null,
+    photo: row.photo,
+    format: row.format,
+    status: row.status,
+    updatedAt: new Date(row.updated_at).toISOString(),
+  };
+}

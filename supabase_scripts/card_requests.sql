@@ -1,19 +1,24 @@
 -- Demandes de carte de donneur (photo + validation par un administrateur).
 --
--- Le parcours actuel (photo, demande, validation, impression / livraison
--- numérique) fonctionne côté client pour la démo. Pour la production, créer
--- cette table et un bucket de stockage pour les photos, puis exposer :
---   - POST   /api/v1/donors/me/card-request        (donneur : photo + format)
---   - GET    /api/v1/card-requests                 (admin : liste)
---   - PATCH  /api/v1/card-requests/{id}            (admin : approve | reject)
+-- Parcours : le donneur ajoute sa photo et demande une carte (numérique ou
+-- physique) ; un administrateur valide ou refuse ; la carte est alors imprimée
+-- (physique) ou disponible dans l'espace du donneur (numérique).
 --
--- La photo est stockée dans un bucket privé Supabase Storage ; on ne conserve
--- ici que son chemin (photo_path), jamais l'image en base.
+-- Pour la démo et le MVP, la photo est conservée en base (data URL compressée,
+-- ~30 Ko). En production, préférer un bucket privé Supabase Storage et ne
+-- stocker ici que le chemin du fichier.
+--
+-- Endpoints associés :
+--   - GET/POST /api/v1/donors/me/card-request   (donneur : sa demande)
+--   - GET      /api/v1/card-requests             (admin : liste)
+--   - PATCH    /api/v1/card-requests/{id}        (admin : approve | reject)
+--
+-- À appliquer dans l'éditeur SQL du dashboard Supabase.
 
 CREATE TABLE IF NOT EXISTS card_requests (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   donor_id      uuid NOT NULL REFERENCES donors (id) ON DELETE CASCADE,
-  photo_path    text,
+  photo         text,
   format        varchar(10) NOT NULL CHECK (format IN ('physical', 'digital')),
   status        varchar(12) NOT NULL DEFAULT 'requested'
                 CHECK (status IN ('requested', 'approved', 'rejected')),
@@ -24,6 +29,8 @@ CREATE TABLE IF NOT EXISTS card_requests (
   UNIQUE (donor_id)
 );
 
--- RLS : le donneur gère sa propre demande ; seuls les administrateurs voient
--- l'ensemble et changent le statut.
+CREATE INDEX IF NOT EXISTS idx_card_requests_status ON card_requests (status);
+
+-- RLS : le donneur gère sa propre demande ; les administrateurs voient tout et
+-- changent le statut (les routes API appliquent déjà ces contrôles).
 ALTER TABLE card_requests ENABLE ROW LEVEL SECURITY;
