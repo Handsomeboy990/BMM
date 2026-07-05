@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";
+import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/providers/auth-provider";
 import { QueryProvider } from "@/providers/query-provider";
@@ -67,6 +68,7 @@ export default function RootLayout({
           <QueryProvider>
             <AuthProvider>{children}</AuthProvider>
           </QueryProvider>
+          <Toaster />
           <ServiceWorker />
           <OfflineIndicator />
         </ThemeProvider>

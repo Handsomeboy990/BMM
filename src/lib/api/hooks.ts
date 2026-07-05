@@ -142,6 +142,7 @@ export function useMe() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Connexion réussie." },
     mutationFn: (payload: LoginPayload) =>
       AUTH_BYPASS ? Promise.resolve(null) : authApi.login(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.me }),
@@ -151,6 +152,7 @@ export function useLogin() {
 export function useRegisterOrganization() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Compte de votre structure créé." },
     mutationFn: (payload: RegisterOrganizationPayload) =>
       AUTH_BYPASS ? Promise.resolve(null) : authApi.register(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.me }),
@@ -192,6 +194,7 @@ export function useEmergency(id: string) {
 export function useCreateEmergency() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Alerte d'urgence publiée." },
     mutationFn: (payload: CreateEmergencyPayload) => {
       if (AUTH_BYPASS) {
         const record: EmergencyRecord = {
@@ -218,6 +221,7 @@ export function useCreateEmergency() {
 export function useUpdateEmergencyStatus() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Statut de l'urgence mis à jour." },
     mutationFn: ({ id, status }: { id: string; status: EmergencyStatus }) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<EmergencyRecord[]>(
@@ -237,6 +241,7 @@ export function useUpdateEmergencyStatus() {
 export function useDeleteEmergency() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Urgence supprimée." },
     mutationFn: (id: string) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<EmergencyRecord[]>(
@@ -268,6 +273,7 @@ export function useCampaigns(hospitalId?: string) {
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Campagne créée." },
     mutationFn: (payload: CreateCampaignPayload) => {
       if (AUTH_BYPASS) {
         const record: CampaignRecord = {
@@ -323,6 +329,7 @@ export function useDonors() {
 
 export function useCreateDonor() {
   return useMutation({
+    meta: { success: "Donneur enregistré." },
     mutationFn: (payload: CreateDonorPayload): Promise<DonorRecord> => {
       if (AUTH_BYPASS) {
         return demoDelay({
@@ -344,6 +351,7 @@ export function useCreateDonor() {
 export function useValidateDonor() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Donneur validé." },
     mutationFn: (id: string) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<DonorRecord[]>({ queryKey: ["donors"] }, (old) =>
@@ -399,6 +407,7 @@ export function useVerifyDonor(id: string, enabled = true) {
 export function useRewardDonor() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Récompense envoyée au donneur." },
     mutationFn: ({ id, ...payload }: { id: string } & RewardPayload) => {
       if (AUTH_BYPASS) {
         // Débit du compte d'approvisionnement en démo (sauf points, gratuits).
@@ -456,6 +465,7 @@ export function useOrganizations() {
 export function useVerifyOrganization() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Organisation vérifiée." },
     mutationFn: (id: string) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<Organization[]>(
@@ -477,6 +487,7 @@ export function useVerifyOrganization() {
 export function useRejectOrganization() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Organisation rejetée." },
     mutationFn: ({ id, reason }: { id: string; reason: string }) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<Organization[]>(
@@ -522,6 +533,7 @@ export function useOrgDocuments(id: string | undefined) {
 export function useUploadOrgDocument() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Justificatif téléversé." },
     mutationFn: ({ docType, file }: { docType: OrgDocumentType; file: File }) =>
       organizationsApi.uploadDocument(docType, file),
     onSuccess: () => {
@@ -554,6 +566,7 @@ export function useDonationsHistory() {
 export function useWithdrawDonations() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Retrait des dons initié." },
     mutationFn: (bolt11: string) =>
       donationsApi.withdraw(bolt11).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["donations"] }),
@@ -593,6 +606,7 @@ export type CreateTransferInput = {
 export function useCreateTransfer() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Demande de transfert publiée." },
     mutationFn: (input: CreateTransferInput) => {
       if (AUTH_BYPASS) {
         const record: TransferRequest = {
@@ -622,6 +636,7 @@ export function useCreateTransfer() {
 export function useRespondTransfer() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Proposition envoyée au centre demandeur." },
     mutationFn: (id: string) => {
       if (AUTH_BYPASS) {
         qc.setQueriesData<TransferRequest[]>(
@@ -712,6 +727,7 @@ export function useDonorOfflineIdentity() {
 export function useWithdrawBalance() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Retrait vers Mobile Money initié." },
     mutationFn: async (payload: { amountSats: number; momoNumber: string }) => {
       if (AUTH_BYPASS) {
         qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
@@ -799,6 +815,7 @@ export function useConfirmCardOrder() {
 /** Ajoute une activité à un donneur (réservé aux structures connectées). */
 export function useAddDonorActivity() {
   return useMutation({
+    meta: { success: "Activité enregistrée." },
     mutationFn: ({
       id,
       activityType,
@@ -847,6 +864,7 @@ export function useMyCardRequest(donorId: string): CardRequestRecord | null {
 export function useSubmitCardRequest(donorId: string) {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Demande de carte envoyée." },
     mutationFn: (
       vars: SubmitCardRequestPayload & {
         donorName?: string;
@@ -892,6 +910,7 @@ export function useCardRequestsList(): CardRequestRecord[] {
 export function useDecideCardRequest() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Demande de carte mise à jour." },
     mutationFn: ({
       request,
       status,
@@ -926,6 +945,7 @@ export function useDecideCardRequest() {
 export function useUpdateDonorProfile() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { success: "Profil mis à jour." },
     mutationFn: ({ id, ...payload }: { id: string } & UpdateDonorPayload) =>
       AUTH_BYPASS
         ? demoDelay(null)
