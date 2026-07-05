@@ -194,20 +194,18 @@ export function RewardConsole() {
             ) : (
               <div className="flex items-center gap-3 rounded-lg border p-3">
                 <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-full text-sm font-semibold">
-                  {verify.data.donor.bloodType}
+                  {verify.data.donor.bloodType || "?"}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-mono text-xs">
-                    {verify.data.donor.id}
-                  </p>
+                  <p className="text-sm font-medium">Donneur trouvé</p>
                   <p className="text-muted-foreground text-xs">
-                    Adresse {verify.data.donor.bitcoinAddress.slice(0, 12)}…
+                    Groupe {verify.data.donor.bloodType || "non renseigné"}
                   </p>
                 </div>
                 {verify.data.verification.isTimestampVerified ? (
                   <Badge variant="success">
                     <Bitcoin className="size-3.5" />
-                    Vérifié
+                    Authentique
                   </Badge>
                 ) : (
                   <Badge variant="warning">Non confirmée</Badge>

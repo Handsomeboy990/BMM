@@ -189,36 +189,28 @@ export function DonorProfileView({ id }: { id: string }) {
           <Droplet className="text-primary size-5" />
         </CardHeader>
         <CardContent className="space-y-4 pt-0 text-sm">
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-xs">
-              Identifiant de récompense
-            </p>
-            <p className="font-mono text-xs break-all">
-              {donor.bitcoinAddress}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-xs">
-              Empreinte de sécurité du profil
-            </p>
-            <p className="font-mono text-xs break-all">{donor.profileHash}</p>
-          </div>
-          {verification.isTimestampVerified && verification.details ? (
+          {verification.isTimestampVerified ? (
             <div className="flex items-start gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
               <Bitcoin className="mt-0.5 size-5 text-amber-500" />
               <div className="space-y-1">
                 <p className="font-medium text-emerald-600 dark:text-emerald-400">
                   Carte authentique et confirmée
                 </p>
-                <p className="text-muted-foreground text-xs">
-                  Confirmée le{" "}
-                  {dateFmt.format(
-                    new Date(verification.details.timestamp * 1000),
-                  )}
-                </p>
+                {verification.details ? (
+                  <p className="text-muted-foreground text-xs">
+                    Confirmée le{" "}
+                    {dateFmt.format(
+                      new Date(verification.details.timestamp * 1000),
+                    )}
+                  </p>
+                ) : null}
               </div>
             </div>
-          ) : null}
+          ) : (
+            <p className="text-muted-foreground">
+              La carte de ce donneur est en cours de validation.
+            </p>
+          )}
           <Button asChild variant="outline" size="sm">
             <Link href={`/verify/${donor.id}`}>Voir la preuve publique</Link>
           </Button>

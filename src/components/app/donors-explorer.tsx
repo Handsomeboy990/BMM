@@ -249,6 +249,9 @@ function DonorActivityAction({ donorId }: { donorId: string }) {
     );
   }
 
+  // Seule la participation à une séance de sensibilisation est attestée
+  // manuellement par la structure. Les dons et les parrainages sont, eux,
+  // enregistrés automatiquement.
   if (!open) {
     return (
       <button
@@ -257,30 +260,28 @@ function DonorActivityAction({ donorId }: { donorId: string }) {
         className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-xs transition-colors"
       >
         <Plus className="size-3.5" />
-        Ajouter une activité
+        Attester une sensibilisation
       </button>
     );
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <Button
-        variant="outline"
         size="sm"
         onClick={() => add("awareness_session", "Sensibilisation")}
         disabled={addActivity.isPending}
       >
         <Megaphone className="size-4" />
-        Sensibilisation
+        Confirmer la participation
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        onClick={() => add("referral", "Parrainage")}
+        onClick={() => setOpen(false)}
         disabled={addActivity.isPending}
       >
-        <UserPlus className="size-4" />
-        Parrainage
+        Annuler
       </Button>
     </div>
   );

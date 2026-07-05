@@ -92,25 +92,11 @@ export function VerifyPanel({ id }: { id: string }) {
 
         <dl className="grid gap-4 sm:grid-cols-2">
           <Detail label="Groupe sanguin" icon={Droplet}>
-            {donor.bloodType}
+            {donor.bloodType || "Non renseigné"}
           </Detail>
           <Detail label="Inscrit le" icon={Clock}>
             {dateFmt.format(new Date(donor.createdAt))}
           </Detail>
-          <div className="space-y-1 sm:col-span-2">
-            <dt className="text-muted-foreground text-xs">
-              Identifiant de récompense
-            </dt>
-            <dd className="font-mono text-xs break-all">
-              {donor.bitcoinAddress}
-            </dd>
-          </div>
-          <div className="space-y-1 sm:col-span-2">
-            <dt className="text-muted-foreground text-xs">
-              Empreinte de sécurité du profil
-            </dt>
-            <dd className="font-mono text-xs break-all">{donor.profileHash}</dd>
-          </div>
         </dl>
 
         {verified && verification.details ? (

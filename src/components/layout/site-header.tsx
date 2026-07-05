@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { primaryNav } from "@/config/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const spaceHref = user?.role === "donor" ? "/donneur" : "/dashboard";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -34,39 +37,49 @@ export function SiteHeader() {
           <Logo />
         </a>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          {primaryNav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        {isAuthenticated ? null : (
+          <nav className="hidden items-center gap-8 md:flex">
+            {primaryNav.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        )}
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
-            <Link href="/login">Se connecter</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="hidden sm:inline-flex"
-          >
-            <Link href="/soutenir">Soutenir</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/donate">Devenir donneur</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button asChild size="sm">
+              <Link href={spaceHref}>Mon espace</Link>
+            </Button>
+          ) : (
+            <>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link href="/login">Se connecter</Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link href="/soutenir">Soutenir</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/donate">Devenir donneur</Link>
+              </Button>
+            </>
+          )}
         </div>
       </Container>
     </header>
