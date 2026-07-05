@@ -1,14 +1,15 @@
+import { CalendarHeart } from "lucide-react";
 import Link from "next/link";
 
 import { DonorGuard } from "@/components/donor/donor-guard";
+import { LogoutButton } from "@/components/donor/logout-button";
 import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
- * Habillage de l'espace donneur: en-tête sobre, distinct de l'espace
- * structures. (Accès en mode démo; à protéger par une session donneur
- * une fois l'endpoint backend disponible.)
+ * Habillage de l'espace donneur : en-tête sobre, distinct de l'espace
+ * structures, avec accès aux campagnes publiques et déconnexion.
  */
 export default function DonorLayout({
   children,
@@ -18,17 +19,18 @@ export default function DonorLayout({
       <div className="flex min-h-dvh flex-col">
         <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
           <div className="flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-            <Link href="/" className="flex items-center">
+            <Link href="/donneur" className="flex items-center">
               <Logo />
             </Link>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground hidden text-sm sm:inline">
-                Espace donneur
-              </span>
-              <ThemeToggle />
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button asChild variant="ghost" size="sm">
-                <Link href="/">Quitter</Link>
+                <Link href="/campagnes">
+                  <CalendarHeart className="size-4" />
+                  <span className="hidden sm:inline">Campagnes</span>
+                </Link>
               </Button>
+              <ThemeToggle />
+              <LogoutButton />
             </div>
           </div>
         </header>

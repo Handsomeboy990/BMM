@@ -327,6 +327,8 @@ export function useCreateDonor() {
         return demoDelay({
           ...payload,
           bloodType: payload.bloodType ?? "O+",
+          latitude: payload.latitude ?? 0,
+          longitude: payload.longitude ?? 0,
           id: `demo-${Date.now()}`,
           otsProof: null,
           validated: false,

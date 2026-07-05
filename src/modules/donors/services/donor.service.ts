@@ -135,8 +135,8 @@ export const donorService = {
           phone_number: data.phoneNumber,
           blood_type: data.bloodType ?? null,
           city: data.city,
-          latitude: data.latitude,
-          longitude: data.longitude,
+          latitude: data.latitude ?? null,
+          longitude: data.longitude ?? null,
           age: data.age,
           available: data.available,
           bitcoin_address: data.bitcoinAddress,
@@ -233,6 +233,28 @@ export const donorService = {
       .select("*")
       .eq("validated", true)
       .limit(200);
+
+    if (error || !donors) {
+      return [];
+    }
+
+    return donors.map(mapDonor);
+  },
+
+  /**
+   * Récupère tous les donneurs (validés ou non), pour l'annuaire des
+   * structures et administrateurs : un donneur récemment inscrit doit être
+   * visible afin d'être validé.
+   */
+  getAllDonors: async (): Promise<DonorRecord[]> => {
+    const admin = createSupabaseAdminClient();
+    const supabase = admin ?? (await createSupabaseServerClient());
+
+    const { data: donors, error } = await supabase
+      .from("donors")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(500);
 
     if (error || !donors) {
       return [];

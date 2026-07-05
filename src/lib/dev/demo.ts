@@ -47,6 +47,7 @@ export const BYPASS_USER: UserProfile = {
     contactEmail: "contact@cnhu-cotonou.bj",
     verified: true,
     createdAt: new Date().toISOString(),
+    balanceSats: 75_000,
   },
 };
 

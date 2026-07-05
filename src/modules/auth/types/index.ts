@@ -20,6 +20,7 @@ export type UserProfile = {
     verified: boolean;
     rejectionReason: string | null;
     createdAt: Date;
+    balanceSats: number;
   } | null;
   donor?: {
     id: string;

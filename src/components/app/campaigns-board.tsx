@@ -68,6 +68,18 @@ export function CampaignsBoard() {
     }
     const form = new FormData(event.currentTarget);
     const targetBloodType = form.get("targetBloodType");
+    const startInput = String(form.get("startsAt") || "");
+    const endInput = String(form.get("endsAt") || "");
+    if (!startInput || !endInput) {
+      setFormError("Indiquez la date de début et la date de fin.");
+      return;
+    }
+    const startsAt = new Date(startInput).toISOString();
+    const endsAt = new Date(endInput).toISOString();
+    if (new Date(endsAt) <= new Date(startsAt)) {
+      setFormError("La date de fin doit être après la date de début.");
+      return;
+    }
     try {
       await createCampaign.mutateAsync({
         title: String(form.get("title")),
@@ -80,6 +92,8 @@ export function CampaignsBoard() {
         radiusKm: Number(form.get("radiusKm")) || 20,
         latitude: coords.latitude,
         longitude: coords.longitude,
+        startsAt,
+        endsAt,
       });
       setOpen(false);
       setType("general");
@@ -166,6 +180,24 @@ export function CampaignsBoard() {
                     min={1}
                     max={500}
                     defaultValue={20}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="startsAt">Début de la campagne</Label>
+                  <Input
+                    id="startsAt"
+                    name="startsAt"
+                    type="datetime-local"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endsAt">Fin de la campagne</Label>
+                  <Input
+                    id="endsAt"
+                    name="endsAt"
+                    type="datetime-local"
+                    required
                   />
                 </div>
               </div>

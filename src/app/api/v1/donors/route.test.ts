@@ -9,6 +9,7 @@ vi.mock("@/modules/donors/services/donor.service", () => {
     donorService: {
       createDonor: vi.fn(),
       getValidatedDonors: vi.fn(),
+      getAllDonors: vi.fn(),
     },
   };
 });
@@ -165,7 +166,7 @@ describe("GET /api/v1/donors", () => {
       organizationId: "h1",
     });
 
-    const mockValidatedDonors = [
+    const mockDonors = [
       {
         id: "d1",
         firstName: "Jane",
@@ -173,16 +174,23 @@ describe("GET /api/v1/donors", () => {
         bloodType: "A+",
         validated: true,
       },
+      {
+        id: "d2",
+        firstName: "Kofi",
+        lastName: "Mensah",
+        bloodType: "O-",
+        validated: false,
+      },
     ];
-    vi.mocked(donorService.getValidatedDonors).mockResolvedValue(
-      mockValidatedDonors as unknown as Awaited<
-        ReturnType<typeof donorService.getValidatedDonors>
+    vi.mocked(donorService.getAllDonors).mockResolvedValue(
+      mockDonors as unknown as Awaited<
+        ReturnType<typeof donorService.getAllDonors>
       >,
     );
 
     const response = await GET();
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.data).toEqual(mockValidatedDonors);
+    expect(json.data).toEqual(mockDonors);
   });
 });

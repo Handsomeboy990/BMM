@@ -30,6 +30,8 @@ export type Organization = {
   verified: boolean;
   rejectionReason?: string | null;
   createdAt: string;
+  /** Solde du compte d'approvisionnement (récompenses), en satoshis. */
+  balanceSats?: number;
 };
 
 export type UserProfile = {
@@ -66,6 +68,8 @@ export type CampaignRecord = {
   latitude: number;
   longitude: number;
   radiusKm: number;
+  startsAt?: string | null;
+  endsAt?: string | null;
   emailsSent: number;
   responsesCount: number;
   status: string;

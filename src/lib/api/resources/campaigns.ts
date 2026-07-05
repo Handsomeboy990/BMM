@@ -11,6 +11,9 @@ export type CreateCampaignPayload = {
   latitude: number;
   longitude: number;
   radiusKm: number;
+  /** Période de la campagne (dates ISO). */
+  startsAt?: string | null;
+  endsAt?: string | null;
 };
 
 export const campaignsApi = {

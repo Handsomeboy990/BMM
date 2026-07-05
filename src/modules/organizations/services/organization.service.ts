@@ -100,4 +100,45 @@ export const organizationService = {
     }
     return mapOrg(data as OrgRow);
   },
+
+  /* --------------------- Compte d'approvisionnement -------------------- */
+
+  /** Solde de récompenses de la structure (en satoshis). */
+  getBalance: async (id: string): Promise<number> => {
+    const supabase =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data } = await supabase
+      .from("organizations")
+      .select("balance_sats")
+      .eq("id", id)
+      .maybeSingle();
+    return data?.balance_sats ?? 0;
+  },
+
+  /**
+   * Ajuste le solde de la structure. `amount` positif recharge, négatif débite.
+   * Le solde ne descend jamais sous zéro. Renvoie le nouveau solde, ou null.
+   */
+  adjustBalance: async (id: string, amount: number): Promise<number | null> => {
+    const supabase =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("balance_sats")
+      .eq("id", id)
+      .maybeSingle();
+    if (!org) return null;
+    const next = Math.max(0, (org.balance_sats ?? 0) + amount);
+    const { data: updated, error } = await supabase
+      .from("organizations")
+      .update({ balance_sats: next })
+      .eq("id", id)
+      .select("balance_sats")
+      .single();
+    if (error || !updated) {
+      console.error("Error adjusting organization balance:", error);
+      return null;
+    }
+    return updated.balance_sats;
+  },
 };

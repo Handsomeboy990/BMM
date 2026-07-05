@@ -26,8 +26,9 @@ export type CreateDonorPayload = {
   /** Optionnel : vide si le donneur ne connaît pas encore son groupe. */
   bloodType?: BloodType;
   city: string;
-  latitude: number;
-  longitude: number;
+  /** Optionnels : la position n'est pas obligatoire à l'inscription. */
+  latitude?: number;
+  longitude?: number;
   age: number;
   available: boolean;
   bitcoinAddress: string;

@@ -98,12 +98,6 @@ export function DonorRegistrationForm({
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!coords) {
-      setError(
-        "Veuillez partager votre position pour être alerté à proximité.",
-      );
-      return;
-    }
     if (!isAdmin && !consent) {
       setError(
         "Merci de confirmer votre consentement au traitement de vos données.",
@@ -112,6 +106,8 @@ export function DonorRegistrationForm({
     }
 
     const form = new FormData(event.currentTarget);
+    // La position est facultative : 0,0 sert uniquement à l'empreinte locale,
+    // les coordonnées réelles (ou aucune) sont envoyées au serveur.
     const profile = {
       firstName: String(form.get("firstName")),
       lastName: String(form.get("lastName")),
@@ -120,8 +116,8 @@ export function DonorRegistrationForm({
       bloodType: String(form.get("bloodType")),
       city: String(form.get("city")),
       age: Number(form.get("age")),
-      latitude: coords.latitude,
-      longitude: coords.longitude,
+      latitude: coords?.latitude ?? 0,
+      longitude: coords?.longitude ?? 0,
     };
 
     setBusy(true);
@@ -141,8 +137,8 @@ export function DonorRegistrationForm({
         city: profile.city,
         age: profile.age,
         available: true,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
+        latitude: coords?.latitude,
+        longitude: coords?.longitude,
         bitcoinAddress: identity.bitcoinAddress,
         profileHash: identity.profileHash,
         signature: identity.signature,
@@ -407,20 +403,26 @@ export function DonorRegistrationForm({
             </div>
           )}
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-start"
-            onClick={requestLocation}
-            disabled={geoStatus === "loading"}
-          >
-            <Navigation className="size-4" />
-            {coords
-              ? `Position : ${coords.latitude}, ${coords.longitude}`
-              : geoStatus === "loading"
-                ? "Localisation…"
-                : "Partager ma position"}
-          </Button>
+          <div className="space-y-1.5">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start"
+              onClick={requestLocation}
+              disabled={geoStatus === "loading"}
+            >
+              <Navigation className="size-4" />
+              {coords
+                ? `Position : ${coords.latitude}, ${coords.longitude}`
+                : geoStatus === "loading"
+                  ? "Localisation…"
+                  : "Partager ma position (facultatif)"}
+            </Button>
+            <p className="text-muted-foreground text-xs">
+              Facultatif. La position permet d'alerter le donneur en priorité
+              quand un besoin proche survient.
+            </p>
+          </div>
 
           {isAdmin ? null : (
             <label className="text-muted-foreground flex cursor-pointer items-start gap-2.5 text-xs">

@@ -3,6 +3,7 @@ import { otsService, breezService, rewardService } from "@/modules/bitcoin";
 import { pointsService } from "@/modules/donations/services/points.service";
 import { izichangeService } from "@/modules/bitcoin/services/izichange.service";
 import { authService } from "@/modules/auth";
+import { organizationService } from "@/modules/organizations/services/organization.service";
 import { emailService } from "@/modules/notifications";
 import { serverPublicUrl } from "@/lib/url.server";
 import { API_ERROR_CODE } from "@/lib/api/errors";
@@ -222,6 +223,14 @@ export async function POST(
         "completed",
         paymentHash,
       );
+
+      // 6b. Débit du compte d'approvisionnement de la structure (best-effort).
+      // Les points de fidélité ne coûtent rien : pas de débit dans ce cas.
+      if (user.organizationId && !validatedData.awardPoints) {
+        await organizationService
+          .adjustBalance(user.organizationId, -satsAmount)
+          .catch((e) => console.error("Débit du solde structure échoué:", e));
+      }
 
       // Enregistrer l'activité de don de sang
       await donorService.addActivity(

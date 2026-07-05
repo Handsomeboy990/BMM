@@ -40,6 +40,12 @@ export const organizationsApi = {
   reject: (id: string, reason: string) =>
     httpClient.patch<Organization>(`/organizations/${id}/reject`, { reason }),
 
+  /** Recharge le compte d'approvisionnement de la structure connectée. */
+  recharge: (amountSats: number) =>
+    httpClient.post<{ balanceSats: number }>("/organizations/me/recharge", {
+      amountSats,
+    }),
+
   /** Justificatifs déposés par la structure connectée. */
   myDocuments: () =>
     httpClient.get<OrgDocument[]>("/organizations/me/documents"),

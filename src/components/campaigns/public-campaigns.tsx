@@ -2,11 +2,13 @@
 
 import {
   CalendarClock,
+  Check,
   Droplet,
   HandHeart,
   Loader2,
   MapPin,
   Target,
+  UserCheck,
   UserPlus,
   Users,
   Wallet,
@@ -20,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useCreateDonation } from "@/lib/api/hooks";
 import type { DonationInvoice } from "@/lib/api/resources";
 import {
@@ -123,13 +127,132 @@ export function PublicCampaigns() {
         open={!!registerFor}
         onClose={() => setRegisterFor(null)}
         title={registerFor ? `S'inscrire : ${registerFor.title}` : ""}
-        description="Devenez donneur pour cette collecte. Vos données sont protégées."
+        description="Rejoignez cette collecte, que vous soyez déjà donneur ou non."
         className="max-w-xl"
       >
-        <Suspense fallback={null}>
-          <DonorRegistrationForm variant="public" />
-        </Suspense>
+        {registerFor ? (
+          <CampaignRegister
+            campaign={registerFor}
+            onClose={() => setRegisterFor(null)}
+          />
+        ) : null}
       </Dialog>
+    </div>
+  );
+}
+
+function CampaignRegister({
+  campaign,
+  onClose,
+}: {
+  campaign: UpcomingCampaign;
+  onClose: () => void;
+}) {
+  const [step, setStep] = useState<"choice" | "existing" | "new">("choice");
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+
+  if (step === "choice") {
+    return (
+      <div className="space-y-3">
+        <p className="text-muted-foreground text-sm">
+          Êtes-vous déjà inscrit comme donneur ?
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setStep("existing")}
+            className="hover:border-primary/40 hover:bg-muted/40 flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all"
+          >
+            <span className="flex items-center gap-2 font-medium">
+              <UserCheck className="text-primary size-4" />
+              Je suis déjà donneur
+            </span>
+            <span className="text-muted-foreground text-xs">
+              Recevez les détails de la collecte par email.
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep("new")}
+            className="hover:border-primary/40 hover:bg-muted/40 flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all"
+          >
+            <span className="flex items-center gap-2 font-medium">
+              <UserPlus className="text-primary size-4" />
+              Je suis nouveau
+            </span>
+            <span className="text-muted-foreground text-xs">
+              Inscrivez-vous comme donneur en quelques minutes.
+            </span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "existing") {
+    if (sent) {
+      return (
+        <div className="space-y-4 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+            <Check className="size-6" />
+          </div>
+          <p className="text-sm">
+            Merci ! Nous vous enverrons par email les détails de la collecte «{" "}
+            {campaign.title} ».
+          </p>
+          <Button className="w-full" onClick={onClose}>
+            Fermer
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (email.trim()) setSent(true);
+        }}
+      >
+        <div className="space-y-2">
+          <Label htmlFor="camp-email">Votre email de donneur</Label>
+          <Input
+            id="camp-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="vous@exemple.bj"
+          />
+        </div>
+        <div className="flex justify-between gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setStep("choice")}
+          >
+            Retour
+          </Button>
+          <Button type="submit">M'inscrire à la collecte</Button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setStep("choice")}
+      >
+        Retour
+      </Button>
+      <Suspense fallback={null}>
+        <DonorRegistrationForm variant="public" />
+      </Suspense>
     </div>
   );
 }

@@ -227,6 +227,7 @@ export const authService = {
             verified: org.verified,
             rejectionReason: org.rejection_reason ?? null,
             createdAt: new Date(org.created_at),
+            balanceSats: org.balance_sats ?? 0,
           }
         : null,
     };

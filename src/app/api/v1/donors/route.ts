@@ -88,8 +88,10 @@ export async function GET() {
       });
     }
 
-    const validatedDonors = await donorService.getValidatedDonors();
-    return success(validatedDonors);
+    // Tous les donneurs (validés ou non) pour que les structures et
+    // administrateurs puissent voir et valider les nouveaux inscrits.
+    const donors = await donorService.getAllDonors();
+    return success(donors);
   } catch (error) {
     return handleApiError(error);
   }

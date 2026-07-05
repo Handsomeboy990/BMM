@@ -15,6 +15,9 @@ export const createDonorSchema = donorSchema.extend({
   bloodType: z
     .enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
     .optional(),
+  // Position facultative : le donneur n'est pas obligé de la partager.
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
   firstName: z.string().min(1, "Le prénom est requis").max(255),
   lastName: z.string().min(1, "Le nom est requis").max(255),
   email: z.string().email("Adresse email invalide"),

@@ -12,6 +12,10 @@ export const createCampaignSchema = z
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
     radiusKm: z.number().min(1).max(500).default(20),
+    // Période de la campagne (dates ISO). Facultatives au niveau du schéma,
+    // mais demandées dans le formulaire.
+    startsAt: z.string().datetime().nullish(),
+    endsAt: z.string().datetime().nullish(),
   })
   .refine(
     (data) => {
