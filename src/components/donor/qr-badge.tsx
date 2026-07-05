@@ -59,7 +59,8 @@ export function QrBadge({
           level="H"
           marginSize={0}
           imageSettings={{
-            src: "/logo_bmm.png",
+            // Icône carrée pour rester nette et non déformée au centre du QR.
+            src: "/icons/icon-192.png",
             height: Math.round(size * 0.22),
             width: Math.round(size * 0.22),
             excavate: true,

@@ -1,5 +1,6 @@
-import { HeartHandshake, Megaphone, Siren, Wrench, Zap } from "lucide-react";
+import { HandHeart, HeartHandshake, Siren, Wrench, Zap } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { DonationForm } from "@/components/donate/donation-form";
@@ -8,14 +9,14 @@ import { Badge } from "@/components/ui/badge";
 export const metadata: Metadata = {
   title: "Soutenir la plateforme",
   description:
-    "Faites un don en Bitcoin Lightning pour soutenir les campagnes, le developpement ou le fonctionnement de Bitcoin Blood.",
+    "Soutenez le fonctionnement de Bitcoin Blood. Pour aider une collecte précise, rendez-vous sur la page des campagnes.",
 };
 
 const ALLOCATION = [
   {
-    icon: Megaphone,
-    title: "Campagnes de don",
-    text: "Recrutement de donneurs sur le terrain, cartes physiques, opérations campus.",
+    icon: Wrench,
+    title: "Fonctionnement de la plateforme",
+    text: "Hébergement, développement continu et sécurité du service.",
   },
   {
     icon: Siren,
@@ -23,9 +24,9 @@ const ALLOCATION = [
     text: "Récompenses immédiates pour les donneurs qui répondent aux alertes vitales.",
   },
   {
-    icon: Wrench,
-    title: "Développement produit",
-    text: "Amélioration continue de la plateforme, de l'IA de matching et de la sécurité.",
+    icon: HandHeart,
+    title: "Animation du réseau",
+    text: "Support aux structures, cartes de donneurs et actions de terrain.",
   },
 ];
 
@@ -67,10 +68,21 @@ export default function SupportPage() {
           <div className="border-accent/25 bg-accent/5 flex items-center gap-3 rounded-xl border p-4">
             <Zap className="text-accent size-5 shrink-0" />
             <p className="text-muted-foreground text-sm">
-              100 % non-dépositaire : chaque satoshi transite par le réseau
-              Lightning, traçable et sans custodian.
+              Paiement instantané et sans intermédiaire : votre don part
+              directement au réseau.
             </p>
           </div>
+
+          <p className="text-muted-foreground text-sm">
+            Vous souhaitez aider une collecte précise ?{" "}
+            <Link
+              href="/campagnes"
+              className="text-primary font-medium hover:underline"
+            >
+              Découvrez les campagnes à venir
+            </Link>
+            .
+          </p>
         </div>
 
         <div className="animate-rise-in [animation-delay:120ms]">

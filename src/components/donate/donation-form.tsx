@@ -18,12 +18,9 @@ import {
 } from "@/lib/api/resources";
 
 const PRESETS = [2_100, 10_000, 21_000, 100_000];
-const PURPOSES: DonationPurpose[] = [
-  "campaign",
-  "development",
-  "operations",
-  "emergency",
-];
+// Le soutien via cette page finance la plateforme uniquement. Le soutien à une
+// campagne précise se fait depuis la page publique de cette campagne.
+const PURPOSES: DonationPurpose[] = ["development", "operations", "emergency"];
 
 function truncateMiddle(value: string, head = 14, tail = 10) {
   if (value.length <= head + tail + 1) return value;
@@ -32,7 +29,7 @@ function truncateMiddle(value: string, head = 14, tail = 10) {
 
 export function DonationForm() {
   const create = useCreateDonation();
-  const [purpose, setPurpose] = useState<DonationPurpose>("campaign");
+  const [purpose, setPurpose] = useState<DonationPurpose>("development");
   const [amount, setAmount] = useState<number>(21_000);
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);

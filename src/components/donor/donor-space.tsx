@@ -235,8 +235,9 @@ export function DonorSpace() {
             </div>
             <p className="text-muted-foreground mt-4 flex items-center gap-1.5 text-xs">
               <KeyRound className="size-3.5" />
-              Gardez bien la clé téléchargée à votre inscription : elle vous
-              sert à vous reconnecter.
+              Gardez bien la clé téléchargée à votre inscription : elle prouve
+              que ce profil est le vôtre. Vous vous connectez avec votre email
+              et votre mot de passe.
             </p>
           </CardContent>
         </Card>

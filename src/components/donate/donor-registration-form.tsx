@@ -194,12 +194,14 @@ export function DonorRegistrationForm({
           <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
               <KeyRound className="size-4" />
-              {isAdmin ? "Clé à remettre au donneur" : "Gardez bien votre clé"}
+              {isAdmin
+                ? "Clé personnelle à remettre au donneur"
+                : "Gardez bien votre clé personnelle"}
             </p>
             <p className="text-muted-foreground text-xs">
               {isAdmin
-                ? "C'est le mot de passe qui permet au donneur de se connecter. Nous ne la gardons pas : téléchargez-la et remettez-la lui."
-                : "C'est elle qui vous permet de vous connecter à votre espace. Nous ne la gardons pas et ne l'envoyons jamais par email : copiez-la ou téléchargez-la et gardez-la en lieu sûr."}
+                ? "Elle prouve que le profil lui appartient et protège ses récompenses. Il se connecte, lui, avec son email et son mot de passe. Nous ne gardons pas la clé : téléchargez-la et remettez-la lui."
+                : "Elle prouve que ce profil est bien le vôtre et protège vos récompenses. Vous, vous vous connectez avec votre email et votre mot de passe. Nous ne gardons pas cette clé : copiez-la ou téléchargez-la et conservez-la en lieu sûr."}
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-background flex-1 truncate rounded border px-2 py-1.5 font-mono text-xs">
