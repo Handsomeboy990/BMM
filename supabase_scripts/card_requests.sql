@@ -31,6 +31,23 @@ CREATE TABLE IF NOT EXISTS card_requests (
 
 CREATE INDEX IF NOT EXISTS idx_card_requests_status ON card_requests (status);
 
--- RLS : le donneur gère sa propre demande ; les administrateurs voient tout et
--- changent le statut (les routes API appliquent déjà ces contrôles).
+-- RLS : le donneur gère sa propre demande ; les membres d'une structure /
+-- administrateurs voient tout et changent le statut (les routes API appliquent
+-- déjà ces contrôles). Sans ces politiques, l'accès via le client de session
+-- est bloqué et la demande de carte échoue.
 ALTER TABLE card_requests ENABLE ROW LEVEL SECURITY;
+
+-- Le donneur gère uniquement sa propre demande.
+DROP POLICY IF EXISTS card_requests_own ON card_requests;
+CREATE POLICY card_requests_own ON card_requests
+  FOR ALL
+  USING (donor_id = auth.uid())
+  WITH CHECK (donor_id = auth.uid());
+
+-- Les membres d'une structure / administrateurs (présents dans user_profiles)
+-- voient et traitent toutes les demandes.
+DROP POLICY IF EXISTS card_requests_staff ON card_requests;
+CREATE POLICY card_requests_staff ON card_requests
+  FOR ALL
+  USING (EXISTS (SELECT 1 FROM user_profiles WHERE id = auth.uid()))
+  WITH CHECK (EXISTS (SELECT 1 FROM user_profiles WHERE id = auth.uid()));

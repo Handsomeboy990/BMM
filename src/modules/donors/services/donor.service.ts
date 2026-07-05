@@ -518,9 +518,9 @@ export const donorService = {
   getCardRequest: async (
     donorId: string,
   ): Promise<CardRequestRecord | null> => {
-    const admin = createSupabaseAdminClient();
-    if (!admin) return null;
-    const { data, error } = await admin
+    const db =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data, error } = await db
       .from("card_requests")
       .select("*")
       .eq("donor_id", donorId)
@@ -535,9 +535,9 @@ export const donorService = {
     photo?: string | null;
     format: "physical" | "digital";
   }): Promise<CardRequestRecord | null> => {
-    const admin = createSupabaseAdminClient();
-    if (!admin) return null;
-    const { data: row, error } = await admin
+    const db =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data: row, error } = await db
       .from("card_requests")
       .upsert(
         {
@@ -562,9 +562,9 @@ export const donorService = {
 
   /** Toutes les demandes de carte, enrichies du nom et du groupe (admin). */
   listCardRequests: async (): Promise<CardRequestRecord[]> => {
-    const admin = createSupabaseAdminClient();
-    if (!admin) return [];
-    const { data, error } = await admin
+    const db =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data, error } = await db
       .from("card_requests")
       .select("*, donors(first_name, last_name, blood_type)")
       .order("updated_at", { ascending: false });
@@ -578,9 +578,9 @@ export const donorService = {
     status: "approved" | "rejected",
     reviewerId: string,
   ): Promise<CardRequestRecord | null> => {
-    const admin = createSupabaseAdminClient();
-    if (!admin) return null;
-    const { data, error } = await admin
+    const db =
+      createSupabaseAdminClient() ?? (await createSupabaseServerClient());
+    const { data, error } = await db
       .from("card_requests")
       .update({
         status,
