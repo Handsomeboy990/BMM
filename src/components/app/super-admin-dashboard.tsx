@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { CardRequestsPanel } from "@/components/app/card-requests-panel";
 import { DonationsPanel } from "@/components/app/donations-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -178,6 +179,8 @@ export function SuperAdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <CardRequestsPanel />
 
       <DonationsPanel />
     </div>

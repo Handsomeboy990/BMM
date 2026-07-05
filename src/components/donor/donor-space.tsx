@@ -19,8 +19,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { BalanceCard } from "@/components/donor/balance-card";
+import { DonorCardSection } from "@/components/donor/donor-card-section";
 import { OfflineIdentityCard } from "@/components/donor/offline-identity-card";
-import { PhysicalCardOrder } from "@/components/donor/physical-card-order";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { ReferralCard } from "@/components/donor/referral-card";
 import { RewardChannelCard } from "@/components/donor/reward-channel-card";
@@ -367,10 +367,15 @@ export function DonorSpace() {
           defaultPhone={donor.phoneNumber}
         />
 
-        {/* Carte physique (mérite / achat) */}
-        <PhysicalCardOrder
-          cardType={donor.cardType}
-          physicalCardStatus={donor.physicalCardStatus}
+        {/* Ma carte de donneur (photo + demande + validation admin) */}
+        <DonorCardSection
+          donor={{
+            id: donor.id,
+            firstName: donor.firstName,
+            lastName: donor.lastName,
+            bloodType: donor.bloodType,
+            city: donor.city,
+          }}
         />
 
         {/* Parrainage */}
