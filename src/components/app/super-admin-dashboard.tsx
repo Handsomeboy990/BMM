@@ -188,7 +188,7 @@ export function SuperAdminDashboard() {
 }
 
 /** Ligne organisation avec revue des justificatifs + validation/rejet. */
-function OrgReviewRow({ org }: { org: Organization }) {
+export function OrgReviewRow({ org }: { org: Organization }) {
   const [showDocs, setShowDocs] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");

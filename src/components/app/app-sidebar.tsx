@@ -6,11 +6,14 @@ import { usePathname } from "next/navigation";
 
 import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
-import { appNav } from "@/config/app-navigation";
+import { navForRole } from "@/config/app-navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const nav = navForRole(user?.role);
 
   return (
     <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
@@ -19,7 +22,7 @@ export function AppSidebar() {
       </Link>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
-        {appNav.map((group) => (
+        {nav.map((group) => (
           <div key={group.title}>
             <p className="text-muted-foreground px-3 pb-2 text-xs font-medium tracking-wider uppercase">
               {group.title}
