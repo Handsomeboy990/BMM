@@ -9,6 +9,7 @@ import {
   useCardRequests as useLocalCardRequests,
   type CardRequest as LocalCardRequest,
 } from "@/lib/card-request";
+import { debitDemoBalance, rechargeDemoBalance } from "@/lib/org-balance";
 import {
   AUTH_BYPASS,
   DEMO_CURRENT_ORG_ID,
@@ -396,11 +397,42 @@ export function useVerifyDonor(id: string, enabled = true) {
 }
 
 export function useRewardDonor() {
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...payload }: { id: string } & RewardPayload) =>
-      AUTH_BYPASS
-        ? demoDelay({ message: "Récompense simulée envoyée.", reward: null })
-        : verifyApi.reward(id, payload).then((r) => r.data),
+    mutationFn: ({ id, ...payload }: { id: string } & RewardPayload) => {
+      if (AUTH_BYPASS) {
+        // Débit du compte d'approvisionnement en démo (sauf points, gratuits).
+        if (!payload.awardPoints) {
+          debitDemoBalance(payload.satsAmount ?? 1000);
+        }
+        return demoDelay({
+          message: "Récompense simulée envoyée.",
+          reward: null,
+        });
+      }
+      return verifyApi.reward(id, payload).then((r) => r.data);
+    },
+    onSuccess: () => {
+      // Le solde de la structure a été débité côté serveur : on le rafraîchit.
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: queryKeys.me });
+    },
+  });
+}
+
+/** Recharge le compte d'approvisionnement de la structure connectée. */
+export function useRechargeOrg() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (amountSats: number) => {
+      if (AUTH_BYPASS) {
+        rechargeDemoBalance(amountSats);
+        return Promise.resolve({ balanceSats: 0 });
+      }
+      return organizationsApi.recharge(amountSats).then((r) => r.data);
+    },
+    onSuccess: () => {
+      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: queryKeys.me });
+    },
   });
 }
 

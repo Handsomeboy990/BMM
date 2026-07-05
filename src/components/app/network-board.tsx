@@ -121,9 +121,15 @@ export function NetworkBoard() {
     <div className="space-y-8">
       {/* Stock par composant */}
       <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Mon stock par composant</CardTitle>
-          <Warehouse className="text-muted-foreground size-5" />
+        <CardHeader className="flex-row items-start justify-between">
+          <div className="space-y-1">
+            <CardTitle>Mon stock de sang</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Poches disponibles par groupe sanguin et par composant, avec les
+              poches qui arrivent bientôt à expiration.
+            </p>
+          </div>
+          <Warehouse className="text-muted-foreground size-5 shrink-0" />
         </CardHeader>
         <CardContent className="overflow-x-auto pt-0">
           <table className="w-full min-w-120 border-separate border-spacing-y-1 text-sm">
@@ -192,6 +198,16 @@ export function NetworkBoard() {
 
       {/* Transferts inter-centres */}
       <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Réseau d'entraide entre centres
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Demandez du sang à d'autres centres quand vous en manquez, ou
+            répondez aux demandes des centres proches. « Réseau » liste les
+            demandes ouvertes ; « Mes demandes » suit les vôtres.
+          </p>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="bg-muted/60 flex gap-1 rounded-lg p-1">
             {(
