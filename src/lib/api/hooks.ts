@@ -49,6 +49,8 @@ import {
   type SubmitCardRequestPayload,
   type CreateCampaignPayload,
   type CreateDonationPayload,
+  type DonationInvoice,
+  type DonationsHistory,
   type CreateDonorPayload,
   type CreateEmergencyPayload,
   type DonorRecord,
@@ -116,6 +118,68 @@ function toRewardEntry(log: RewardLog): RewardEntry {
 /** Délai simulé pour que les états de chargement restent visibles en démo. */
 const demoDelay = <T>(value: T) =>
   new Promise<T>((resolve) => setTimeout(() => resolve(value), 350));
+
+/**
+ * Fonctionnalités qui tournent en local (données de démo + navigateur) tant que
+ * leur backend n'est pas finalisé. Actives même hors bypass d'authentification,
+ * pour que la démo fonctionne de bout en bout.
+ */
+const DEMO_CARDS = true;
+const DEMO_NETWORK = true;
+// Paiements et flux Bitcoin/Lightning/Mobile Money (Izichange, Nostr, Breez) :
+// récompense, approvisionnement du compte, retraits et dons plateforme.
+const DEMO_PAYMENTS = true;
+const LOCAL_CARDS = AUTH_BYPASS || DEMO_CARDS;
+const LOCAL_NETWORK = AUTH_BYPASS || DEMO_NETWORK;
+const LOCAL_PAYMENTS = AUTH_BYPASS || DEMO_PAYMENTS;
+
+/** Facture Lightning simulée (le QR reste scannable en démo). */
+function demoDonationInvoice(payload: CreateDonationPayload): DonationInvoice {
+  return {
+    bolt11: `lnbc${payload.amountSats}n1demo${Math.random()
+      .toString(36)
+      .slice(2, 10)}xqzdemobitcoinbloodsimulatedinvoiceforpresentationonly`,
+    amountSats: payload.amountSats,
+    purpose: payload.purpose,
+    feesSat: 0,
+    simulated: true,
+  };
+}
+
+/** Historique de dons plateforme simulé (vue super-admin). */
+const demoDonationsHistory: DonationsHistory = {
+  donations: [
+    {
+      id: "don-demo-1",
+      amountSats: 100_000,
+      purpose: "development",
+      message: "Bravo pour le projet !",
+      bolt11: null,
+      status: "completed",
+      createdAt: new Date(Date.now() - 3_600_000).toISOString(),
+    },
+    {
+      id: "don-demo-2",
+      amountSats: 21_000,
+      purpose: "emergency",
+      message: null,
+      bolt11: null,
+      status: "completed",
+      createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    },
+    {
+      id: "don-demo-3",
+      amountSats: 10_000,
+      purpose: "operations",
+      message: "Continuez comme ça.",
+      bolt11: null,
+      status: "completed",
+      createdAt: new Date(Date.now() - 5 * 86_400_000).toISOString(),
+    },
+  ],
+  totalSats: 131_000,
+  count: 3,
+};
 
 export const queryKeys = {
   me: ["auth", "me"] as const,
@@ -409,7 +473,7 @@ export function useRewardDonor() {
   return useMutation({
     meta: { success: "Récompense envoyée au donneur." },
     mutationFn: ({ id, ...payload }: { id: string } & RewardPayload) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_PAYMENTS) {
         // Débit du compte d'approvisionnement en démo (sauf points, gratuits).
         if (!payload.awardPoints) {
           debitDemoBalance(payload.satsAmount ?? 1000);
@@ -423,7 +487,7 @@ export function useRewardDonor() {
     },
     onSuccess: () => {
       // Le solde de la structure a été débité côté serveur : on le rafraîchit.
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: queryKeys.me });
+      if (!LOCAL_PAYMENTS) qc.invalidateQueries({ queryKey: queryKeys.me });
     },
   });
 }
@@ -433,14 +497,14 @@ export function useRechargeOrg() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (amountSats: number) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_PAYMENTS) {
         rechargeDemoBalance(amountSats);
         return Promise.resolve({ balanceSats: 0 });
       }
       return organizationsApi.recharge(amountSats).then((r) => r.data);
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: queryKeys.me });
+      if (!LOCAL_PAYMENTS) qc.invalidateQueries({ queryKey: queryKeys.me });
     },
   });
 }
@@ -548,7 +612,9 @@ export function useUploadOrgDocument() {
 export function useCreateDonation() {
   return useMutation({
     mutationFn: (payload: CreateDonationPayload) =>
-      donationsApi.create(payload).then((r) => r.data),
+      LOCAL_PAYMENTS
+        ? demoDelay(demoDonationInvoice(payload))
+        : donationsApi.create(payload).then((r) => r.data),
   });
 }
 
@@ -556,9 +622,12 @@ export function useCreateDonation() {
 export function useDonationsHistory() {
   return useQuery({
     queryKey: ["donations", "history"],
-    enabled: !AUTH_BYPASS,
-    refetchInterval: 30_000,
-    queryFn: () => donationsApi.history().then((r) => r.data),
+    enabled: LOCAL_PAYMENTS || !AUTH_BYPASS,
+    refetchInterval: LOCAL_PAYMENTS ? false : 30_000,
+    queryFn: () =>
+      LOCAL_PAYMENTS
+        ? demoDelay(demoDonationsHistory)
+        : donationsApi.history().then((r) => r.data),
   });
 }
 
@@ -568,8 +637,12 @@ export function useWithdrawDonations() {
   return useMutation({
     meta: { success: "Retrait des dons initié." },
     mutationFn: (bolt11: string) =>
-      donationsApi.withdraw(bolt11).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["donations"] }),
+      LOCAL_PAYMENTS
+        ? demoDelay({ paymentHash: `demo${Date.now().toString(16)}` })
+        : donationsApi.withdraw(bolt11).then((r) => r.data),
+    onSuccess: () => {
+      if (!LOCAL_PAYMENTS) qc.invalidateQueries({ queryKey: ["donations"] });
+    },
   });
 }
 
@@ -580,7 +653,9 @@ export function useStock() {
   return useQuery({
     queryKey: ["stock"],
     queryFn: () =>
-      AUTH_BYPASS ? demoDelay(demoStock) : stockApi.list().then((r) => r.data),
+      LOCAL_NETWORK
+        ? demoDelay(demoStock)
+        : stockApi.list().then((r) => r.data),
   });
 }
 
@@ -589,7 +664,7 @@ export function useTransfers() {
   return useQuery({
     queryKey: ["transfers"],
     queryFn: () =>
-      AUTH_BYPASS
+      LOCAL_NETWORK
         ? demoDelay(demoTransfers)
         : transfersApi.list().then((r) => r.data),
   });
@@ -608,7 +683,7 @@ export function useCreateTransfer() {
   return useMutation({
     meta: { success: "Demande de transfert publiée." },
     mutationFn: (input: CreateTransferInput) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_NETWORK) {
         const record: TransferRequest = {
           ...input,
           id: `trf-${Date.now()}`,
@@ -627,7 +702,7 @@ export function useCreateTransfer() {
       return transfersApi.create(input).then((r) => r.data);
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["transfers"] });
+      if (!LOCAL_NETWORK) qc.invalidateQueries({ queryKey: ["transfers"] });
     },
   });
 }
@@ -638,7 +713,7 @@ export function useRespondTransfer() {
   return useMutation({
     meta: { success: "Proposition envoyée au centre demandeur." },
     mutationFn: (id: string) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_NETWORK) {
         qc.setQueriesData<TransferRequest[]>(
           { queryKey: ["transfers"] },
           (old) =>
@@ -658,7 +733,7 @@ export function useRespondTransfer() {
       return transfersApi.respond(id).then((r) => r.data);
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["transfers"] });
+      if (!LOCAL_NETWORK) qc.invalidateQueries({ queryKey: ["transfers"] });
     },
   });
 }
@@ -672,7 +747,15 @@ export function useDonorProfile() {
     queryFn: () =>
       AUTH_BYPASS
         ? demoDelay(demoDonorAccount)
-        : donorsApi.me().then((r) => toDonorAccount(r.data)),
+        : donorsApi.me().then((r) => {
+            const account = toDonorAccount(r.data);
+            // En démo paiements, on crédite un solde retirable pour pouvoir
+            // dérouler le retrait Mobile Money même sans historique réel.
+            if (DEMO_PAYMENTS && account.balanceSats < 1) {
+              account.balanceSats = 45_000;
+            }
+            return account;
+          }),
     retry: false,
   });
 }
@@ -712,7 +795,7 @@ export function useDonorOfflineIdentity() {
       id: string;
       bloodType: string;
     }): Promise<OfflineIdentityResponse> => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_PAYMENTS) {
         const { createOfflineAttestation } =
           await import("@/lib/bitcoin/donor-identity");
         return createOfflineAttestation(id, bloodType);
@@ -729,7 +812,7 @@ export function useWithdrawBalance() {
   return useMutation({
     meta: { success: "Retrait vers Mobile Money initié." },
     mutationFn: async (payload: { amountSats: number; momoNumber: string }) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_PAYMENTS) {
         qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
           old
             ? {
@@ -748,7 +831,7 @@ export function useWithdrawBalance() {
       return res.data;
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+      if (!LOCAL_PAYMENTS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
     },
   });
 }
@@ -758,7 +841,7 @@ export function useOrderCard() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (method: CardOrderMethod): Promise<CardOrderResult> => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_CARDS) {
         const status = method === "merit" ? "merited" : "pending";
         qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
           old ? { ...old, physicalCardStatus: status } : old,
@@ -777,7 +860,7 @@ export function useOrderCard() {
       return res.data;
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+      if (!LOCAL_CARDS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
     },
   });
 }
@@ -787,7 +870,7 @@ export function useConfirmCardOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: string) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_CARDS) {
         qc.setQueryData<DonorAccount>(["donor", "me"], (old) =>
           old
             ? {
@@ -807,7 +890,7 @@ export function useConfirmCardOrder() {
       return res.data;
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
+      if (!LOCAL_CARDS) qc.invalidateQueries({ queryKey: ["donor", "me"] });
     },
   });
 }
@@ -853,10 +936,10 @@ export function useMyCardRequest(donorId: string): CardRequestRecord | null {
   const local = useLocalCardRequest(donorId);
   const query = useQuery({
     queryKey: ["card-request", "me"],
-    enabled: !AUTH_BYPASS && donorId.length > 0,
+    enabled: !LOCAL_CARDS && donorId.length > 0,
     queryFn: () => cardRequestsApi.mine().then((r) => r.data.request),
   });
-  if (AUTH_BYPASS) return local ? localToCardRecord(local) : null;
+  if (LOCAL_CARDS) return local ? localToCardRecord(local) : null;
   return query.data ?? null;
 }
 
@@ -871,7 +954,7 @@ export function useSubmitCardRequest(donorId: string) {
         bloodType?: string;
       },
     ) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_CARDS) {
         localUpsertCardRequest({
           donorId,
           donorName: vars.donorName ?? "",
@@ -888,7 +971,7 @@ export function useSubmitCardRequest(donorId: string) {
         .then((r) => r.data.request);
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS)
+      if (!LOCAL_CARDS)
         qc.invalidateQueries({ queryKey: ["card-request", "me"] });
     },
   });
@@ -899,10 +982,10 @@ export function useCardRequestsList(): CardRequestRecord[] {
   const local = useLocalCardRequests();
   const query = useQuery({
     queryKey: ["card-requests"],
-    enabled: !AUTH_BYPASS,
+    enabled: !LOCAL_CARDS,
     queryFn: () => cardRequestsApi.list().then((r) => r.data),
   });
-  if (AUTH_BYPASS) return local.map(localToCardRecord);
+  if (LOCAL_CARDS) return local.map(localToCardRecord);
   return query.data ?? [];
 }
 
@@ -918,7 +1001,7 @@ export function useDecideCardRequest() {
       request: CardRequestRecord;
       status: "approved" | "rejected";
     }) => {
-      if (AUTH_BYPASS) {
+      if (LOCAL_CARDS) {
         localUpsertCardRequest({
           donorId: request.donorId,
           donorName: request.donorName,
@@ -936,7 +1019,7 @@ export function useDecideCardRequest() {
         .then((r) => r.data.request);
     },
     onSuccess: () => {
-      if (!AUTH_BYPASS) qc.invalidateQueries({ queryKey: ["card-requests"] });
+      if (!LOCAL_CARDS) qc.invalidateQueries({ queryKey: ["card-requests"] });
     },
   });
 }
