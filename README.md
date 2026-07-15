@@ -85,7 +85,7 @@ npm run dev
 npm run db:push
 ```
 
-L'application est disponible sur http://localhost:3000.
+L'application est disponible sur http://localhost:3000
 
 ## Scripts disponibles
 
