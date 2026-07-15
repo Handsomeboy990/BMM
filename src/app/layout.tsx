@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";
@@ -72,6 +73,7 @@ export default function RootLayout({
           <ServiceWorker />
           <OfflineIndicator />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
