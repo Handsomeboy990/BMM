@@ -1,5 +1,5 @@
 -- =========================================================================
--- Bitcoin Blood — Script Global d'Initialisation de la Base de Données
+-- HEMORA — Script Global d'Initialisation de la Base de Données
 -- À exécuter dans l'éditeur SQL de votre Dashboard Supabase
 -- Ce script est idempotent et préserve les tables et types existants.
 -- =========================================================================

@@ -1,6 +1,6 @@
 # API
 
-L'API de Bitcoin Blood est exposée par les Route Handlers de Next.js sous le
+L'API de HEMORA est exposée par les Route Handlers de Next.js sous le
 préfixe `/api/v1/`.
 
 ## Conventions

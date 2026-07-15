@@ -1,9 +1,8 @@
-import { Droplet } from "lucide-react";
 import Link from "next/link";
 
 import { AuthBrandPanel } from "@/components/auth/auth-brand-panel";
+import { Logo } from "@/components/shared/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { siteConfig } from "@/config/site";
 
 /**
  * Habillage des écrans d'authentification: volet « moniteur de signes
@@ -23,8 +22,7 @@ export default function AuthLayout({
             href="/"
             className="flex items-center gap-2 font-semibold lg:invisible"
           >
-            <Droplet className="text-primary size-5" />
-            {siteConfig.name}
+            <Logo variant="horizontal" height="1.6rem" />
           </Link>
           <ThemeToggle />
         </div>

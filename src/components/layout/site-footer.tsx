@@ -1,6 +1,5 @@
-import { Droplet } from "lucide-react";
-
 import { Container } from "@/components/layout/container";
+import { Logo } from "@/components/shared/logo";
 import { footerNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 
@@ -10,8 +9,7 @@ export function SiteFooter() {
       <Container className="grid gap-10 py-14 md:grid-cols-[1.5fr_repeat(3,1fr)]">
         <div className="flex flex-col gap-3">
           <span className="flex items-center gap-2 font-semibold">
-            <Droplet className="text-primary" />
-            {siteConfig.name}
+            <Logo variant="horizontal" height="1.6rem" />
           </span>
           <p className="text-muted-foreground max-w-xs text-sm">
             Mieux gérer les donneurs de sang pour sauver plus de vies, partout

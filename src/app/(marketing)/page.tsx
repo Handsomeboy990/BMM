@@ -28,7 +28,7 @@ const storyPanels: StoryPanel[] = [
     eyebrow: "Le don",
     title: "Un donneur, une vie",
     description:
-      "En quelques secondes, Bitcoin Blood identifie le bon donneur, compatible et disponible, au plus près du besoin.",
+      "En quelques secondes, HEMORA identifie le bon donneur, compatible et disponible, au plus près du besoin.",
   },
   {
     image:

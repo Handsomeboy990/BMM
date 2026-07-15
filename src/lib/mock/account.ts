@@ -17,7 +17,7 @@ export type CurrentUser = {
 export const currentUser: CurrentUser = {
   name: "Aïssatou Diallo",
   initials: "AD",
-  email: "aissatou.diallo@bitcoinblood.africa",
+  email: "aissatou.diallo@hemora.africa",
   role: "Donneuse vérifiée",
   group: "O-",
   city: "Dakar",

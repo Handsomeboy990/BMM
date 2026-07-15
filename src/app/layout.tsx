@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 
 import { ServiceWorker } from "@/components/pwa/service-worker";
 import { siteConfig } from "@/config/site";
@@ -8,16 +7,6 @@ import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -49,11 +38,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="fr"
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
+    <html lang="fr" suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col">
         <ThemeProvider
           attribute="class"

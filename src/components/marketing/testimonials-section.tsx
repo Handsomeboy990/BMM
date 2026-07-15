@@ -15,7 +15,7 @@ export function TestimonialsSection() {
       <Container className="flex flex-col gap-14">
         <SectionHeading
           eyebrow="Témoignages"
-          title="Ils sauvent des vies avec Bitcoin Blood"
+          title="Ils sauvent des vies avec HEMORA"
           description="Donneurs, soignants et organisateurs racontent l'impact sur le terrain."
         />
 

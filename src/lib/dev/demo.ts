@@ -34,7 +34,7 @@ const DEMO_ORG_ID = "11111111-1111-4111-8111-111111111111";
 
 export const BYPASS_USER: UserProfile = {
   id: "00000000-0000-4000-8000-000000000000",
-  email: "demo@bitcoinblood.bj",
+  email: "demo@hemora.bj",
   role: "org_admin",
   organizationId: DEMO_ORG_ID,
   organization: {

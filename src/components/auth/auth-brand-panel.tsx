@@ -1,9 +1,9 @@
-import { Droplet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Logo } from "@/components/shared/logo";
+
 import { HeartbeatMonitor } from "@/components/auth/heartbeat-monitor";
-import { siteConfig } from "@/config/site";
 
 const readouts = [
   { value: "12 480", label: "donneurs" },
@@ -51,8 +51,7 @@ export function AuthBrandPanel() {
         href="/"
         className="relative flex items-center gap-2 text-lg font-semibold tracking-tight"
       >
-        <Droplet className="size-6 text-[var(--color-primary)]" />
-        {siteConfig.name}
+        <Logo variant="horizontal" height="2.2rem" />
       </Link>
 
       <div className="relative space-y-8">

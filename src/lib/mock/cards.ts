@@ -19,7 +19,7 @@ export const donorCard: DonorCard = {
   issuedAt: "2025-09-14",
   validUntil: "2027-09-14",
   donations: 12,
-  verifyUrl: "https://verify.bitcoinblood.africa/c/BB-SN-0001-2480",
+  verifyUrl: "https://verify.hemora.africa/c/BB-SN-0001-2480",
 };
 
 export type BitcoinProof = {

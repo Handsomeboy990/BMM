@@ -1,5 +1,5 @@
 -- =============================================
--- Bitcoin Blood — Gestion des Campagnes
+-- HEMORA — Gestion des Campagnes
 -- À exécuter dans Supabase > SQL Editor
 -- Prérequis : tables organizations et user_profiles déjà créées
 -- =============================================

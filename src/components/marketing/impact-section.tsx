@@ -17,7 +17,7 @@ export function ImpactSection() {
           <SectionHeading
             eyebrow="Sur le terrain"
             title="Un geste simple, un impact qui sauve"
-            description="Derrière chaque alerte, il y a des soignants, des donneurs et des familles. Bitcoin Blood réduit le temps entre le besoin et le don."
+            description="Derrière chaque alerte, il y a des soignants, des donneurs et des familles. HEMORA réduit le temps entre le besoin et le don."
           />
           <ul className="flex flex-col gap-4">
             {impactPoints.map((point, index) => (

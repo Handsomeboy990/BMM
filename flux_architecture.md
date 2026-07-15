@@ -1,4 +1,4 @@
-# Architecture & Flux — Bitcoin Blood (Backend)
+# Architecture & Flux — HEMORA (Backend)
 
 > **Audience** : Développeurs frontend, agents IA, nouveaux contributeurs.
 > Ce document est la **source de vérité** du backend. Il décrit l'architecture générale, les flux de données, les modules, tous les endpoints disponibles avec leurs paramètres et comportements.
@@ -24,7 +24,7 @@
 ```
 ┌──────────────┬─────────────────────┬────────────────┬──────────────────┐
 │   DONNEUR    │   HÔPITAL / ONG     │  SUPER ADMIN   │  PUBLIC (Scan)   │
-│  (Citoyen)   │ (Structure de santé)│ (Bitcoin Blood)│  QR Code carte   │
+│  (Citoyen)   │ (Structure de santé)│ (HEMORA)       │  QR Code carte   │
 ├──────────────┼─────────────────────┼────────────────┼──────────────────┤
 │ S'inscrit    │ Crée urgences       │ Gère les orgas │ Vérifie une      │
 │ Donne son    │ Lance campagnes     │ Supervise tout │ carte donneur    │
@@ -597,7 +597,7 @@ POST /api/v1/donors                              [Public]
      │
      │  7. Retourne l'UUID du donneur
      ▼
-Le frontend génère la Carte Bitcoin Blood (QR Code → UUID)
+Le frontend génère la Carte HEMORA (QR Code → UUID)
 ```
 
 ### Flux 2 — Urgence sanguine + Blood Emergency AI

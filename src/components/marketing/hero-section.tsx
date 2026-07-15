@@ -72,9 +72,9 @@ export function HeroSection() {
             className="animate-rise-in text-muted-foreground max-w-xl text-lg text-pretty"
             style={{ animationDelay: "160ms" }}
           >
-            Bitcoin Blood enregistre les donneurs volontaires, retrouve des
-            profils compatibles en quelques secondes et déclenche des alertes
-            ciblées en cas d'urgence.
+            HEMORA enregistre les donneurs volontaires, retrouve des profils
+            compatibles en quelques secondes et déclenche des alertes ciblées en
+            cas d'urgence.
           </p>
 
           <div

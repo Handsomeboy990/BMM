@@ -1,12 +1,11 @@
 "use client";
 
-import { Droplet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
 import { appNav } from "@/config/app-navigation";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
@@ -15,8 +14,7 @@ export function AppSidebar() {
   return (
     <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
       <div className="flex h-16 items-center gap-2 border-b px-6 font-semibold">
-        <Droplet className="text-primary size-5" />
-        {siteConfig.name}
+        <Logo variant="horizontal" height="1.6rem" />
       </div>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">

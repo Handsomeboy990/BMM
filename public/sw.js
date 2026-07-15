@@ -1,4 +1,4 @@
-/* Service worker Bitcoin Blood — installable + repli hors-ligne minimal.
+/* Service worker HEMORA — installable + repli hors-ligne minimal.
  * Stratégie volontairement prudente pour ne jamais gêner le rendu de
  * l'application (ni le HMR en développement):
  *  - navigations: réseau d'abord, repli sur le shell mis en cache;
