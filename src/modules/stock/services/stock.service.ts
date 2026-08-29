@@ -47,7 +47,45 @@ export const stockService = {
     return (data as StockRow[]).map(mapStock);
   },
 
-  /** Ajuste le niveau d'un poste de stock. */
+  /**
+   * Fixe le niveau d'un poste de stock d'une structure, en le créant s'il
+   * n'existe pas encore. La grille compte 24 combinaisons (3 composants x 8
+   * groupes) et une structure n'en a presque jamais 24 en base: sans
+   * création à la volée, il serait impossible de saisir un premier niveau.
+   */
+  setUnits: async (input: {
+    hospitalId: string;
+    component: BloodComponent;
+    bloodType: string;
+    units: number;
+    expiringSoon: number;
+  }): Promise<StockRecord> => {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("stock")
+      .upsert(
+        {
+          hospital_id: input.hospitalId,
+          component: input.component,
+          blood_type: input.bloodType,
+          units: input.units,
+          expiring_soon: input.expiringSoon,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "hospital_id,component,blood_type" },
+      )
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(
+        error?.message ?? "Erreur lors de la mise à jour du stock.",
+      );
+    }
+    return mapStock(data as StockRow);
+  },
+
+  /** Ajuste le niveau d'un poste de stock existant, par identifiant. */
   updateUnits: async (
     id: string,
     units: number,

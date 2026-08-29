@@ -6,6 +6,25 @@ import { ApiError } from "@/lib/api/errors";
 import { CreateDonorDTO, DonorRecord } from "../types";
 import type { UpdateDonorDTO } from "../schemas";
 
+export type DonorActivityType =
+  | "blood_donation"
+  | "referral"
+  | "awareness_session";
+
+export type DonorActivityRecord = {
+  id: string;
+  activityType: DonorActivityType;
+  description: string | null;
+  createdAt: string;
+};
+
+type DonorActivityRow = {
+  id: string;
+  activity_type: DonorActivityType;
+  description: string | null;
+  created_at: string;
+};
+
 interface DBDonorRow {
   id: string;
   first_name: string;
@@ -372,6 +391,31 @@ export const donorService = {
       console.error("Error getting activities count:", err);
       return 0;
     }
+  },
+
+  /**
+   * Historique des activités d'un donneur, la plus récente d'abord.
+   * Sert à l'espace donneur (« mes dons ») et à la fiche vue par une
+   * structure. La description est libre: c'est la structure qui la renseigne.
+   */
+  listActivities: async (
+    donorId: string,
+  ): Promise<DonorActivityRecord[]> => {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("donor_activities")
+      .select("id, activity_type, description, created_at")
+      .eq("donor_id", donorId)
+      .order("created_at", { ascending: false });
+
+    if (error || !data) return [];
+
+    return (data as DonorActivityRow[]).map((row) => ({
+      id: row.id,
+      activityType: row.activity_type,
+      description: row.description,
+      createdAt: row.created_at,
+    }));
   },
 
   /**

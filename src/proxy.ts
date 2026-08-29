@@ -58,7 +58,8 @@ export async function proxy(request: NextRequest) {
       (path === "/api/v1/donors" && request.method === "POST") ||
       (path === "/api/v1/donations" && request.method === "POST") ||
       path.startsWith("/api/v1/verify") ||
-      path.startsWith("/api/v1/search")
+      path.startsWith("/api/v1/search") ||
+      path.startsWith("/api/v1/public")
     ) {
       return response;
     }
