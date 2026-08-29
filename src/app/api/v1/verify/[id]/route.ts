@@ -201,10 +201,18 @@ export async function POST(
         }
         paymentHash = `credit_balance_${Math.random().toString(36).substring(2, 12)}`;
       } else if (validatedData.momoNumber) {
-        paymentHash = await izichangeService.cashoutToMoMo(
+        const cashout = await izichangeService.cashoutToMoMo(
           validatedData.momoNumber,
           satsAmount,
         );
+        // Une passerelle non branchée ne verse rien: on échoue plutôt que de
+        // débiter la structure et d'annoncer un versement au donneur.
+        if (cashout.simulated) {
+          throw new Error(
+            "Passerelle Mobile Money non configurée: aucun versement n'a été effectué.",
+          );
+        }
+        paymentHash = cashout.transactionId;
       } else {
         const payoutResult = await breezService.payInvoice(
           validatedData.bolt11Invoice as string,

@@ -88,7 +88,10 @@ describe("POST /api/v1/donors/me/withdraw", () => {
     vi.mocked(rewardService.createRewardLog).mockResolvedValue({
       id: "reward1",
     } as any);
-    vi.mocked(izichangeService.cashoutToMoMo).mockResolvedValue("txhash123");
+    vi.mocked(izichangeService.cashoutToMoMo).mockResolvedValue({
+      transactionId: "txhash123",
+      simulated: false,
+    });
     vi.mocked(rewardService.updateRewardStatus).mockResolvedValue({
       id: "reward1",
       status: "completed",
@@ -151,6 +154,62 @@ describe("POST /api/v1/donors/me/withdraw", () => {
       "failed",
       undefined,
       "Network Error",
+    );
+  });
+
+  it("restores the balance and says so when the gateway is not wired", async () => {
+    vi.mocked(authService.getCurrentUser).mockResolvedValue({
+      id: "d1",
+      role: "donor",
+      donor: { id: "d1" },
+    } as any);
+    vi.mocked(donorService.getDonorById).mockResolvedValue({
+      id: "d1",
+      balanceSats: 1000,
+    } as any);
+    vi.mocked(donorService.updateDonorBalance)
+      .mockResolvedValueOnce(500)
+      .mockResolvedValueOnce(1000);
+    vi.mocked(rewardService.createRewardLog).mockResolvedValue({
+      id: "reward1",
+    } as any);
+    vi.mocked(izichangeService.cashoutToMoMo).mockResolvedValue({
+      transactionId: "simulated_momo_x",
+      simulated: true,
+    });
+    vi.mocked(rewardService.updateRewardStatus).mockResolvedValue({
+      id: "reward1",
+      status: "failed",
+    } as any);
+
+    const req = new Request("http://localhost/api/v1/donors/me/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amountSats: 500, momoNumber: "+229123456" }),
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(200);
+
+    const json = await response.json();
+    // Rien n'est parti: le solde doit être revenu à son niveau initial.
+    expect(json.data.simulated).toBe(true);
+    expect(json.data.balanceSats).toBe(1000);
+    expect(json.data.reward).toBeNull();
+    expect(donorService.updateDonorBalance).toHaveBeenNthCalledWith(
+      1,
+      "d1",
+      -500,
+    );
+    expect(donorService.updateDonorBalance).toHaveBeenNthCalledWith(
+      2,
+      "d1",
+      500,
+    );
+    expect(rewardService.updateRewardStatus).toHaveBeenCalledWith(
+      "reward1",
+      "failed",
+      undefined,
+      expect.stringContaining("non configurée"),
     );
   });
 });

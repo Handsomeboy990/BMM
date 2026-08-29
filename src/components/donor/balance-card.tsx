@@ -1,6 +1,12 @@
 "use client";
 
-import { AlertCircle, ArrowDownToLine, Check, Wallet } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowDownToLine,
+  Check,
+  Wallet,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +30,7 @@ export function BalanceCard({
 }) {
   const withdraw = useWithdrawBalance();
   const [open, setOpen] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<{ simulated: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function onWithdraw(event: React.FormEvent<HTMLFormElement>) {
@@ -42,10 +48,11 @@ export function BalanceCard({
       return;
     }
     try {
-      await withdraw.mutateAsync({ amountSats, momoNumber });
-      setDone(true);
+      const result = await withdraw.mutateAsync({ amountSats, momoNumber });
+      // Le serveur indique si un virement a réellement eu lieu. Annoncer un
+      // dépôt qui n'est jamais parti ferait attendre le donneur pour rien.
+      setDone({ simulated: Boolean(result.simulated) });
       setOpen(false);
-      setTimeout(() => setDone(false), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Le retrait a échoué.");
     }
@@ -60,7 +67,7 @@ export function BalanceCard({
       <CardContent className="space-y-4 pt-0">
         <div className="from-primary/10 flex items-end justify-between rounded-xl bg-linear-to-br to-transparent p-5">
           <div>
-            <p className="text-3xl font-bold tracking-tight">
+            <p className="font-display text-3xl font-bold tracking-tight">
               {balanceSats.toLocaleString("fr-FR")}{" "}
               <span className="text-base font-medium">sats</span>
             </p>
@@ -73,7 +80,7 @@ export function BalanceCard({
               size="sm"
               onClick={() => {
                 setOpen(true);
-                setDone(false);
+                setDone(null);
               }}
               disabled={balanceSats < 1}
             >
@@ -83,10 +90,25 @@ export function BalanceCard({
           ) : null}
         </div>
 
-        {done ? (
-          <p className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400">
+        {done?.simulated ? (
+          <p
+            role="status"
+            className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400"
+          >
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <span>
+              Les retraits Mobile Money ne sont pas encore actifs sur cette
+              plateforme. Aucun virement n&apos;a été effectué et votre solde
+              est intact.
+            </span>
+          </p>
+        ) : done ? (
+          <p
+            role="status"
+            className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400"
+          >
             <Check className="size-4" />
-            Retrait initié : vous recevrez un dépôt Mobile Money.
+            Retrait initié: vous recevrez un dépôt Mobile Money.
           </p>
         ) : null}
 

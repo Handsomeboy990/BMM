@@ -46,14 +46,18 @@ export type CardOrderResult = {
   message: string;
   status: string;
   orderId: string;
-  /** Présent uniquement pour une commande payante (redirection Izichange). */
-  checkoutUrl?: string;
+  /** Redirection de paiement, `null` tant que la passerelle n'est pas branchée. */
+  checkoutUrl?: string | null;
+  /** Vrai quand aucun encaissement réel n'a eu lieu. */
+  simulated?: boolean;
 };
 
 export type WithdrawResult = {
   message: string;
   balanceSats: number;
-  reward: RewardLog;
+  reward: RewardLog | null;
+  /** Vrai quand aucun virement n'a eu lieu: le solde est resté intact. */
+  simulated?: boolean;
 };
 
 export const donorsApi = {

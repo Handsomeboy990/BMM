@@ -33,6 +33,9 @@ export function PhysicalCardOrder({
   const [error, setError] = useState<string | null>(null);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  // Vrai quand la passerelle de paiement n'est pas branchée: il n'y a alors
+  // rien à régler en ligne, et rien à confirmer.
+  const [paymentUnavailable, setPaymentUnavailable] = useState(false);
 
   const status = pendingOrderId ? "pending" : physicalCardStatus;
   const alreadyPhysical = cardType === "physical" || status === "ordered_paid";
@@ -44,6 +47,7 @@ export function PhysicalCardOrder({
       if (method === "pay") {
         setPendingOrderId(result.orderId);
         setCheckoutUrl(result.checkoutUrl ?? null);
+        setPaymentUnavailable(Boolean(result.simulated));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Commande impossible.");
@@ -57,6 +61,7 @@ export function PhysicalCardOrder({
       await confirm.mutateAsync(pendingOrderId);
       setPendingOrderId(null);
       setCheckoutUrl(null);
+      setPaymentUnavailable(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Confirmation impossible.");
     }
@@ -102,30 +107,37 @@ export function PhysicalCardOrder({
             <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
               <Clock className="size-6 shrink-0 text-amber-500" />
               <div>
-                <p className="font-medium">Paiement en attente</p>
+                <p className="font-medium">
+                  {paymentUnavailable
+                    ? "Commande enregistrée"
+                    : "Paiement en attente"}
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  Réglez {CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF par
-                  paiement mobile, puis confirmez.
+                  {paymentUnavailable
+                    ? `Le paiement en ligne n'est pas encore disponible. Votre centre de collecte vous indiquera comment régler les ${CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF.`
+                    : `Réglez ${CARD_PRICE_XOF.toLocaleString("fr-FR")} XOF par paiement mobile, puis confirmez.`}
                 </p>
               </div>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              {checkoutUrl ? (
-                <Button asChild variant="outline" className="flex-1">
-                  <a href={checkoutUrl} target="_blank" rel="noreferrer">
-                    <ExternalLink className="size-4" />
-                    Procéder au paiement
-                  </a>
+            {paymentUnavailable ? null : (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                {checkoutUrl ? (
+                  <Button asChild variant="outline" className="flex-1">
+                    <a href={checkoutUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="size-4" />
+                      Procéder au paiement
+                    </a>
+                  </Button>
+                ) : null}
+                <Button
+                  className="flex-1"
+                  onClick={onConfirm}
+                  disabled={confirm.isPending}
+                >
+                  {confirm.isPending ? "Confirmation…" : "J'ai payé"}
                 </Button>
-              ) : null}
-              <Button
-                className="flex-1"
-                onClick={onConfirm}
-                disabled={confirm.isPending}
-              >
-                {confirm.isPending ? "Confirmation…" : "J'ai payé"}
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         ) : (
           <>

@@ -81,11 +81,13 @@ export async function POST(req: Request) {
 
       return success(
         {
-          message:
-            "Commande de carte payante initiée avec succès. Veuillez procéder au paiement.",
+          message: payment.simulated
+            ? "Commande enregistrée. Le paiement en ligne n'est pas encore disponible: votre centre vous indiquera comment régler la carte."
+            : "Commande de carte initiée. Veuillez procéder au paiement.",
           status: "pending",
           orderId: order.id,
           checkoutUrl: payment.checkoutUrl,
+          simulated: payment.simulated,
         },
         { status: 201 },
       );

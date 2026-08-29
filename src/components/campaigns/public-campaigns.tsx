@@ -18,6 +18,7 @@ import { Suspense, useState } from "react";
 
 import { CampaignCountdown } from "@/components/campaigns/campaign-countdown";
 import { DonorRegistrationForm } from "@/components/donate/donor-registration-form";
+import { SimulatedInvoiceNotice } from "@/components/donate/simulated-invoice-notice";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -344,6 +345,7 @@ function CampaignSupport({ campaign }: { campaign: PublicCampaign }) {
           Merci. Scannez pour envoyer{" "}
           {invoice.amountSats.toLocaleString("fr-FR")} sats à la collecte.
         </p>
+        {invoice.simulated ? <SimulatedInvoiceNotice /> : null}
         <div className="flex justify-center">
           <QrBadge
             value={invoice.bolt11}

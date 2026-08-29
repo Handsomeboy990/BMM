@@ -3,6 +3,7 @@
 import { AlertCircle, Bitcoin, Heart, Wallet, Zap } from "lucide-react";
 import { useState } from "react";
 
+import { SimulatedInvoiceNotice } from "@/components/donate/simulated-invoice-notice";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,14 +73,7 @@ export function DonationForm() {
             {DONATION_PURPOSE_LABELS[invoice.purpose].toLowerCase()}.
           </p>
 
-          {/* Avertissement de facture simulee, masque a la demande.
-          {invoice.simulated ? (
-            <p className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
-              <AlertCircle className="mt-0.5 size-4 shrink-0" />
-              Facture de demonstration (SDK Breez en mode simulation cote
-              serveur). Configurez le noeud Breez pour des factures reelles.
-            </p>
-          ) : null} */}
+          {invoice.simulated ? <SimulatedInvoiceNotice /> : null}
 
           <div className="flex justify-center">
             <QrBadge
@@ -92,12 +86,14 @@ export function DonationForm() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild className="flex-1">
-              <a href={`lightning:${invoice.bolt11}`}>
-                <Wallet className="size-4" />
-                Ouvrir dans le portefeuille
-              </a>
-            </Button>
+            {invoice.simulated ? null : (
+              <Button asChild className="flex-1">
+                <a href={`lightning:${invoice.bolt11}`}>
+                  <Wallet className="size-4" />
+                  Ouvrir dans le portefeuille
+                </a>
+              </Button>
+            )}
             <Button
               variant="outline"
               className="flex-1"

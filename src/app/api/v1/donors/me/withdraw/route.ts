@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Débit du solde (temporaire)
+    // 4. Débit du solde (rendu si le versement échoue en 6)
     const updatedBalance = await donorService.updateDonorBalance(
       donorId,
       -amountSats,
@@ -72,22 +72,46 @@ export async function POST(req: Request) {
 
     try {
       // 6. Exécution du cashout MoMo
-      const paymentHash = await izichangeService.cashoutToMoMo(
+      const cashout = await izichangeService.cashoutToMoMo(
         momoNumber,
         amountSats,
       );
+
+      // 6b. Rien n'est parti tant que la passerelle est simulée: on rend le
+      // solde plutôt que de laisser un donneur croire à un virement.
+      if (cashout.simulated) {
+        const restoredBalance = await donorService.updateDonorBalance(
+          donorId,
+          amountSats,
+        );
+        await rewardService.updateRewardStatus(
+          rewardLog.id,
+          "failed",
+          undefined,
+          "Passerelle Mobile Money non configurée: aucun virement effectué.",
+        );
+
+        return success({
+          message:
+            "Passerelle Mobile Money non configurée: aucun virement n'a été effectué et votre solde est intact.",
+          balanceSats: restoredBalance ?? dbDonor.balanceSats,
+          reward: null,
+          simulated: true,
+        });
+      }
 
       // 7. Enregistrement du succès
       const finalLog = await rewardService.updateRewardStatus(
         rewardLog.id,
         "completed",
-        paymentHash,
+        cashout.transactionId,
       );
 
       return success({
-        message: "Retrait MoMo exécuté avec succès.",
+        message: "Retrait Mobile Money exécuté avec succès.",
         balanceSats: updatedBalance,
         reward: finalLog,
+        simulated: false,
       });
     } catch (paymentError) {
       // En cas d'erreur de paiement, on recrédite le solde du donneur
