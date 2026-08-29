@@ -73,6 +73,9 @@ export const donorsApi = {
       `/donors/${id}/validate`,
     ),
 
+  /** Fiche d'un donneur (structures et administration). */
+  get: (id: string) => httpClient.get<DonorRecord>(`/donors/${id}`),
+
   /** Profil du donneur connecté. */
   me: () => httpClient.get<DonorRecord>("/donors/me"),
 

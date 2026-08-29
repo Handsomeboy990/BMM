@@ -209,6 +209,16 @@ export function useDonors() {
   });
 }
 
+/** Fiche d'un donneur, pour les structures et l'administration. */
+export function useDonor(id: string) {
+  return useQuery({
+    queryKey: ["donors", "detail", id],
+    enabled: id.length > 0,
+    queryFn: () => donorsApi.get(id).then((r) => r.data),
+    retry: false,
+  });
+}
+
 export function useCreateDonor() {
   return useMutation({
     meta: { success: "Donneur enregistré." },
