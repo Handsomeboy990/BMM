@@ -16,6 +16,11 @@ export type PublicStatistics = {
   activeCampaigns: number;
   activeEmergencies: number;
   donationsRecorded: number;
+  /**
+   * Niveaux par groupe. Vide tant qu'aucune structure n'a déclaré de stock:
+   * une grille de zéros se lirait « tous les groupes sont en rupture », ce
+   * qui est faux quand la donnée est simplement absente.
+   */
   availability: BloodAvailability[];
   /** Villes réellement couvertes, pour le bandeau des régions. */
   cities: string[];
@@ -52,6 +57,10 @@ export const statisticsService = {
   /**
    * Chiffres publics de la plateforme. Aucune donnée nominative n'en sort:
    * uniquement des agrégats destinés à la page d'accueil.
+   *
+   * Lève si la base ne répond pas: renvoyer des zéros ferait passer une panne
+   * pour une plateforme vide, et la page d'accueil afficherait « 0 donneur,
+   * tous les groupes en rupture » alors que rien n'est su.
    */
   getPublicStatistics: async (): Promise<PublicStatistics> => {
     const supabase = await createSupabaseServerClient();
@@ -77,6 +86,21 @@ export const statisticsService = {
           .select("id", { count: "exact", head: true })
           .eq("activity_type", "blood_donation"),
       ]);
+
+    const firstError = [
+      donors.error,
+      organizations.error,
+      campaigns.error,
+      emergencies.error,
+      stock.error,
+      activities.error,
+    ].find(Boolean);
+
+    if (firstError) {
+      throw new Error(
+        `Statistiques indisponibles: ${firstError.message ?? "erreur base de données"}`,
+      );
+    }
 
     const unitsByType = new Map<string, number>();
     for (const row of (stock.data ?? []) as {
@@ -104,7 +128,8 @@ export const statisticsService = {
       activeCampaigns: campaigns.count ?? 0,
       activeEmergencies: emergencies.count ?? 0,
       donationsRecorded: activities.count ?? 0,
-      availability: toAvailability(unitsByType),
+      availability:
+        unitsByType.size === 0 ? [] : toAvailability(unitsByType),
       cities: [...cities].sort((a, b) => a.localeCompare(b, "fr")),
     };
   },

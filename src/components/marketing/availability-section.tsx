@@ -69,6 +69,11 @@ export function AvailabilitySection() {
           <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
             Les niveaux de réserve ne sont pas consultables pour le moment.
           </p>
+        ) : stats.data.availability.length === 0 ? (
+          <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
+            Aucune structure du réseau n'a encore publié son stock. Les niveaux
+            apparaîtront ici dès la première déclaration.
+          </p>
         ) : (
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {stats.data.availability.map((item, index) => {
