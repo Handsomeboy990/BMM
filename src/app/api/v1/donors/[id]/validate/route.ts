@@ -1,5 +1,6 @@
 import { donorService } from "@/modules/donors/services/donor.service";
 import { authService } from "@/modules/auth";
+import { otsService } from "@/modules/bitcoin";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -14,12 +15,10 @@ export async function PATCH(
 ) {
   try {
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
     }
 
     const id = (await params).id;
@@ -40,7 +39,15 @@ export async function PATCH(
       });
     }
 
-    const validatedDonor = await donorService.validateDonor(id);
+    // Horodatage du profil sur Bitcoin via OpenTimestamps uniquement à la validation
+    let otsProof = null;
+    try {
+      otsProof = await otsService.stampHash(donor.profileHash);
+    } catch (e) {
+      console.error("L'horodatage OpenTimestamps a échoué à la validation.", e);
+    }
+
+    const validatedDonor = await donorService.validateDonor(id, otsProof);
     if (!validatedDonor) {
       return failure(
         API_ERROR_CODE.INTERNAL_ERROR,
@@ -48,6 +55,13 @@ export async function PATCH(
         { status: 500 },
       );
     }
+
+    // Enregistrer l'activité de don de sang
+    await donorService.addActivity(
+      id,
+      "blood_donation",
+      "Don de sang physique validé à la clinique.",
+    );
 
     return success({
       message: "Donneur validé avec succès.",

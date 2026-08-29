@@ -17,7 +17,7 @@
 | Validation      | Zod sur toutes les entrées                                                     |
 | Tests           | Vitest (38 tests, 100% au vert)                                                |
 | Bitcoin         | OpenTimestamps (horodatage), BIP-322 (signature), Breez Liquid SDK (Lightning) |
-| Emails          | EmailJS via API REST (`fetch` natif, pas de dépendance npm)                    |
+| Emails          | Supabase Edge Function (`send-email`)                                          |
 
 ### Acteurs de la plateforme
 
@@ -59,7 +59,7 @@ src/
 ├── modules/                  ← Logique métier (services)
 │   ├── auth/                 ← Connexion, inscription, session
 │   ├── bitcoin/              ← OTS, BIP-322, Breez Lightning, Rewards
-│   ├── campaigns/            ← Campagnes + envoi EmailJS
+│   ├── campaigns/            ← Campagnes + envoi via Supabase Edge Function
 │   ├── donors/               ← Inscription et profil donneur
 │   ├── emergencies/          ← Alertes d'urgence sanguine
 │   └── matching/             ← Blood Emergency AI (algorithme de scoring)
@@ -464,8 +464,8 @@ Toutes les tables ont des politiques RLS activées en base. C'est une **deuxièm
 >
 > 1. Récupère le nom de l'hôpital depuis la base
 > 2. Filtre les donneurs compatibles dans le rayon (Haversine)
-> 3. Envoie les emails par lots de 50 via l'API REST EmailJS (`Promise.allSettled`)
-> 4. Si `EMAILJS_*` non configuré → mode simulation (logs console)
+> 3. Envoie les emails par lots de 50 via Supabase Edge Function `send-email` (`Promise.allSettled`)
+> 4. Mode simulation si l'appel échoue (logs console)
 > 5. Sauvegarde la campagne avec le compte d'emails envoyés
 
 #### `GET /api/v1/campaigns`
@@ -637,8 +637,8 @@ POST /api/v1/campaigns                           [org_admin]
      │  2. Injecte hospitalId depuis la session
      │  3. Récupère le nom de l'hôpital depuis la base
      │  4. Filtre les donneurs compatibles dans le rayon
-     │  5. Envoie les emails par lots de 50 via EmailJS
-     │     └─ Fallback simulation si clés absentes
+     │  5. Envoie les emails par lots de 50 via Supabase Edge Function
+     │     └─ Fallback simulation si l'envoi échoue
      │  6. Sauvegarde campagne avec compteur emails_sent
      ▼
 [Supabase DB] → Table campaigns (persistée)
@@ -694,11 +694,8 @@ BREEZ_API_KEY=votre_cle_api_breez
 BREEZ_MNEMONIC="votre phrase de 12 ou 24 mots"
 BREEZ_WORKING_DIR=./.breez_state
 
-# EmailJS (optionnel — simulation si absent)
-EMAILJS_SERVICE_ID=service_xxx
-EMAILJS_TEMPLATE_ID=template_xxx
-EMAILJS_PUBLIC_KEY=xxx
-EMAILJS_PRIVATE_KEY=xxx
+# Aucun paramètre d'e-mail supplémentaire n'est requis.
+# Supabase utilise sa configuration SMTP interne ou ses Edge Functions.
 ```
 
 ---
@@ -717,7 +714,7 @@ EMAILJS_PRIVATE_KEY=xxx
 | Vérification carte donneur (OTS)              | ✅ Fait     | 1 test  |
 | Table `emergencies` + API CRUD complète       | ✅ Fait     | 9 tests |
 | Table `campaigns` + API                       | ✅ Fait     | 1 test  |
-| Envoi emails réels EmailJS (lots de 50)       | ✅ Fait     | —       |
+| Envoi emails réels via Supabase Edge Function | ✅ Fait     | —       |
 | Middleware JWT + protection des routes        | ✅ Fait     | —       |
 | RLS sur toutes les tables                     | ✅ Fait     | —       |
 | Récompenses Lightning (Breez Liquid SDK)      | ✅ Fait     | 2 tests |

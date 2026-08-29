@@ -1,17 +1,40 @@
 import { donorService } from "@/modules/donors";
 import { otsService, breezService, rewardService } from "@/modules/bitcoin";
+import { pointsService } from "@/modules/donations/services/points.service";
+import { izichangeService } from "@/modules/bitcoin/services/izichange.service";
 import { authService } from "@/modules/auth";
+import { organizationService } from "@/modules/organizations/services/organization.service";
+import { emailService } from "@/modules/notifications";
+import { serverPublicUrl } from "@/lib/url.server";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 import { z } from "zod";
 
-const rewardPayloadSchema = z.object({
-  bolt11Invoice: z.string().min(10, "La facture BOLT11 est invalide"),
-  satsAmount: z
-    .number()
-    .min(1, "Le montant doit être supérieur à 0")
-    .optional(),
-});
+const rewardPayloadSchema = z
+  .object({
+    bolt11Invoice: z
+      .string()
+      .min(10, "La facture BOLT11 est invalide")
+      .optional(),
+    momoNumber: z.string().min(8, "Le numéro MoMo est invalide").optional(),
+    awardPoints: z.boolean().optional(),
+    creditBalance: z.boolean().optional(),
+    satsAmount: z
+      .number()
+      .min(1, "Le montant doit être supérieur à 0")
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      data.bolt11Invoice ||
+      data.momoNumber ||
+      data.awardPoints ||
+      data.creditBalance,
+    {
+      message:
+        "Vous devez fournir soit une facture BOLT11, soit un numéro MoMo, soit choisir l'attribution de points, soit créditer le solde",
+    },
+  );
 
 /**
  * GET /api/v1/verify/[id]
@@ -59,6 +82,8 @@ export async function GET(
       }
     }
 
+    const activityCount = await donorService.getActivitiesCount(donor.id);
+
     return success({
       donor: {
         id: donor.id,
@@ -67,6 +92,10 @@ export async function GET(
         profileHash: donor.profileHash,
         hasOtsProof: !!donor.otsProof,
         createdAt: donor.createdAt,
+        balanceSats: donor.balanceSats,
+        cardType: donor.cardType,
+        physicalCardStatus: donor.physicalCardStatus,
+        activityCount,
       },
       verification: {
         isTimestampVerified,
@@ -90,12 +119,10 @@ export async function POST(
   try {
     // 1. Authentification & Autorisation (Seuls les hôpitaux/administrateurs connectés peuvent récompenser)
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
     }
 
     const id = (await params).id;
@@ -136,29 +163,92 @@ export async function POST(
     const satsAmount = validatedData.satsAmount || 1000;
 
     // 4. Initialisation d'une trace de paiement en statut 'pending'
+    // Pour MoMo, on stocke "momo:<numero>" dans bolt11Invoice
+    // Pour les points, on stocke "points"
+    const invoiceOrMomo = validatedData.awardPoints
+      ? "points"
+      : validatedData.creditBalance
+        ? "credit_balance"
+        : validatedData.momoNumber
+          ? `momo:${validatedData.momoNumber}`
+          : validatedData.bolt11Invoice || "";
+
     const rewardLog = await rewardService.createRewardLog({
       donorId: id,
-      hospitalId: user.organizationId,
+      hospitalId: user.organizationId ?? null,
       satsAmount,
-      bolt11Invoice: validatedData.bolt11Invoice,
+      bolt11Invoice: invoiceOrMomo,
     });
 
     try {
-      // 5. Exécution du paiement Lightning via Breez
-      const payoutResult = await breezService.payInvoice(
-        validatedData.bolt11Invoice,
-      );
+      // 5. Exécution du paiement Lightning via Breez, ou MoMo via Izichange, ou attribution de points, ou crédit de solde
+      let paymentHash: string;
 
-      if (!payoutResult || !payoutResult.paymentHash) {
-        throw new Error("Paiement échoué. Aucun hash de transaction retourné.");
+      if (validatedData.awardPoints) {
+        const pointsResult = await pointsService.awardPoints(
+          id,
+          satsAmount,
+          user.organizationId || undefined,
+        );
+        if (!pointsResult.success || !pointsResult.proofBase64) {
+          throw new Error("Échec de l'attribution des points de fidélité.");
+        }
+        paymentHash = `points_ots_${pointsResult.proofBase64.substring(0, 16)}`;
+      } else if (validatedData.creditBalance) {
+        const newBal = await donorService.updateDonorBalance(id, satsAmount);
+        if (newBal === null) {
+          throw new Error("Impossible de créditer le solde du donneur.");
+        }
+        paymentHash = `credit_balance_${Math.random().toString(36).substring(2, 12)}`;
+      } else if (validatedData.momoNumber) {
+        paymentHash = await izichangeService.cashoutToMoMo(
+          validatedData.momoNumber,
+          satsAmount,
+        );
+      } else {
+        const payoutResult = await breezService.payInvoice(
+          validatedData.bolt11Invoice as string,
+        );
+        if (!payoutResult || !payoutResult.paymentHash) {
+          throw new Error(
+            "Paiement échoué. Aucun hash de transaction retourné.",
+          );
+        }
+        paymentHash = payoutResult.paymentHash;
       }
 
       // 6. Mise à jour de la trace en succès
       const updatedLog = await rewardService.updateRewardStatus(
         rewardLog.id,
         "completed",
-        payoutResult.paymentHash,
+        paymentHash,
       );
+
+      // 6b. Débit du compte d'approvisionnement de la structure (best-effort).
+      // Les points de fidélité ne coûtent rien : pas de débit dans ce cas.
+      if (user.organizationId && !validatedData.awardPoints) {
+        await organizationService
+          .adjustBalance(user.organizationId, -satsAmount)
+          .catch((e) => console.error("Débit du solde structure échoué:", e));
+      }
+
+      // Enregistrer l'activité de don de sang
+      await donorService.addActivity(
+        id,
+        "blood_donation",
+        `Don de sang physique récompensé (${satsAmount} sats).`,
+      );
+
+      // 7. Email de récompense (best-effort: n'échoue jamais le paiement).
+      void emailService
+        .sendDonorReward({
+          toEmail: donor.email,
+          toName: `${donor.firstName} ${donor.lastName}`,
+          sats: satsAmount,
+          hospitalName: user.organization?.name ?? "un centre partenaire",
+          verifyUrl: await serverPublicUrl(`/verify/${donor.id}`),
+        })
+        .catch((e) => console.error("Reward email failed:", e));
 
       return success({
         message: "Récompense envoyée avec succès.",

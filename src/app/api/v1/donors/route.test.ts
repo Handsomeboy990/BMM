@@ -9,6 +9,7 @@ vi.mock("@/modules/donors/services/donor.service", () => {
     donorService: {
       createDonor: vi.fn(),
       getValidatedDonors: vi.fn(),
+      getAllDonors: vi.fn(),
     },
   };
 });
@@ -63,7 +64,7 @@ describe("POST /api/v1/donors", () => {
       available: true,
       bitcoinAddress: "bc1q...",
       profileHash: "hash...",
-      otsProof: "ots-proof-xyz",
+      otsProof: null,
       createdAt: new Date("2026-06-30T12:00:00.000Z"),
     };
     vi.mocked(donorService.createDonor).mockResolvedValue(
@@ -106,11 +107,13 @@ describe("POST /api/v1/donors", () => {
       "bc1q...",
       "sig...",
     );
-    expect(otsService.stampHash).toHaveBeenCalledWith("hash...");
-    expect(donorService.createDonor).toHaveBeenCalledWith({
-      ...body,
-      otsProof: "ots-proof-xyz",
-    });
+    expect(donorService.createDonor).toHaveBeenCalledWith(
+      {
+        ...body,
+        otsProof: null,
+      },
+      { asAdmin: false },
+    );
   });
 
   it("should return 400 if BIP-322 signature is invalid", async () => {
@@ -163,7 +166,7 @@ describe("GET /api/v1/donors", () => {
       organizationId: "h1",
     });
 
-    const mockValidatedDonors = [
+    const mockDonors = [
       {
         id: "d1",
         firstName: "Jane",
@@ -171,16 +174,23 @@ describe("GET /api/v1/donors", () => {
         bloodType: "A+",
         validated: true,
       },
+      {
+        id: "d2",
+        firstName: "Kofi",
+        lastName: "Mensah",
+        bloodType: "O-",
+        validated: false,
+      },
     ];
-    vi.mocked(donorService.getValidatedDonors).mockResolvedValue(
-      mockValidatedDonors as unknown as Awaited<
-        ReturnType<typeof donorService.getValidatedDonors>
+    vi.mocked(donorService.getAllDonors).mockResolvedValue(
+      mockDonors as unknown as Awaited<
+        ReturnType<typeof donorService.getAllDonors>
       >,
     );
 
     const response = await GET();
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json.data).toEqual(mockValidatedDonors);
+    expect(json.data).toEqual(mockDonors);
   });
 });

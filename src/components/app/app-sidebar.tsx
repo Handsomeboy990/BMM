@@ -1,24 +1,28 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
-import { appNav } from "@/config/app-navigation";
+import { navForRole } from "@/config/app-navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const nav = navForRole(user?.role);
 
   return (
     <aside className="bg-card hidden w-64 shrink-0 flex-col border-r lg:flex">
-      <div className="flex h-16 items-center gap-2 border-b px-6 font-semibold">
-        <Logo variant="horizontal" height="1.6rem" />
-      </div>
+      <Link href="/dashboard" className="flex h-16 items-center border-b px-6">
+        <Logo />
+      </Link>
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
-        {appNav.map((group) => (
+        {nav.map((group) => (
           <div key={group.title}>
             <p className="text-muted-foreground px-3 pb-2 text-xs font-medium tracking-wider uppercase">
               {group.title}
@@ -57,10 +61,15 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="border-t p-4">
-        <p className="text-muted-foreground text-xs">
-          Hackathon Bitcoin Mastermind 2026
-        </p>
+      <div className="space-y-3 border-t p-4">
+        <Link
+          href="/soutenir"
+          className="border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors"
+        >
+          <Heart className="size-4" />
+          Soutenir la plateforme
+        </Link>
+        <p className="text-muted-foreground text-xs">Time's Care 2026</p>
       </div>
     </aside>
   );

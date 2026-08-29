@@ -3,7 +3,14 @@ import { httpClient } from "@/lib/api/http-client";
 import type { VerifyResult } from "./types";
 
 export type RewardPayload = {
-  bolt11Invoice: string;
+  /** Facture Lightning BOLT11 du donneur (versement Lightning). */
+  bolt11Invoice?: string;
+  /** Numéro Mobile Money du donneur (cash-out via Izichange). */
+  momoNumber?: string;
+  /** Attribue des points de fidélité au lieu d'un versement monétaire. */
+  awardPoints?: boolean;
+  /** Crédite le solde plateforme du donneur (retirable plus tard par lui). */
+  creditBalance?: boolean;
   satsAmount?: number;
 };
 

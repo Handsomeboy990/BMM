@@ -8,3 +8,5 @@ export * from "./verify";
 export * from "./organizations";
 export * from "./stock";
 export * from "./transfers";
+export * from "./donations";
+export * from "./card-requests";

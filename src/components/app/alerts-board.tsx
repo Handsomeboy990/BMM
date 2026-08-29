@@ -5,12 +5,16 @@ import {
   Check,
   Clock,
   Droplet,
+  Eye,
+  Mail,
   MapPin,
   Navigation,
   Plus,
+  Radio,
   Trash2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import {
@@ -65,6 +70,10 @@ export function AlertsBoard() {
   const createEmergency = useCreateEmergency();
   const updateStatus = useUpdateEmergencyStatus();
   const deleteEmergency = useDeleteEmergency();
+
+  const { pageItems, page, setPage, totalPages, total } = usePagination(
+    emergencies ?? [],
+  );
 
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -172,6 +181,27 @@ export function AlertsBoard() {
                     : "Définir la localisation"}
               </Button>
 
+              {/* Canaux de diffusion de l'alerte (automatiques). */}
+              <div className="space-y-2">
+                <Label>Canaux de diffusion</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
+                    <Mail className="text-primary size-4" />
+                    <span className="flex-1">E-mails ciblés</span>
+                    <Badge variant="success">Actif</Badge>
+                  </div>
+                  <div className="border-accent/40 bg-accent/5 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
+                    <Radio className="text-accent size-4" />
+                    <span className="flex-1">Réseau Nostr</span>
+                    <Badge variant="success">Actif</Badge>
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Chaque alerte est aussi diffusée sur un réseau public, gratuit
+                  et fiable même en cas de panne des opérateurs télécoms.
+                </p>
+              </div>
+
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
@@ -219,7 +249,7 @@ export function AlertsBoard() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {emergencies.map((alert) => (
+          {pageItems.map((alert) => (
             <Card key={alert.id}>
               <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -249,6 +279,13 @@ export function AlertsBoard() {
                   <Badge variant={statusBadge[alert.status]}>
                     {statusLabel[alert.status]}
                   </Badge>
+
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/alerts/${alert.id}`}>
+                      <Eye className="size-4" />
+                      Détails
+                    </Link>
+                  </Button>
 
                   {alert.status === "active" ? (
                     <>
@@ -295,6 +332,13 @@ export function AlertsBoard() {
               </CardContent>
             </Card>
           ))}
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </div>

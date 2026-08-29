@@ -17,7 +17,7 @@ export const BLOOD_TYPES = [
 
 export type BloodType = (typeof BLOOD_TYPES)[number];
 
-export type OrganizationType = "hospital" | "ong" | "collect";
+export type OrganizationType = "hospital" | "ngo" | "blood_center";
 
 export type Organization = {
   id: string;
@@ -28,13 +28,16 @@ export type Organization = {
   city: string;
   contactEmail: string;
   verified: boolean;
+  rejectionReason?: string | null;
   createdAt: string;
+  /** Solde du compte d'approvisionnement (récompenses), en satoshis. */
+  balanceSats?: number;
 };
 
 export type UserProfile = {
   id: string;
   email: string | undefined;
-  role: "super_admin" | "org_admin";
+  role: "super_admin" | "org_admin" | "donor";
   organizationId: string | null;
   organization?: Organization | null;
 };
@@ -65,6 +68,8 @@ export type CampaignRecord = {
   latitude: number;
   longitude: number;
   radiusKm: number;
+  startsAt?: string | null;
+  endsAt?: string | null;
   emailsSent: number;
   responsesCount: number;
   status: string;
@@ -88,6 +93,14 @@ export type DonorRecord = {
   otsProof: string | null;
   validated: boolean;
   createdAt: string;
+  /** Solde de satoshis accumulé sur la plateforme (retirable par le donneur). */
+  balanceSats?: number;
+  /** Type de carte : "digital" par défaut, "physical" une fois obtenue. */
+  cardType?: string;
+  /** Statut de la commande de carte physique (none | merited | pending | ordered_paid…). */
+  physicalCardStatus?: string;
+  /** Identifiant du donneur parrain, le cas échéant. */
+  referredBy?: string | null;
 };
 
 /** Donneur renvoyé par /search, enrichi de la distance (et du score en IA). */
@@ -149,6 +162,10 @@ export type VerifyResult = {
     profileHash: string;
     hasOtsProof: boolean;
     createdAt: string;
+    balanceSats?: number;
+    cardType?: string;
+    physicalCardStatus?: string;
+    activityCount?: number;
   };
   verification: {
     isTimestampVerified: boolean;

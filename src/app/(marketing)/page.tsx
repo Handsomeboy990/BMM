@@ -9,6 +9,7 @@ import {
   ScrollStory,
   type StoryPanel,
 } from "@/components/marketing/scroll-story";
+import { SecuritySection } from "@/components/marketing/security-section";
 import { TestimonialsSection } from "@/components/marketing/testimonials-section";
 
 const storyPanels: StoryPanel[] = [
@@ -31,9 +32,8 @@ const storyPanels: StoryPanel[] = [
       "En quelques secondes, HEMORA identifie le bon donneur, compatible et disponible, au plus près du besoin.",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1584515933487-779824d29309?w=1600&q=70&auto=format&fit=crop",
-    alt: "Deux mains qui se serrent en signe de solidarité",
+    image: "/emergency-banner.png",
+    alt: "Carte d'Afrique lumineuse avec profil médical d'urgence",
     eyebrow: "La communauté",
     title: "Une Afrique qui répond présente",
     description:
@@ -48,6 +48,7 @@ export default function HomePage() {
       <RegionsStrip />
       <ScrollStory panels={storyPanels} />
       <FeaturesSection />
+      <SecuritySection />
       <ImpactSection />
       <AvailabilitySection />
       <HowItWorksSection />

@@ -47,3 +47,11 @@ CLAUDE.md
 
 # playwright-cli artifacts (screenshots, logs)
 .playwright-cli/
+
+
+demo/
+
+analyse_strategique.md
+
+# Document de travail interne (non versionné)
+GUIDE_PLATEFORME.md

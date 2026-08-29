@@ -11,7 +11,7 @@ export const emergencySchema = z.object({
 });
 
 export const createEmergencySchema = emergencySchema.extend({
-  hospitalId: z.string().uuid(),
+  hospitalId: z.string().uuid().nullable(),
 });
 
 export const updateEmergencyStatusSchema = z.object({

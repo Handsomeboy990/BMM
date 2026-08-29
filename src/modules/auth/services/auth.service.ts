@@ -96,14 +96,21 @@ export const authService = {
         throw new Error("Erreur lors de la création de l'organisation");
       }
 
-      // 3. Création du profil utilisateur lié à l'organisation
-      const { error: profileError } = await admin.from("user_profiles").insert([
-        {
-          id: userId,
-          organization_id: newOrg.id,
-          role: "org_admin",
-        },
-      ]);
+      // 3. Rattachement du profil utilisateur à l'organisation.
+      // Un trigger `handle_new_user` peut déjà avoir créé la ligne
+      // `user_profiles` lors du signUp Auth: on fait donc un upsert sur la
+      // clé primaire `id` (au lieu d'un insert qui violerait la PK) pour
+      // renseigner l'organisation et le rôle, que le trigger existe ou non.
+      const { error: profileError } = await admin.from("user_profiles").upsert(
+        [
+          {
+            id: userId,
+            organization_id: newOrg.id,
+            role: "org_admin",
+          },
+        ],
+        { onConflict: "id" },
+      );
 
       if (profileError) {
         console.error("Profile insertion failed:", profileError);
@@ -138,14 +145,66 @@ export const authService = {
       return null;
     }
 
-    // Récupère le rôle et l'organisation associée
-    const { data: profile, error: profileError } = await supabase
+    // Récupère le rôle et l'organisation associée via le client admin: la
+    // session est déjà authentifiée (JWT validé par getUser ci-dessus), et
+    // lire le profil avec le service-role rend /auth/me insensible aux
+    // défauts de politiques RLS sur user_profiles (ex: récursion). On ne lit
+    // que la ligne de l'utilisateur courant, identifiée par son id vérifié.
+    const db = createSupabaseAdminClient() ?? supabase;
+
+    // Détection du rôle : un compte présent dans `donors` est un donneur, même
+    // s'il possède par ailleurs une ligne user_profiles (créée par un trigger).
+    // On vérifie donc `donors` en premier, ce qui évite qu'un donneur soit pris
+    // pour un membre d'organisation et accède aux espaces d'administration.
+    const { data: donor } = await db
+      .from("donors")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (donor) {
+      return {
+        id: user.id,
+        email: user.email || undefined,
+        role: "donor",
+        organizationId: null,
+        organization: null,
+        donor: {
+          id: donor.id,
+          firstName: donor.first_name,
+          lastName: donor.last_name,
+          bloodType: donor.blood_type,
+          city: donor.city,
+          latitude: donor.latitude,
+          longitude: donor.longitude,
+          age: donor.age,
+          available: donor.available,
+          bitcoinAddress: donor.bitcoin_address,
+          profileHash: donor.profile_hash,
+          otsProof: donor.ots_proof,
+          validated: donor.validated,
+          createdAt: new Date(donor.created_at),
+          balanceSats: donor.balance_sats,
+          cardType: donor.card_type,
+          physicalCardStatus: donor.physical_card_status,
+          referredBy: donor.referred_by,
+        },
+      };
+    }
+
+    const { data: profile, error: profileError } = await db
       .from("user_profiles")
       .select("*, organization:organizations(*)")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
+    if (!profile) {
+      if (profileError) {
+        console.error(
+          "getCurrentUser: lecture du profil utilisateur échouée:",
+          profileError,
+        );
+      }
       return null;
     }
 
@@ -166,7 +225,9 @@ export const authService = {
             city: org.city,
             contactEmail: org.contact_email,
             verified: org.verified,
+            rejectionReason: org.rejection_reason ?? null,
             createdAt: new Date(org.created_at),
+            balanceSats: org.balance_sats ?? 0,
           }
         : null,
     };

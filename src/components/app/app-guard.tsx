@@ -11,16 +11,20 @@ import { useAuth } from "@/providers/auth-provider";
  * session de l'organisation n'est pas établie.
  */
 export function AppGuard({ children }: { children: ReactNode }) {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("/login");
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace("/login");
+      } else if (user?.role === "donor") {
+        router.replace("/donneur");
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || user?.role === "donor") {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Droplet className="text-primary size-8 animate-pulse" />

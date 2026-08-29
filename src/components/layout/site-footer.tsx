@@ -1,16 +1,22 @@
-import { Container } from "@/components/layout/container";
+import Link from "next/link";
+
 import { Logo } from "@/components/shared/logo";
+
+import { Container } from "@/components/layout/container";
 import { footerNav } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
+
+const legalLinks = [
+  { label: "Mentions légales", href: "/mentions-legales" },
+  { label: "Confidentialité", href: "/confidentialite" },
+  { label: "Conditions d'utilisation", href: "/conditions" },
+];
 
 export function SiteFooter() {
   return (
     <footer className="bg-secondary/30 border-t">
       <Container className="grid gap-10 py-14 md:grid-cols-[1.5fr_repeat(3,1fr)]">
         <div className="flex flex-col gap-3">
-          <span className="flex items-center gap-2 font-semibold">
-            <Logo variant="horizontal" height="1.6rem" />
-          </span>
+          <Logo />
           <p className="text-muted-foreground max-w-xs text-sm">
             Mieux gérer les donneurs de sang pour sauver plus de vies, partout
             en Afrique.
@@ -36,11 +42,21 @@ export function SiteFooter() {
         ))}
       </Container>
 
-      <Container className="text-muted-foreground flex flex-col items-center justify-between gap-2 border-t py-6 text-sm sm:flex-row">
+      <Container className="text-muted-foreground flex flex-col items-center justify-between gap-3 border-t py-6 text-sm sm:flex-row">
         <span>
-          {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
+          {new Date().getFullYear()} Bitcoin Blood. Tous droits réservés.
         </span>
-        <span>Hackathon Bitcoin Mastermind 2026</span>
+        <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          {legalLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="hover:text-foreground transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </Container>
     </footer>
   );

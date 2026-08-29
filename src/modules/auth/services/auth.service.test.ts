@@ -37,6 +37,7 @@ vi.mock("@/lib/supabase/server", () => {
 
   return {
     createSupabaseServerClient: vi.fn(() => Promise.resolve(client)),
+    createSupabaseAdminClient: vi.fn(() => client),
   };
 });
 
@@ -80,7 +81,7 @@ describe("authService", () => {
         password: "wrongpassword",
       };
       await expect(authService.login(credentials)).rejects.toThrow(
-        "Invalid credentials",
+        "Email ou mot de passe incorrect.",
       );
     });
   });
@@ -127,12 +128,18 @@ describe("authService", () => {
         },
       };
 
-      const mockSingle = vi
-        .fn()
-        .mockResolvedValue({ data: mockProfile, error: null });
-      const mockEq = vi.fn(() => ({ single: mockSingle }));
-      const mockSelect = vi.fn(() => ({ eq: mockEq }));
-      mockClient.from.mockReturnValue({ select: mockSelect });
+      // getCurrentUser vérifie d'abord la table donors (aucun donneur ici),
+      // puis user_profiles. Les deux lectures utilisent maybeSingle.
+      const makeChain = (result: { data: unknown; error: null }) => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({ maybeSingle: vi.fn().mockResolvedValue(result) })),
+        })),
+      });
+      mockClient.from.mockImplementation((table: string) =>
+        table === "donors"
+          ? makeChain({ data: null, error: null })
+          : makeChain({ data: mockProfile, error: null }),
+      );
 
       const result = await authService.getCurrentUser();
 
@@ -152,7 +159,9 @@ describe("authService", () => {
           city: "Dakar",
           contactEmail: "contact@hospital.org",
           verified: true,
+          rejectionReason: null,
           createdAt: new Date("2026-06-30T12:00:00.000Z"),
+          balanceSats: 0,
         },
       });
     });

@@ -1,9 +1,9 @@
 import { createDonorSchema } from "@/modules/donors";
 import { donorService } from "@/modules/donors/services/donor.service";
-import { walletService, otsService } from "@/modules/bitcoin";
+import { walletService } from "@/modules/bitcoin";
 import { authService } from "@/modules/auth";
 import { emailService } from "@/modules/notifications";
-import { clientEnv } from "@/lib/env/client";
+import { serverPublicUrl } from "@/lib/url.server";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
 
@@ -34,22 +34,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // Horodatage du profil sur Bitcoin via OpenTimestamps
-    let otsProof = null;
-    try {
-      otsProof = await otsService.stampHash(validatedData.profileHash);
-    } catch (e) {
-      console.error(
-        "L'horodatage OpenTimestamps a échoué. Poursuite de la création sans preuve.",
-        e,
-      );
-    }
+    // Si l'appelant est une structure/administrateur connecté, on inscrit le
+    // donneur sans affecter sa session (création via l'API admin).
+    const caller = await authService.getCurrentUser();
+    const asAdmin =
+      caller?.role === "org_admin" || caller?.role === "super_admin";
 
-    // Enregistrement dans la base de données (Supabase Auth + Table donors)
-    const newDonor = await donorService.createDonor({
-      ...validatedData,
-      otsProof,
-    });
+    // Enregistrement dans la base de données (Supabase Auth + Table donors) sans preuve OTS initiale
+    const newDonor = await donorService.createDonor(
+      {
+        ...validatedData,
+        otsProof: null,
+      },
+      { asAdmin },
+    );
 
     if (!newDonor) {
       return failure(
@@ -66,7 +64,7 @@ export async function POST(req: Request) {
         toName: `${newDonor.firstName} ${newDonor.lastName}`,
         bloodType: newDonor.bloodType,
         city: newDonor.city,
-        verifyUrl: `${clientEnv.NEXT_PUBLIC_APP_URL}/verify/${newDonor.id}`,
+        verifyUrl: await serverPublicUrl(`/verify/${newDonor.id}`),
       })
       .catch((e) => console.error("Welcome email failed:", e));
 
@@ -90,8 +88,10 @@ export async function GET() {
       });
     }
 
-    const validatedDonors = await donorService.getValidatedDonors();
-    return success(validatedDonors);
+    // Tous les donneurs (validés ou non) pour que les structures et
+    // administrateurs puissent voir et valider les nouveaux inscrits.
+    const donors = await donorService.getAllDonors();
+    return success(donors);
   } catch (error) {
     return handleApiError(error);
   }

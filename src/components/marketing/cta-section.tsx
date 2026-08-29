@@ -1,4 +1,5 @@
-import { ArrowRight, Droplet } from "lucide-react";
+import { ArrowRight, Droplet, Heart } from "lucide-react";
+import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { Reveal } from "@/components/shared/reveal";
@@ -31,10 +32,25 @@ export function CtaSection() {
                 Inscrivez-vous comme donneur ou mobilisez votre communauté pour
                 la prochaine campagne.
               </p>
-              <Button size="lg" variant="secondary" className="group">
-                Devenir donneur
-                <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg" variant="secondary" className="group">
+                  <Link href="/donate">
+                    Devenir donneur
+                    <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  <Link href="/soutenir">
+                    <Heart className="size-4" />
+                    Soutenir la plateforme
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </Reveal>

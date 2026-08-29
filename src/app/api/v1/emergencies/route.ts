@@ -1,4 +1,5 @@
 import { createEmergencySchema, emergencyService } from "@/modules/emergencies";
+import { nostrService } from "@/modules/notifications/services/nostr.service";
 import { authService } from "@/modules/auth";
 import { API_ERROR_CODE } from "@/lib/api/errors";
 import { handleApiError, success, failure } from "@/lib/api/response";
@@ -10,21 +11,31 @@ import { handleApiError, success, failure } from "@/lib/api/response";
 export async function POST(req: Request) {
   try {
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
     }
 
     const body = await req.json();
 
-    // Sécurité: Forcer l'injection du hospitalId de la session de confiance
-    body.hospitalId = user.organizationId;
+    // On rattache l'organisation de la session si elle existe ; l'action reste
+    // possible sans organisation liée.
+    body.hospitalId = user.organizationId ?? null;
 
     const validatedData = createEmergencySchema.parse(body);
     const emergency = await emergencyService.createEmergency(validatedData);
+
+    // Publication asynchrone sur Nostr
+    void nostrService
+      .publishEmergencyAlert({
+        hospitalName: user.organization?.name ?? "Centre Partenaire",
+        hospitalId: user.organizationId ?? "",
+        bloodType: validatedData.bloodType,
+        quantity: validatedData.quantityNeeded,
+        city: validatedData.city,
+      })
+      .catch((e) => console.error("Nostr publish failed:", e));
 
     return success(emergency, { status: 201 });
   } catch (error) {

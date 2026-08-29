@@ -1,8 +1,8 @@
 import { ArrowRight, BellRing, Droplet, HeartPulse } from "lucide-react";
+import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
 import { RevealImage } from "@/components/marketing/reveal-image";
-import { RotatingHeadline } from "@/components/marketing/rotating-headline";
 import { StatCounter } from "@/components/marketing/stat-counter";
 import { GridPattern } from "@/components/shared/grid-pattern";
 import { Badge } from "@/components/ui/badge";
@@ -57,36 +57,33 @@ export function HeroSection() {
             className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl"
             style={{ animationDelay: "80ms" }}
           >
-            Chaque goutte compte.{" "}
-            <RotatingHeadline
-              className="font-semibold"
-              words={[
-                "Connectons les donneurs.",
-                "Sauvons des vies ensemble.",
-                "Mobilisons toute l'Afrique.",
-              ]}
-            />
+            Votre sang sauve des vies,{" "}
+            <span className="text-primary block sm:inline">
+              Bitcoin sécurise votre engagement.
+            </span>
           </h1>
 
           <p
             className="animate-rise-in text-muted-foreground max-w-xl text-lg text-pretty"
             style={{ animationDelay: "160ms" }}
           >
-            HEMORA enregistre les donneurs volontaires, retrouve des profils
-            compatibles en quelques secondes et déclenche des alertes ciblées en
-            cas d'urgence.
+            Rejoignez le premier réseau panafricain de donneurs de sang
+            volontaires et recevez des récompenses pour votre geste de
+            solidarité.
           </p>
 
           <div
             className="animate-rise-in flex flex-wrap items-center gap-3"
             style={{ animationDelay: "240ms" }}
           >
-            <Button size="lg" className="group">
-              Devenir donneur
-              <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+            <Button size="lg" className="group" asChild>
+              <Link href="/donate">
+                Devenir donneur maintenant
+                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-0.5" />
+              </Link>
             </Button>
-            <Button size="lg" variant="outline">
-              Découvrir le fonctionnement
+            <Button size="lg" variant="outline" asChild>
+              <Link href="#fonctionnement">Découvrir le fonctionnement</Link>
             </Button>
           </div>
         </div>
@@ -97,10 +94,10 @@ export function HeroSection() {
         >
           <RevealImage
             priority
-            ratio="4 / 5"
+            ratio="1 / 1"
             delay={120}
-            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=70&auto=format&fit=crop"
-            alt="Soignant africain consultant une alerte de don sur son téléphone"
+            src="/hero-background.png"
+            alt="Un centre de don de sang moderne avec une infirmière en Afrique"
             sizes="(min-width: 1024px) 28rem, 90vw"
             className="shadow-primary/10 shadow-2xl"
           />

@@ -13,6 +13,8 @@ export type CampaignRecord = {
   latitude: number;
   longitude: number;
   radiusKm: number;
+  startsAt: string | null;
+  endsAt: string | null;
   emailsSent: number;
   responsesCount: number;
   status: string;

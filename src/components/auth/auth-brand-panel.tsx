@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Logo } from "@/components/shared/logo";
-
 import { HeartbeatMonitor } from "@/components/auth/heartbeat-monitor";
+import { Logo } from "@/components/shared/logo";
 
 const readouts = [
   { value: "12 480", label: "donneurs" },
@@ -47,11 +46,10 @@ export function AuthBrandPanel() {
         }}
       />
 
-      <Link
-        href="/"
-        className="relative flex items-center gap-2 text-lg font-semibold tracking-tight"
-      >
-        <Logo variant="horizontal" height="2.2rem" />
+      {/* Volet toujours sombre: on force le contexte `.dark` pour que le texte
+          du logo reste clair quel que soit le thème global. */}
+      <Link href="/" className="dark relative flex items-center">
+        <Logo />
       </Link>
 
       <div className="relative space-y-8">
@@ -68,7 +66,7 @@ export function AuthBrandPanel() {
         </h2>
 
         <p className="max-w-sm text-sm leading-relaxed text-white/60">
-          Le réseau qui relie donneurs et urgences à travers le continent — et
+          Le réseau qui relie donneurs et urgences à travers le continent - et
           ancre chaque don sur Bitcoin pour des preuves inaltérables.
         </p>
 

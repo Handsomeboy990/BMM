@@ -21,7 +21,7 @@ type RevealImageProps = {
 
 /**
  * Image qui se révèle au défilement avec un fondu, un léger zoom et un
- * dé-flou — la même grammaire d'animation que les visuels de Spaceship.
+ * dé-flou - la même grammaire d'animation que les visuels de Spaceship.
  * S'appuie sur next/image pour l'optimisation et le lazy-loading.
  */
 export function RevealImage({

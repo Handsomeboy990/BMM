@@ -6,7 +6,7 @@ export type RewardLogRecord = {
   hospitalId: string | null;
   satsAmount: number;
   status: "pending" | "completed" | "failed";
-  bolt11Invoice: string | null;
+  bolt11Invoice: string | null; // Peut aussi stocker 'momo:<numero>' ou 'points'
   paymentHash: string | null;
   errorMessage: string | null;
   createdAt: Date;

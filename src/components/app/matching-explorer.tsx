@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Select, SelectItem } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useSearchDonors } from "@/lib/api/hooks";
@@ -50,6 +51,8 @@ export function MatchingExplorer() {
   );
 
   const matches: MatchingDonor[] = search.data?.matches ?? [];
+  const { pageItems, page, setPage, totalPages, total } =
+    usePagination(matches);
 
   function onSearch() {
     if (!coords) {
@@ -146,7 +149,7 @@ export function MatchingExplorer() {
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {matches.map((donor) => (
+        {pageItems.map((donor) => (
           <Card key={donor.id}>
             <CardContent className="space-y-4 p-5">
               <div className="flex items-start gap-3">
@@ -201,6 +204,13 @@ export function MatchingExplorer() {
           </p>
         ) : null}
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

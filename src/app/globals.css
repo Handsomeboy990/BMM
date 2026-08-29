@@ -9,64 +9,81 @@
  */
 :root {
   --radius: 0.625rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.21 0.02 256);
+  /* Thème Clair - Confiance, Médical et Lumineux */
+  --background: oklch(0.99 0.003 256); /* Blanc chaud - #FCFCFC */
+  --foreground: oklch(0.22 0.025 256); /* Ardoise sombre - #2E333D */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 256);
+  --card: oklch(1 0 0); /* Blanc pur - #FFFFFF */
+  --card-foreground: oklch(0.22 0.025 256);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 256);
+  --popover-foreground: oklch(0.22 0.025 256);
 
-  --primary: oklch(0.55 0.21 25);
-  --primary-foreground: oklch(0.98 0.01 25);
+  /* Primaire : Rouge Médical Vibrant */
+  --primary: oklch(0.58 0.225 22.5); /* Rouge écarlate - #D92332 */
+  --primary-foreground: oklch(0.98 0.005 20); /* Crème très clair - #FFF8F8 */
 
-  --secondary: oklch(0.97 0.01 256);
-  --secondary-foreground: oklch(0.21 0.02 256);
+  /* Secondaire : Gris Ardoise Premium */
+  --secondary: oklch(0.28 0.015 256); /* Gris ardoise premium - #1E232B */
+  --secondary-foreground: oklch(0.98 0.005 256);
 
-  --muted: oklch(0.97 0.01 256);
-  --muted-foreground: oklch(0.55 0.02 256);
+  /* Accent : Orange Chaleureux (Bitcoin / Lightning) */
+  --accent: oklch(0.68 0.19 45); /* Orange Bitcoin - #E67E22 */
+  --accent-foreground: oklch(0.12 0.03 45);
 
-  --accent: oklch(0.97 0.01 256);
-  --accent-foreground: oklch(0.21 0.02 256);
+  /* Couleurs Sémantiques & Utilitaires */
+  --muted: oklch(0.96 0.005 256); /* Gris clair - #F3F4F6 */
+  --muted-foreground: oklch(0.55 0.015 256); /* Gris ardoise moyen - #858D99 */
 
+  --success: oklch(0.64 0.17 145); /* Vert émeraude - #27AE60 */
+  --success-foreground: oklch(0.98 0.005 145);
+
+  --warning: oklch(0.72 0.16 70); /* Jaune ocre - #E2A100 */
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.98 0.01 25);
 
-  --border: oklch(0.92 0.01 256);
-  --input: oklch(0.92 0.01 256);
-  --ring: oklch(0.55 0.21 25);
+  --border: oklch(0.92 0.008 256); /* Bordure subtile - #E4E7EB */
+  --input: oklch(0.92 0.008 256);
+  --ring: oklch(0.58 0.225 22.5);
 }
 
 .dark {
-  --background: oklch(0.18 0.02 256);
-  --foreground: oklch(0.96 0.01 256);
+  /* Thème Sombre - Premium, Technologique, Épuré */
+  --background: oklch(0.14 0.012 256); /* Noir bleuté profond - #0F1216 */
+  --foreground: oklch(0.95 0.005 256); /* Blanc pur texturé - #ECEFF2 */
 
-  --card: oklch(0.22 0.02 256);
-  --card-foreground: oklch(0.96 0.01 256);
+  --card: oklch(0.18 0.015 256); /* Gris foncé mat - #181C24 */
+  --card-foreground: oklch(0.95 0.005 256);
 
-  --popover: oklch(0.22 0.02 256);
-  --popover-foreground: oklch(0.96 0.01 256);
+  --popover: oklch(0.18 0.015 256);
+  --popover-foreground: oklch(0.95 0.005 256);
 
-  --primary: oklch(0.62 0.2 25);
-  --primary-foreground: oklch(0.18 0.02 256);
+  /* Primaire : Rouge Écarlate Lumineux */
+  --primary: oklch(0.62 0.22 22.5); /* Rouge rubis électrique - #E53E3E */
+  --primary-foreground: oklch(0.98 0.005 20);
 
-  --secondary: oklch(0.27 0.02 256);
-  --secondary-foreground: oklch(0.96 0.01 256);
+  /* Secondaire : Gris Ardoise Lumineux */
+  --secondary: oklch(0.22 0.015 256); /* Gris sombre mat - #151920 */
+  --secondary-foreground: oklch(0.95 0.005 256);
 
-  --muted: oklch(0.27 0.02 256);
-  --muted-foreground: oklch(0.7 0.02 256);
+  /* Accent : Orange Bitcoin Éclatant */
+  --accent: oklch(0.72 0.2 45); /* Orange chaud lumineux - #FF9900 */
+  --accent-foreground: oklch(0.1 0.02 45);
 
-  --accent: oklch(0.27 0.02 256);
-  --accent-foreground: oklch(0.96 0.01 256);
+  --muted: oklch(0.22 0.015 256); /* Gris ardoise - #242B35 */
+  --muted-foreground: oklch(0.72 0.01 256); /* Gris clair - #B0B7C0 */
 
-  --destructive: oklch(0.62 0.2 25);
-  --destructive-foreground: oklch(0.96 0.01 256);
+  --success: oklch(0.68 0.17 145); /* Vert émeraude brillant - #2ECC71 */
+  --success-foreground: oklch(0.1 0.02 145);
 
-  --border: oklch(0.3 0.02 256);
-  --input: oklch(0.3 0.02 256);
-  --ring: oklch(0.62 0.2 25);
+  --border: oklch(0.24 0.015 256); /* Bordures contrastées - #2D3540 */
+  --input: oklch(0.24 0.015 256);
+  --ring: oklch(0.62 0.22 22.5);
 }
 
 @theme inline {
@@ -80,10 +97,13 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -101,10 +121,10 @@
   --ease-brand: cubic-bezier(0.55, 0, 0.35, 1);
   --ease-reveal: cubic-bezier(0, 0, 0.35, 1);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
 
 @layer base {
@@ -342,5 +362,85 @@
       filter: none;
       transition: none;
     }
+  }
+}
+
+/* Champ téléphone international (react-phone-number-input) accordé au thème. */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+}
+
+.PhoneInputInput::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.15rem;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.35rem;
+  height: 1rem;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px
+    color-mix(in oklch, var(--color-border) 80%, transparent);
+}
+
+.PhoneInputCountryIcon--border {
+  background: transparent;
+  box-shadow: 0 0 0 1px
+    color-mix(in oklch, var(--color-border) 80%, transparent);
+}
+
+.PhoneInputCountrySelectArrow {
+  color: var(--color-muted-foreground);
+  opacity: 0.9;
+  border-color: currentColor;
+  margin-left: 0.1rem;
+}
+
+.PhoneInputCountrySelect:focus
+  + .PhoneInputCountryIcon
+  + .PhoneInputCountrySelectArrow,
+.PhoneInputCountrySelect:focus + .PhoneInputCountryIcon {
+  color: var(--color-ring);
+}
+
+/* Impression : n'imprimer que l'élément marqué .print-area (carte donneur). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .no-print {
+    display: none !important;
   }
 }

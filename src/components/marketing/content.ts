@@ -1,65 +1,51 @@
-import {
-  BellRing,
-  CalendarHeart,
-  HeartPulse,
-  MapPin,
-  ShieldCheck,
-  UsersRound,
-} from "lucide-react";
+import { BellRing, HeartPulse, ShieldCheck, Smartphone } from "lucide-react";
 
 export const features = [
   {
-    icon: UsersRound,
-    title: "Donneurs volontaires",
-    description:
-      "Enregistrez votre profil et votre groupe sanguin en quelques minutes, en toute confidentialité.",
-  },
-  {
-    icon: MapPin,
-    title: "Recherche compatible",
-    description:
-      "Retrouvez rapidement des donneurs compatibles à proximité du lieu de l'urgence.",
-  },
-  {
     icon: BellRing,
-    title: "Alertes ciblées",
+    title: "Alerté près de chez vous",
     description:
-      "Notifiez instantanément les bons donneurs lorsqu'une vie est en jeu.",
-  },
-  {
-    icon: CalendarHeart,
-    title: "Campagnes de don",
-    description:
-      "Organisez et suivez vos campagnes de collecte, de l'inscription au bilan.",
+      "Vous n'êtes prévenu que lorsque votre groupe sanguin est vraiment nécessaire, à proximité.",
   },
   {
     icon: ShieldCheck,
-    title: "Cartes vérifiables",
+    title: "Vos données restent à vous",
     description:
-      "Cartes physiques et numériques dont l'authenticité est vérifiable en un instant.",
+      "Vos informations médicales sont protégées et ne sont partagées qu'avec votre accord.",
   },
   {
     icon: HeartPulse,
-    title: "Preuves Bitcoin",
+    title: "Une carte de confiance",
     description:
-      "L'intégrité des données est ancrée sur Bitcoin, vérifiable publiquement.",
+      "Votre carte de donneur et l'historique de vos dons ne peuvent pas être falsifiés.",
+  },
+  {
+    icon: Smartphone,
+    title: "Récompensé simplement",
+    description:
+      "Recevez votre récompense directement sur votre Mobile Money, par un simple dépôt, sans rien à installer.",
   },
 ] as const;
 
 export const steps = [
   {
-    title: "Inscrivez-vous",
+    title: "Créez votre profil",
     description:
-      "Créez votre profil de donneur et renseignez votre groupe sanguin et votre zone.",
+      "Indiquez votre groupe sanguin et votre ville pour rejoindre le réseau de votre région.",
   },
   {
-    title: "Soyez alerté",
+    title: "Recevez votre carte de donneur",
     description:
-      "Recevez une notification dès qu'un besoin compatible survient près de chez vous.",
+      "Une carte de confiance est créée pour vous : elle prouve votre identité de donneur en toute sécurité.",
   },
   {
-    title: "Sauvez des vies",
+    title: "Répondez aux urgences",
     description:
-      "Rendez-vous au point de collecte et confirmez votre don en toute simplicité.",
+      "Quand un besoin proche correspond à votre groupe, rendez-vous au centre de don le plus proche.",
+  },
+  {
+    title: "Recevez votre récompense",
+    description:
+      "Dès votre don confirmé, vous recevez une récompense, sur votre Mobile Money ou en Bitcoin.",
   },
 ] as const;

@@ -16,12 +16,10 @@ export async function POST(
 ) {
   try {
     const user = await authService.getCurrentUser();
-    if (!user || !user.organizationId || !user.organization) {
-      return failure(
-        API_ERROR_CODE.FORBIDDEN,
-        "Accès refusé. L'utilisateur n'est associé à aucune organisation.",
-        { status: 403 },
-      );
+    if (!user) {
+      return failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
+        status: 401,
+      });
     }
 
     const id = (await params).id;
@@ -54,8 +52,8 @@ export async function POST(
 
     const transfer = await transferService.respondTransfer(
       id,
-      user.organizationId,
-      user.organization.name,
+      user.organizationId ?? null,
+      user.organization?.name ?? "Structure",
     );
     return success(transfer);
   } catch (error) {

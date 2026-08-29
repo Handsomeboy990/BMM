@@ -50,10 +50,13 @@ export async function middleware(request: NextRequest) {
     // Exemptions publiques (sinon on ne pourrait jamais se connecter/s'inscrire)
     if (
       path === "/api/v1/health" ||
+      path === "/api/v1/docs" ||
+      path === "/api/v1/openapi.json" ||
       path === "/api/v1/auth/login" ||
       path === "/api/v1/auth/register" ||
       path === "/api/v1/auth/logout" ||
       (path === "/api/v1/donors" && request.method === "POST") ||
+      (path === "/api/v1/donations" && request.method === "POST") ||
       path.startsWith("/api/v1/verify") ||
       path.startsWith("/api/v1/search")
     ) {

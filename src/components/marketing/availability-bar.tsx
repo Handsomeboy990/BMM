@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useInView } from "@/hooks/use-in-view";
 import type { BloodTypeAvailability } from "@/lib/mock/landing";
 import { cn } from "@/lib/utils";
@@ -25,8 +26,19 @@ export function AvailabilityBar({
 
   return (
     <div ref={ref} className="flex flex-col gap-2 rounded-lg border p-4">
-      <div className="flex items-baseline justify-between">
-        <span className="text-lg font-semibold">{group}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="relative size-5">
+            <Image
+              src="/blood-droplet-pure.jpg"
+              alt="Goutte de sang"
+              fill
+              sizes="20px"
+              className="object-contain"
+            />
+          </div>
+          <span className="text-lg font-semibold">{group}</span>
+        </div>
         <span className="text-muted-foreground text-xs">
           {STATUS_LABELS[status]}
         </span>

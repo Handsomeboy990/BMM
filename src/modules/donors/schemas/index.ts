@@ -10,6 +10,14 @@ export const donorSchema = z.object({
 });
 
 export const createDonorSchema = donorSchema.extend({
+  // Groupe sanguin optionnel à l'inscription : un donneur qui ne le connaît
+  // pas encore peut le laisser vide (renseigné plus tard, après un test).
+  bloodType: z
+    .enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+    .optional(),
+  // Position facultative : le donneur n'est pas obligé de la partager.
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
   firstName: z.string().min(1, "Le prénom est requis").max(255),
   lastName: z.string().min(1, "Le nom est requis").max(255),
   email: z.string().email("Adresse email invalide"),
@@ -21,6 +29,10 @@ export const createDonorSchema = donorSchema.extend({
   bitcoinAddress: z.string().min(1).max(255),
   profileHash: z.string().length(64),
   signature: z.string().min(1),
+  referredById: z
+    .string()
+    .uuid("L'identifiant du parrain doit être un UUID valide")
+    .optional(),
 });
 
 export const donorProfileBaseSchema = donorSchema;

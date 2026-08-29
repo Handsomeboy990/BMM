@@ -1,13 +1,17 @@
 import {
   ArrowLeftRight,
   Bell,
+  Building2,
   CalendarHeart,
+  IdCard,
   LayoutDashboard,
   Search,
   Users,
   Zap,
   type LucideIcon,
 } from "lucide-react";
+
+export type AppRole = "super_admin" | "org_admin" | "donor";
 
 export type AppNavItem = {
   label: string;
@@ -49,3 +53,22 @@ export const appNav: AppNavGroup[] = [
     items: [{ label: "Réseau & stock", href: "/reseau", icon: ArrowLeftRight }],
   },
 ];
+
+/**
+ * Menu réservé au super-administrateur : supervision de l'ensemble du réseau,
+ * en plus de ce que voit une structure.
+ */
+export const adminNav: AppNavGroup[] = [
+  {
+    title: "Administration",
+    items: [
+      { label: "Organisations", href: "/organisations", icon: Building2 },
+      { label: "Demandes de cartes", href: "/demandes-cartes", icon: IdCard },
+    ],
+  },
+];
+
+/** Renvoie le menu adapté au rôle : l'admin voit tout, plus l'administration. */
+export function navForRole(role: AppRole | undefined): AppNavGroup[] {
+  return role === "super_admin" ? [...appNav, ...adminNav] : appNav;
+}
