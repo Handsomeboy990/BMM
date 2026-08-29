@@ -42,9 +42,9 @@ export const aboutContent = {
 } as const;
 
 /**
- * Ce que la plateforme fait aujourd'hui. Chaque ligne correspond à une
- * fonctionnalité livrée, pas à une intention: si une promesse disparaît du
- * produit, elle disparaît d'ici.
+ * Ce que la plateforme apporte aujourd'hui, formulé du point de vue de la
+ * personne qui l'utilise. Chaque entrée correspond à une fonctionnalité
+ * réellement livrée: si elle disparaît du produit, elle disparaît d'ici.
  */
 export const aboutPillars = [
   {

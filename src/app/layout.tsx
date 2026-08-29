@@ -6,6 +6,7 @@ import {
   Plus_Jakarta_Sans,
 } from "next/font/google";
 
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";
 import { Toaster } from "@/components/ui/toaster";
@@ -106,6 +107,7 @@ export default function RootLayout({
           <Toaster />
           <ServiceWorker />
           <OfflineIndicator />
+          <InstallPrompt />
         </ThemeProvider>
         <Analytics />
       </body>

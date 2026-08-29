@@ -165,11 +165,23 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Entrée d'un panneau ou d'une boîte de dialogue. */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -263,7 +275,41 @@
 
 @layer utilities {
   .animate-rise-in {
-    animation: rise-in 0.6s var(--ease-reveal) both;
+    animation: rise-in 0.62s var(--ease-reveal) both;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.28s var(--ease-brand) both;
+  }
+
+  /**
+   * Entrée en cascade: chaque enfant direct part un cran après le précédent.
+   * Évite de poser un `animationDelay` à la main sur chaque élément d'une
+   * liste dont on ne connaît pas la longueur à l'avance.
+   */
+  .stagger > * {
+    animation: rise-in 0.55s var(--ease-reveal) both;
+  }
+  .stagger > *:nth-child(1) {
+    animation-delay: 40ms;
+  }
+  .stagger > *:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .stagger > *:nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .stagger > *:nth-child(4) {
+    animation-delay: 190ms;
+  }
+  .stagger > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  .stagger > *:nth-child(6) {
+    animation-delay: 290ms;
+  }
+  .stagger > *:nth-child(n + 7) {
+    animation-delay: 330ms;
   }
 
   .animate-marquee {
@@ -322,6 +368,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .animate-rise-in,
+    .animate-scale-in,
+    .stagger > *,
     .animate-marquee,
     .animate-word-in,
     .animate-word-out,

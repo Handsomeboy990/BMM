@@ -177,10 +177,8 @@ export function ContentEditor() {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <Label htmlFor="content-body">Texte</Label>
               <span className="text-muted-foreground text-xs">
-                <code className="font-mono">## Titre</code> pour une section,{" "}
-                <code className="font-mono">- </code> pour une puce,{" "}
-                <code className="font-mono">**gras**</code>,{" "}
-                <code className="font-mono">[lien](/page)</code>
+                Une ligne commençant par deux dièses devient un titre de
+                section, par un tiret une puce.
               </span>
             </div>
             <Textarea
@@ -191,8 +189,8 @@ export function ContentEditor() {
               className="font-mono text-sm leading-relaxed"
             />
             <p className="text-muted-foreground text-xs">
-              {body.length.toLocaleString("fr-FR")} caractères. Le HTML
-              n&apos;est pas interprété: il s&apos;affichera tel quel.
+              {body.length.toLocaleString("fr-FR")} caractères. Utilisez
+              l&apos;aperçu pour voir la page telle qu&apos;elle sera publiée.
             </p>
           </div>
         </div>
@@ -209,7 +207,7 @@ function ContentPreview({ title, body }: { title: string; body: string }) {
     <div className="bg-card rounded-xl border p-6 sm:p-8">
       <div className="text-muted-foreground mb-6 flex items-center gap-2 text-xs">
         <FileText className="size-3.5" />
-        Aperçu, rendu comme sur le site public
+        Aperçu: exactement ce que verront les visiteurs
       </div>
       <h2 className="font-display mb-8 text-2xl font-extrabold tracking-tight">
         {title}

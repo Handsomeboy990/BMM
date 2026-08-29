@@ -81,9 +81,9 @@ export default function AboutPage() {
       <section className="bg-secondary/[0.04] border-b py-24 dark:bg-black/20">
         <Container className="flex flex-col gap-12">
           <SectionHeading
-            eyebrow="Ce que nous avons construit"
-            title="Quatre promesses, tenues par du code"
-            description="Chaque ligne correspond à une fonctionnalité livrée, vérifiable dans l'application."
+            eyebrow="Ce que nous faisons"
+            title="Quatre engagements, tenus au quotidien"
+            description="Ce que la plateforme apporte concrètement aux donneurs et aux structures de santé."
           />
           {/* Une liste, pas une séquence: ces quatre promesses n'ont pas
               d'ordre, les numéroter aurait suggéré des étapes. */}

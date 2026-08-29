@@ -21,6 +21,7 @@ import { useState } from "react";
 
 import { BalanceCard } from "@/components/donor/balance-card";
 import { DonorCardSection } from "@/components/donor/donor-card-section";
+import { NotificationCard } from "@/components/donor/notification-card";
 import { OfflineIdentityCard } from "@/components/donor/offline-identity-card";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { ReferralCard } from "@/components/donor/referral-card";
@@ -415,6 +416,8 @@ export function DonorSpace() {
             city: donor.city,
           }}
         />
+
+        <NotificationCard />
 
         <ReferralCard donorId={donor.id} />
 

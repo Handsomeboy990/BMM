@@ -7,14 +7,14 @@ import { cn } from "@/lib/utils";
 
 type Direction = "up" | "down" | "left" | "right" | "scale";
 
-// Décalages volontairement discrets, dans l'esprit de Spaceship :
-// l'élément glisse de quelques pixels seulement et se fond en place.
+// Le décalage doit se voir sans distraire: à 12 px l'animation passait
+// inaperçue, à 24 px la page semblerait sauter.
 const HIDDEN: Record<Direction, string> = {
-  up: "translate-y-3 opacity-0",
-  down: "-translate-y-3 opacity-0",
-  left: "-translate-x-3 opacity-0",
-  right: "translate-x-3 opacity-0",
-  scale: "scale-[0.98] opacity-0",
+  up: "translate-y-6 opacity-0",
+  down: "-translate-y-6 opacity-0",
+  left: "-translate-x-6 opacity-0",
+  right: "translate-x-6 opacity-0",
+  scale: "scale-[0.96] opacity-0",
 };
 
 type RevealProps = ComponentProps<"div"> & {
@@ -42,7 +42,13 @@ export function Reveal({
   ...props
 }: RevealProps) {
   const Component = (as ?? "div") as ElementType;
-  const { ref, inView } = useInView<HTMLDivElement>();
+  // L'observateur déclenche dès qu'un huitième de l'élément entre, avec une
+  // marge basse: le mouvement commence pendant la montée, pas une fois
+  // l'élément déjà installé au centre de l'écran.
+  const { ref, inView } = useInView<HTMLDivElement>({
+    threshold: 0.08,
+    rootMargin: "0px 0px -4% 0px",
+  });
 
   return (
     <Component
@@ -54,7 +60,7 @@ export function Reveal({
         ...style,
       }}
       className={cn(
-        "transition-all duration-600 will-change-transform motion-reduce:translate-x-0 motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:transition-none",
+        "transition-all duration-700 will-change-transform motion-reduce:translate-x-0 motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:transition-none",
         inView
           ? "translate-x-0 translate-y-0 scale-100 opacity-100"
           : HIDDEN[direction],

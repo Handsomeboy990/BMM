@@ -5,14 +5,14 @@ import { siteConfig } from "@/config/site";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: siteConfig.name,
-    short_name: "BB",
+    short_name: "HEMORA",
     description: siteConfig.description,
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#11151c",
-    theme_color: "#11151c",
+    background_color: "#0F1216",
+    theme_color: "#0F1216",
     lang: "fr",
     categories: ["health", "medical", "social"],
     icons: [
@@ -35,10 +35,15 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    // Raccourcis proposés par le système à l'appui long sur l'icône.
     shortcuts: [
-      { name: "Tableau de bord", url: "/dashboard" },
-      { name: "Nouvelle alerte", url: "/alerts" },
-      { name: "Devenir donneur", url: "/donate" },
+      {
+        name: "Mon espace donneur",
+        short_name: "Mon espace",
+        url: "/donneur",
+      },
+      { name: "Vérifier une carte", short_name: "Vérifier", url: "/verify" },
+      { name: "Déclencher une alerte", short_name: "Alerte", url: "/alerts" },
     ],
   };
 }

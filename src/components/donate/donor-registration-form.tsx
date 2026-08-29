@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneField } from "@/components/ui/phone-field";
 import { Select, SelectItem } from "@/components/ui/select";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCreateDonor } from "@/lib/api/hooks";
 import {
@@ -95,6 +96,41 @@ export function DonorRegistrationForm({
     request: requestLocation,
   } = useGeolocation();
 
+  // Une dizaine de champs: un rafraîchissement ne doit pas tout effacer. Le
+  // mot de passe n'est jamais conservé.
+  const formRef = useRef<HTMLFormElement>(null);
+  const {
+    draft,
+    restored,
+    save: saveDraft,
+    clear: clearDraft,
+  } = useFormDraft<Record<string, string>>("inscription-donneur", {
+    omit: ["password"],
+  });
+
+  // Réinjection du brouillon une fois le formulaire monté.
+  useEffect(() => {
+    if (!draft || !formRef.current) return;
+    for (const [name, value] of Object.entries(draft)) {
+      const field = formRef.current.elements.namedItem(name);
+      if (field instanceof HTMLInputElement && field.type !== "password") {
+        field.value = value;
+      }
+    }
+  }, [draft]);
+
+  /** Mémorise la saisie à chaque frappe, sans le mot de passe. */
+  function onFormInput() {
+    const form = formRef.current;
+    if (!form) return;
+
+    const values: Record<string, string> = {};
+    for (const [name, value] of new FormData(form).entries()) {
+      if (typeof value === "string") values[name] = value;
+    }
+    saveDraft(values);
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -159,6 +195,7 @@ export function DonorRegistrationForm({
           : { mode: "lightning" },
       );
 
+      clearDraft();
       setSuccess({ donor, wif: identity.wif });
     } catch (err) {
       setError(err instanceof Error ? err.message : "L'inscription a échoué.");
@@ -267,7 +304,33 @@ export function DonorRegistrationForm({
   return (
     <Card>
       <CardContent className="p-6">
-        <form className="space-y-5" onSubmit={onSubmit}>
+        <form
+          ref={formRef}
+          className="space-y-5"
+          onSubmit={onSubmit}
+          onInput={onFormInput}
+        >
+          {restored && draft ? (
+            <p
+              role="status"
+              className="text-muted-foreground flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-xs"
+            >
+              <span>
+                Nous avons retrouvé votre saisie précédente. Le mot de passe est
+                à ressaisir.
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  formRef.current?.reset();
+                  clearDraft();
+                }}
+                className="hover:text-foreground focus-visible:ring-ring cursor-pointer rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Repartir de zéro
+              </button>
+            </p>
+          ) : null}
           {referredById ? (
             <p className="border-primary/25 bg-primary/5 text-primary flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <Users className="size-4 shrink-0" />
