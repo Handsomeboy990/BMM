@@ -19,25 +19,44 @@ const saveSchema = z.object({
   body: z.string().min(1).max(60_000),
 });
 
-async function requireSuperAdmin() {
+type Guard =
+  | { ok: false; response: ReturnType<typeof failure> }
+  | {
+      ok: true;
+      user: NonNullable<Awaited<ReturnType<typeof authService.getCurrentUser>>>;
+    };
+
+/**
+ * Union discriminée volontaire: `ok` prouve à TypeScript que `user` existe
+ * dans la branche autorisée. Un objet aux deux champs optionnels laissait
+ * passer un accès à `user` sur le chemin refusé.
+ */
+async function requireSuperAdmin(): Promise<Guard> {
   const user = await authService.getCurrentUser();
+
   if (!user) {
     return {
-      error: failure(API_ERROR_CODE.UNAUTHORIZED, "Authentification requise.", {
-        status: 401,
-      }),
+      ok: false,
+      response: failure(
+        API_ERROR_CODE.UNAUTHORIZED,
+        "Authentification requise.",
+        { status: 401 },
+      ),
     };
   }
+
   if (user.role !== "super_admin") {
     return {
-      error: failure(
+      ok: false,
+      response: failure(
         API_ERROR_CODE.FORBIDDEN,
         "Réservé à l'administration de la plateforme.",
         { status: 403 },
       ),
     };
   }
-  return { user };
+
+  return { ok: true, user };
 }
 
 /**
@@ -47,7 +66,7 @@ async function requireSuperAdmin() {
 export async function GET() {
   try {
     const guard = await requireSuperAdmin();
-    if (guard.error) return guard.error;
+    if (!guard.ok) return guard.response;
 
     return success(await contentService.list());
   } catch (error) {
@@ -62,7 +81,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const guard = await requireSuperAdmin();
-    if (guard.error) return guard.error;
+    if (!guard.ok) return guard.response;
 
     const payload = saveSchema.parse(await request.json());
     const saved = await contentService.save({
