@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   authApi,
   campaignsApi,
+  contentApi,
   cardRequestsApi,
   donationsApi,
   donorsApi,
@@ -26,6 +27,7 @@ import {
   type LoginPayload,
   type OrgDocumentType,
   type RegisterOrganizationPayload,
+  type SaveContentPayload,
   type RewardPayload,
   type SearchParams,
   type SetStockPayload,
@@ -59,6 +61,7 @@ export const queryKeys = {
   donorRewards: (donorId?: string) =>
     ["donor", "rewards", donorId ?? "me"] as const,
   cardRequests: ["card-requests"] as const,
+  siteContent: ["admin", "content"] as const,
   myCardRequest: ["card-request", "me"] as const,
   verify: (id: string) => ["verify", id] as const,
 };
@@ -541,5 +544,26 @@ export function useDecideCardRequest() {
       status: "approved" | "rejected";
     }) => cardRequestsApi.decide(id, status).then((r) => r.data.request),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.cardRequests }),
+  });
+}
+
+/* ------------------------ Contenus éditoriaux ---------------------- */
+
+/** Textes des pages légales, tels qu'enregistrés (super-admin). */
+export function useSiteContent() {
+  return useQuery({
+    queryKey: queryKeys.siteContent,
+    queryFn: () => contentApi.list().then((r) => r.data),
+  });
+}
+
+/** Enregistre le texte d'une page depuis la console d'administration. */
+export function useSaveSiteContent() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { success: "Page enregistrée. Elle est publiée immédiatement." },
+    mutationFn: (payload: SaveContentPayload) =>
+      contentApi.save(payload).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.siteContent }),
   });
 }

@@ -11,3 +11,4 @@ export * from "./transfers";
 export * from "./donations";
 export * from "./card-requests";
 export * from "./statistics";
+export * from "./content";

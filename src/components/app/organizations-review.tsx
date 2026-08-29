@@ -2,7 +2,7 @@
 
 import { Building2 } from "lucide-react";
 
-import { OrgReviewRow } from "@/components/app/super-admin-dashboard";
+import { OrgReviewRow } from "@/components/admin/org-review-row";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QueryBoundary } from "@/components/ui/query-boundary";
