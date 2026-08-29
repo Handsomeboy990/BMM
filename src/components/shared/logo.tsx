@@ -41,17 +41,21 @@ export function BrandMark({ className }: { className?: string }) {
         fill="url(#hemora-drop)"
       />
 
-      {/* Donneur: tête, bras levés, corps. Découpé dans la goutte. */}
-      <g fill="#fff">
-        <circle cx="32" cy="27" r="6" />
-        <path d="M18.4 27.8a2.9 2.9 0 0 1 4.6-3.4c2.4 3.2 5.4 5.3 9 6.2v5.6c-5.4-1-10-4-13.6-8.4Z" />
-        <path d="M45.6 27.8a2.9 2.9 0 0 0-4.6-3.4c-2.4 3.2-5.4 5.3-9 6.2v5.6c5.4-1 10-4 13.6-8.4Z" />
-        <path d="M32 34.6c5.2 0 9.4 3.9 9.4 8.7 0 6-5.4 10.8-9.4 13.5-4-2.7-9.4-7.5-9.4-13.5 0-4.8 4.2-8.7 9.4-8.7Z" />
+      {/* Donneur: tête, bras levés, buste. Les bras sont tracés au trait
+          avec des extrémités arrondies pour rester lisibles à 24 px. */}
+      <g fill="#fff" stroke="#fff" strokeLinecap="round" strokeWidth="4.6">
+        <circle cx="32" cy="25.5" r="5.4" stroke="none" />
+        <path d="M20.5 26.5c2.3 4.2 6.1 6.9 11.5 7.7" fill="none" />
+        <path d="M43.5 26.5c-2.3 4.2-6.1 6.9-11.5 7.7" fill="none" />
+        <path
+          d="M32 33.4c5.6 0 10.1 4.2 10.1 9.4 0 6.4-5.8 11.6-10.1 14.5-4.3-2.9-10.1-8.1-10.1-14.5 0-5.2 4.5-9.4 10.1-9.4Z"
+          stroke="none"
+        />
       </g>
 
       {/* Cœur porté par le donneur */}
       <path
-        d="M32 52.4c-3.4-2.4-6-5-6-7.7 0-1.9 1.5-3.3 3.3-3.3 1.1 0 2.1.5 2.7 1.4.6-.9 1.6-1.4 2.7-1.4 1.8 0 3.3 1.4 3.3 3.3 0 2.7-2.6 5.3-6 7.7Z"
+        d="M32 51.6c-3.6-2.6-6.3-5.4-6.3-8.3 0-2 1.6-3.6 3.5-3.6 1.2 0 2.2.6 2.8 1.5.6-.9 1.6-1.5 2.8-1.5 1.9 0 3.5 1.6 3.5 3.6 0 2.9-2.7 5.7-6.3 8.3Z"
         fill="#C0202C"
       />
     </svg>

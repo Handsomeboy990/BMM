@@ -16,7 +16,7 @@ import { homeSectionIds } from "@/config/navigation";
  */
 export function AudiencesSection() {
   return (
-    <section id={homeSectionIds.temoignages} className="border-t py-24">
+    <section id={homeSectionIds.publics} className="border-t py-24">
       <Container className="flex flex-col gap-14">
         <SectionHeading
           eyebrow="Pour qui"

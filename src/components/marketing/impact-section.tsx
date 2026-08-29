@@ -1,16 +1,52 @@
+"use client";
+
+import { Bell, CalendarHeart, Droplet, MapPin } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
 import { Container } from "@/components/layout/container";
-import { homeSectionIds } from "@/config/navigation";
-import { RevealImage } from "@/components/marketing/reveal-image";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/shared/reveal";
+import { Skeleton } from "@/components/ui/skeleton";
+import { homeSectionIds } from "@/config/navigation";
+import { usePublicStats } from "@/lib/api/hooks";
 
 const impactPoints = [
-  "Une mobilisation déclenchée en moins d'une minute.",
-  "Des donneurs compatibles localisés à proximité du besoin.",
-  "Un suivi clair, du don jusqu'à la transfusion.",
+  "Une mobilisation déclenchée en quelques minutes, pas en quelques heures.",
+  "Des donneurs compatibles localisés à proximité immédiate du besoin.",
+  "Un suivi lisible, du don enregistré jusqu'à la récompense versée.",
 ] as const;
 
+/**
+ * L'activité réelle du réseau, plutôt qu'un collage d'images d'illustration.
+ * Un visiteur qui envisage de donner veut savoir s'il se passe quelque chose
+ * ici, maintenant: ces quatre chiffres viennent de la base.
+ */
 export function ImpactSection() {
+  const stats = usePublicStats();
+
+  const figures: { icon: LucideIcon; label: string; value?: number }[] = [
+    {
+      icon: Bell,
+      label: "Urgences en cours",
+      value: stats.data?.activeEmergencies,
+    },
+    {
+      icon: CalendarHeart,
+      label: "Campagnes actives",
+      value: stats.data?.activeCampaigns,
+    },
+    {
+      icon: Droplet,
+      label: "Dons enregistrés",
+      value: stats.data?.donationsRecorded,
+    },
+    {
+      icon: MapPin,
+      label: "Villes couvertes",
+      value: stats.data?.citiesCovered,
+    },
+  ];
+
   return (
     <section
       id={homeSectionIds.impact}
@@ -20,7 +56,7 @@ export function ImpactSection() {
         <div className="flex flex-col gap-8">
           <SectionHeading
             eyebrow="Sur le terrain"
-            title="Un geste simple, un impact qui sauve"
+            title="Un geste simple, un impact mesurable"
             description="Derrière chaque alerte, il y a des soignants, des donneurs et des familles. HEMORA réduit le temps entre le besoin et le don."
           />
           <ul className="flex flex-col gap-4">
@@ -36,27 +72,23 @@ export function ImpactSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <RevealImage
-            ratio="3 / 4"
-            className="row-span-2"
-            src="https://images.unsplash.com/photo-1615461065929-4f8ffed6ca40?w=800&q=70&auto=format&fit=crop"
-            alt="Don du sang en cours dans un centre de collecte"
-            sizes="(min-width: 1024px) 20vw, 45vw"
-          />
-          <RevealImage
-            ratio="4 / 3"
-            delay={120}
-            src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=700&q=70&auto=format&fit=crop"
-            alt="Équipe médicale au-dessus d'un patient au bloc"
-            sizes="(min-width: 1024px) 20vw, 45vw"
-          />
-          <RevealImage
-            ratio="4 / 3"
-            delay={220}
-            src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=700&q=70&auto=format&fit=crop"
-            alt="Deux mains qui se serrent en signe de soutien"
-            sizes="(min-width: 1024px) 20vw, 45vw"
-          />
+          {figures.map((figure, index) => (
+            <Reveal key={figure.label} delay={index * 80} direction="scale">
+              <div className="bg-card flex h-full flex-col gap-3 rounded-2xl border p-6">
+                <figure.icon className="text-primary size-5" />
+                {stats.isPending || stats.isError ? (
+                  <Skeleton className="h-9 w-16" />
+                ) : (
+                  <span className="font-display text-3xl font-extrabold tracking-tight tabular-nums">
+                    {(figure.value ?? 0).toLocaleString("fr-FR")}
+                  </span>
+                )}
+                <span className="text-muted-foreground text-sm">
+                  {figure.label}
+                </span>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </Container>
     </section>

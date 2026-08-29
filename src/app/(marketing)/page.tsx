@@ -12,32 +12,28 @@ import {
 } from "@/components/marketing/scroll-story";
 import { SecuritySection } from "@/components/marketing/security-section";
 
+/**
+ * Récit en deux temps: le besoin, puis la réponse. Les visuels sont servis
+ * depuis le domaine: passer par un hébergeur d'images tiers ajoutait une
+ * dépendance réseau qui bloquait l'affichage de la page quand il ne
+ * répondait pas, et exposait l'adresse IP des visiteurs.
+ */
 const storyPanels: StoryPanel[] = [
   {
-    image:
-      "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1600&q=70&auto=format&fit=crop",
-    alt: "Équipe médicale au-dessus d'un patient au bloc opératoire",
-    eyebrow: "Urgence",
+    image: "/emergency-banner.png",
+    alt: "Carte d'Afrique connectée, veille sanitaire d'un praticien",
+    eyebrow: "Le besoin",
     title: "Quand chaque minute compte",
     description:
-      "Une demande de sang rare peut surgir à tout instant. La rapidité de mobilisation fait la différence entre la vie et la perte.",
+      "Une demande de sang rare peut surgir à tout instant, n'importe où sur le continent. La vitesse de mobilisation change l'issue.",
   },
   {
-    image:
-      "https://images.unsplash.com/photo-1615461065929-4f8ffed6ca40?w=1600&q=70&auto=format&fit=crop",
-    alt: "Don du sang en cours dans un centre de collecte",
-    eyebrow: "Le don",
-    title: "Un donneur, une vie",
+    image: "/how-it-works.png",
+    alt: "Une donneuse fait scanner sa carte à l'accueil d'un centre de collecte",
+    eyebrow: "La réponse",
+    title: "Un donneur identifié, une vie sauvée",
     description:
-      "En quelques secondes, HEMORA identifie le bon donneur, compatible et disponible, au plus près du besoin.",
-  },
-  {
-    image: "/emergency-banner.png",
-    alt: "Carte d'Afrique lumineuse avec profil médical d'urgence",
-    eyebrow: "La communauté",
-    title: "Une Afrique qui répond présente",
-    description:
-      "Un réseau de volontaires qui grandit ville après ville, mobilisable d'un seul geste quand un besoin survient.",
+      "HEMORA retrouve les donneurs compatibles et disponibles au plus près du besoin, et leur carte se vérifie en un scan à l'accueil.",
   },
 ];
 

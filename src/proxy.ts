@@ -1,6 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { withDeadline } from "@/lib/deadline";
+
+/**
+ * Chaque requête, page comprise, passe par ici et attend la vérification de
+ * session. Si le fournisseur d'authentification ne répond pas, tout le site
+ * attend avec lui. On borne donc l'attente, et on échoue fermé: pas de
+ * session vérifiée, pas d'accès aux routes protégées.
+ */
+const SESSION_DEADLINE_MS = 3_000;
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -39,9 +49,17 @@ export async function proxy(request: NextRequest) {
   });
 
   // 1. Récupération cryptographique de la session utilisateur
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await withDeadline(
+      supabase.auth.getUser(),
+      SESSION_DEADLINE_MS,
+      "Vérification de session",
+    );
+    user = result.data.user;
+  } catch (error) {
+    console.error("Vérification de session impossible:", error);
+  }
 
   const path = request.nextUrl.pathname;
 

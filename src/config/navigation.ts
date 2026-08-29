@@ -9,7 +9,7 @@ export const homeSectionIds = {
   fonctionnement: "fonctionnement",
   reserves: "reserves",
   impact: "impact",
-  temoignages: "temoignages",
+  publics: "publics",
 } as const;
 
 export const primaryNav = [
@@ -44,7 +44,7 @@ export const footerNav = [
     title: "La plateforme",
     links: [
       { label: "Notre impact", href: `/#${homeSectionIds.impact}` },
-      { label: "Témoignages", href: `/#${homeSectionIds.temoignages}` },
+      { label: "Pour qui", href: `/#${homeSectionIds.publics}` },
       { label: "Soutenir HEMORA", href: "/soutenir" },
     ],
   },

@@ -1,14 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { AuthReadouts } from "@/components/auth/auth-readouts";
 import { HeartbeatMonitor } from "@/components/auth/heartbeat-monitor";
 import { Logo } from "@/components/shared/logo";
-
-const readouts = [
-  { value: "12 480", label: "donneurs" },
-  { value: "54", label: "pays" },
-  { value: "47 s", label: "pour alerter" },
-];
 
 /**
  * Volet de marque de l'authentification, pensé comme un moniteur de signes
@@ -21,7 +16,7 @@ export function AuthBrandPanel() {
       {/* Image d'ambiance très atténuée, assombrie pour rester en retrait. */}
       <div aria-hidden className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?w=1400&q=60&auto=format&fit=crop"
+          src="/hero-background.png"
           alt=""
           fill
           sizes="50vw"
@@ -61,7 +56,7 @@ export function AuthBrandPanel() {
           Réseau panafricain du don · en direct
         </span>
 
-        <h2 className="max-w-md text-4xl leading-[1.05] font-semibold tracking-tight text-balance xl:text-5xl">
+        <h2 className="font-display max-w-md text-4xl leading-[1.05] font-extrabold tracking-tight text-balance xl:text-5xl">
           Chaque battement compte.
         </h2>
 
@@ -80,16 +75,7 @@ export function AuthBrandPanel() {
         </div>
       </div>
 
-      <dl className="relative grid grid-cols-3 gap-4 border-t border-white/10 pt-6">
-        {readouts.map((item) => (
-          <div key={item.label} className="space-y-1">
-            <dt className="font-mono text-2xl font-semibold tracking-tight">
-              {item.value}
-            </dt>
-            <dd className="text-xs text-white/50">{item.label}</dd>
-          </div>
-        ))}
-      </dl>
+      <AuthReadouts />
     </aside>
   );
 }

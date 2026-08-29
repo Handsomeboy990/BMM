@@ -1,5 +1,9 @@
 import { authService } from "@/modules/auth";
 import { handleApiError, success } from "@/lib/api/response";
+import { withDeadline } from "@/lib/deadline";
+
+/** La sonde ne doit jamais faire attendre une page derrière elle. */
+const SESSION_DEADLINE_MS = 5_000;
 
 /**
  * GET /api/v1/auth/me
@@ -12,7 +16,11 @@ import { handleApiError, success } from "@/lib/api/response";
  */
 export async function GET() {
   try {
-    const user = await authService.getCurrentUser();
+    const user = await withDeadline(
+      authService.getCurrentUser(),
+      SESSION_DEADLINE_MS,
+      "Profil de session",
+    );
     return success(user ?? null);
   } catch (error) {
     return handleApiError(error);
