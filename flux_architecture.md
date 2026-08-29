@@ -70,7 +70,7 @@ src/
 │   ├── env.ts                ← Validation des variables d'env (Zod)
 │   └── supabase/server.ts    ← Clients Supabase (session + admin)
 │
-└── middleware.ts             ← Protection des routes (auth Supabase JWT)
+└── proxy.ts                  ← Protection des routes (auth Supabase JWT)
 ```
 
 ### Convention de réponse API
@@ -93,7 +93,7 @@ Les codes d'erreur sont **stables** : `bad_request`, `unauthorized`, `forbidden`
 
 ### Protection des routes
 
-Le middleware `src/middleware.ts` protège **toutes** les routes `/api/v1/*` via le JWT Supabase, à l'exception des routes publiques :
+Le proxy `src/proxy.ts` protège **toutes** les routes `/api/v1/*` via le JWT Supabase, à l'exception des routes publiques :
 
 | Route                    | Accès                          |
 | ------------------------ | ------------------------------ |
@@ -104,7 +104,7 @@ Le middleware `src/middleware.ts` protège **toutes** les routes `/api/v1/*` via
 
 ### Double protection anti-IDOR
 
-En plus du middleware, chaque contrôleur **réinjecte** l'identifiant de l'organisation depuis la session serveur. Un hôpital ne peut jamais agir au nom d'un autre :
+En plus du proxy, chaque contrôleur **réinjecte** l'identifiant de l'organisation depuis la session serveur. Un hôpital ne peut jamais agir au nom d'un autre :
 
 ```typescript
 // Sécurité : on ne lit PAS le hospitalId depuis le body du client
