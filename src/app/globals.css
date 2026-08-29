@@ -28,8 +28,8 @@
   --primary: oklch(0.58 0.225 22.5); /* Rouge écarlate - #D92332 */
   --primary-foreground: oklch(0.98 0.005 20); /* Crème très clair - #FFF8F8 */
 
-  /* Secondaire : Gris Ardoise Premium */
-  --secondary: oklch(0.28 0.015 256); /* Gris ardoise premium - #1E232B */
+  /* Secondaire : Bleu Nuit HEMORA (couleur du mot-symbole) */
+  --secondary: oklch(0.29 0.062 264); /* Bleu nuit - #1B2A4A */
   --secondary-foreground: oklch(0.98 0.005 256);
 
   /* Accent : Orange Chaleureux (Bitcoin / Lightning) */
@@ -67,8 +67,8 @@
   --primary: oklch(0.62 0.22 22.5); /* Rouge rubis électrique - #E53E3E */
   --primary-foreground: oklch(0.98 0.005 20);
 
-  /* Secondaire : Gris Ardoise Lumineux */
-  --secondary: oklch(0.22 0.015 256); /* Gris sombre mat - #151920 */
+  /* Secondaire : Bleu Nuit assombri pour le thème sombre */
+  --secondary: oklch(0.24 0.04 264); /* Bleu nuit profond - #161C2B */
   --secondary-foreground: oklch(0.95 0.005 256);
 
   /* Accent : Orange Bitcoin Éclatant */
@@ -110,13 +110,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
-
   /* Courbes d'accélération signature (inspirées de Spaceship). */
   --ease-brand: cubic-bezier(0.55, 0, 0.35, 1);
   --ease-reveal: cubic-bezier(0, 0, 0.35, 1);
@@ -125,6 +118,22 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+}
+
+/**
+ * Les trois familles sont chargées par `next/font` dans le layout racine, qui
+ * expose `--font-*-loaded` sur `<html>`. Ce bloc `@theme` (non `inline`) est
+ * obligatoire: il émet réellement les variables dans `:root`, alors que
+ * `@theme inline` se contente de les substituer dans les utilitaires et
+ * laisserait la pile système de Tailwind s'appliquer au `body`.
+ */
+@theme {
+  --font-sans: var(--font-sans-loaded), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-display-loaded), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-mono-loaded), ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
 }
 
 @layer base {

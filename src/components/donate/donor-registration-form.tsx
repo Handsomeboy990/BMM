@@ -44,7 +44,7 @@ type Success = { donor: DonorRecord; wif: string };
 /** Télécharge la clé privée en fichier local. Aucune transmission réseau. */
 function downloadKey({ donor, wif }: Success) {
   const content = [
-    "Bitcoin Blood - Cle privee du donneur",
+    "HEMORA - Cle privee du donneur",
     "",
     `Donneur : ${donor.firstName} ${donor.lastName}`,
     `Identifiant : ${donor.id}`,
@@ -59,7 +59,7 @@ function downloadKey({ donor, wif }: Success) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `bitcoin-blood-cle-${donor.id.slice(0, 8)}.txt`;
+  a.download = `hemora-cle-${donor.id.slice(0, 8)}.txt`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -433,7 +433,7 @@ export function DonorRegistrationForm({
                 className="accent-primary mt-0.5 size-4 shrink-0 rounded"
               />
               <span>
-                J'autorise Bitcoin Blood à traiter mes données de santé pour
+                J'autorise HEMORA à traiter mes données de santé pour
                 être alerté en cas de besoin compatible, conformément à la
                 réglementation sur la protection des données.
               </span>

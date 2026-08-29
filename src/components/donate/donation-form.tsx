@@ -114,7 +114,7 @@ export function DonationForm() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle>Soutenir Bitcoin Blood</CardTitle>
+        <CardTitle>Soutenir HEMORA</CardTitle>
         <Bitcoin className="size-5 text-amber-500" />
       </CardHeader>
       <CardContent>

@@ -11,7 +11,7 @@ export async function GET() {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Documentation API - Bitcoin Blood</title>
+    <title>Documentation API - HEMORA</title>
     <link rel="icon" type="image/png" href="/favicon.ico" />
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.18.2/swagger-ui.css" />
     <style>
@@ -28,7 +28,7 @@ export async function GET() {
         margin: 0;
         background: #fafafa;
       }
-      /* Personnalisation premium pour correspondre à la marque Bitcoin Blood */
+      /* Personnalisation premium pour correspondre à la marque HEMORA */
       .swagger-ui .topbar {
         background-color: #8c0000;
         border-bottom: 3px solid #ff9900;

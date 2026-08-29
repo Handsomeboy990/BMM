@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Montserrat, Plus_Jakarta_Sans } from "next/font/google";
 
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";
@@ -11,30 +11,50 @@ import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
 
+/** Texte courant: humaniste, très lisible aux petites tailles. */
 const sansFont = Plus_Jakarta_Sans({
-  variable: "--font-sans",
+  variable: "--font-sans-loaded",
   subsets: ["latin"],
+  display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const techFont = Space_Grotesk({
-  variable: "--font-mono",
+/** Titres et signature de marque: géométrique, alignée sur le logo HEMORA. */
+const displayFont = Montserrat({
+  variable: "--font-display-loaded",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  weight: ["600", "700", "800"],
+});
+
+/** Données techniques: empreintes, adresses Bitcoin, factures Lightning. */
+const monoFont = JetBrains_Mono({
+  variable: "--font-mono-loaded",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
+    default: `${siteConfig.name} - ${siteConfig.tagline}`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
+  applicationName: siteConfig.name,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: siteConfig.name,
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} - ${siteConfig.tagline}`,
+    description: siteConfig.description,
   },
   icons: {
     icon: "/icons/icon-192.png",
@@ -44,8 +64,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#11151c" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F1216" },
+    { media: "(prefers-color-scheme: light)", color: "#FCFCFC" },
   ],
 };
 
@@ -56,7 +76,11 @@ export default function RootLayout({
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${sansFont.variable} ${techFont.variable}`}
+      // Next 16 ne neutralise plus `scroll-behavior: smooth` pendant une
+      // navigation sans cet attribut: les changements de page sauteraient
+      // en douceur au lieu d'être instantanés.
+      data-scroll-behavior="smooth"
+      className={`${sansFont.variable} ${displayFont.variable} ${monoFont.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
         <ThemeProvider

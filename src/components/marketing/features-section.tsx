@@ -16,7 +16,7 @@ export function FeaturesSection() {
       <Container className="flex flex-col gap-14">
         <div className="flex flex-col gap-6">
           <SectionHeading
-            eyebrow="Pourquoi Bitcoin Blood"
+            eyebrow="Pourquoi HEMORA"
             title="La solidarité, rendue simple et fiable."
             description="Un réseau qui relie donneurs et hôpitaux, récompense les gestes qui sauvent et protège vos données."
           />

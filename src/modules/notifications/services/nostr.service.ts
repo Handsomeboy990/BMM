@@ -8,7 +8,7 @@ import { hexToBytes } from "@noble/hashes/utils";
 
 export const nostrService = {
   /**
-   * Publie une alerte d'urgence sur des relais Nostr publics via le Bot centralisé Bitcoin Blood.
+   * Publie une alerte d'urgence sur des relais Nostr publics via le Bot centralisé HEMORA.
    * Chaque événement contient des tags structurés (groupe sanguin, ville, hospital_id)
    * pour permettre un filtrage fin par les applications clientes.
    */
@@ -38,7 +38,7 @@ export const nostrService = {
         `Localisation : ${emergencyData.city}\n\n` +
         `#UrgenceSang #BitcoinBlood #${emergencyData.city.replace(/\s+/g, "")}`;
 
-      // Clé du bot centralisé Bitcoin Blood (la même pour tous les hôpitaux)
+      // Clé du bot centralisé HEMORA (la même pour tous les hôpitaux)
       let secretKey: Uint8Array;
       if (process.env.NOSTR_PRIVATE_KEY_HEX) {
         secretKey = hexToBytes(process.env.NOSTR_PRIVATE_KEY_HEX);

@@ -18,7 +18,7 @@ export const offlineIdentityService = {
       donorId,
       bloodType,
       timestamp: new Date().toISOString(),
-      issuer: "Bitcoin Blood Network (Clinic Signature)",
+      issuer: "HEMORA Network (Clinic Signature)",
     };
 
     const payloadString = JSON.stringify(payload);

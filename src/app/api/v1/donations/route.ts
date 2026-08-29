@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const data = createDonationSchema.parse(body);
 
-    const description = `Bitcoin Blood - ${purposeLabel[data.purpose]}${
+    const description = `HEMORA - ${purposeLabel[data.purpose]}${
       data.message ? ` : ${data.message}` : ""
     }`;
 

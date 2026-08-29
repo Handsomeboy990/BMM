@@ -4,7 +4,7 @@
  */
 
 const BRAND = {
-  name: "Bitcoin Blood",
+  name: "HEMORA",
   red: "#e5484d",
   dark: "#11151c",
   text: "#1f2430",

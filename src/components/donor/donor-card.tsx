@@ -47,7 +47,7 @@ export function DonorCard({
           <div className="flex items-center gap-2">
             <Droplet className="size-5" />
             <span className="text-sm font-semibold tracking-wide">
-              Bitcoin Blood
+              HEMORA
             </span>
           </div>
           <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">

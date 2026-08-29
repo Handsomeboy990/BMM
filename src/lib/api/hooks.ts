@@ -138,7 +138,7 @@ function demoDonationInvoice(payload: CreateDonationPayload): DonationInvoice {
   return {
     bolt11: `lnbc${payload.amountSats}n1demo${Math.random()
       .toString(36)
-      .slice(2, 10)}xqzdemobitcoinbloodsimulatedinvoiceforpresentationonly`,
+      .slice(2, 10)}xqzdemosimulatedinvoiceforpresentationonly`,
     amountSats: payload.amountSats,
     purpose: payload.purpose,
     feesSat: 0,

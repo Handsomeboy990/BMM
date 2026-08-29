@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 export const metadata: Metadata = {
   title: "Soutenir la plateforme",
   description:
-    "Soutenez le fonctionnement de Bitcoin Blood. Pour aider une collecte précise, rendez-vous sur la page des campagnes.",
+    "Soutenez le fonctionnement de HEMORA. Pour aider une collecte précise, rendez-vous sur la page des campagnes.",
 };
 
 const ALLOCATION = [
@@ -41,7 +41,7 @@ export default function SupportPage() {
               Soutien communautaire
             </Badge>
             <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-              Soutenez <span className="text-primary">Bitcoin Blood</span>
+              Soutenez <span className="text-primary">HEMORA</span>
             </h1>
             <p className="text-muted-foreground max-w-md text-lg text-balance">
               Votre don en sats finance directement le réseau. Paiement

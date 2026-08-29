@@ -85,7 +85,7 @@ export async function createOfflineAttestation(
     donorId,
     bloodType,
     timestamp: new Date().toISOString(),
-    issuer: "Bitcoin Blood Network (Clinic Signature)",
+    issuer: "HEMORA Network (Clinic Signature)",
   };
   const profileHash = await sha256Hex(JSON.stringify(payload));
 

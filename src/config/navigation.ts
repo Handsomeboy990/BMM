@@ -1,33 +1,54 @@
+/**
+ * Navigation publique. Chaque entrée pointe vers une page réelle: les ancres
+ * de la page d'accueil sont déclarées ici avec l'identifiant de section
+ * correspondant, pour qu'un lien ne puisse pas viser une section absente.
+ */
+
+/** Identifiants d'ancre posés sur les sections de la page d'accueil. */
+export const homeSectionIds = {
+  fonctionnement: "fonctionnement",
+  reserves: "reserves",
+  impact: "impact",
+  temoignages: "temoignages",
+} as const;
+
 export const primaryNav = [
-  { label: "Donneurs", href: "#donneurs" },
-  { label: "Fonctionnement", href: "#fonctionnement" },
+  { label: "Fonctionnement", href: `/#${homeSectionIds.fonctionnement}` },
+  { label: "Réserves", href: `/#${homeSectionIds.reserves}` },
   { label: "Campagnes", href: "/campagnes" },
-  { label: "Impact", href: "#impact" },
+  { label: "Vérifier une carte", href: "/verify" },
 ] as const;
 
 export const footerNav = [
   {
-    title: "Plateforme",
+    title: "Donneurs",
     links: [
-      { label: "Devenir donneur", href: "#donneurs" },
-      { label: "Lancer une alerte", href: "#fonctionnement" },
-      { label: "Campagnes", href: "#campagnes" },
+      { label: "Devenir donneur", href: "/donate" },
+      { label: "Espace donneur", href: "/connexion-donneur" },
+      { label: "Campagnes de collecte", href: "/campagnes" },
+      { label: "Vérifier une carte", href: "/verify" },
     ],
   },
   {
-    title: "Ressources",
+    title: "Structures de santé",
     links: [
-      { label: "Compatibilité sanguine", href: "#fonctionnement" },
-      { label: "Cartes vérifiables", href: "#fonctionnement" },
-      { label: "Preuves Bitcoin", href: "#impact" },
+      { label: "Créer un compte", href: "/register" },
+      { label: "Se connecter", href: "/login" },
+      { label: "Comment ça marche", href: `/#${homeSectionIds.fonctionnement}` },
     ],
   },
   {
-    title: "À propos",
+    title: "La plateforme",
     links: [
-      { label: "Notre mission", href: "#impact" },
-      { label: "Sécurité", href: "#impact" },
-      { label: "Contact", href: "#impact" },
+      { label: "Notre impact", href: `/#${homeSectionIds.impact}` },
+      { label: "Témoignages", href: `/#${homeSectionIds.temoignages}` },
+      { label: "Soutenir HEMORA", href: "/soutenir" },
     ],
   },
+] as const;
+
+export const legalNav = [
+  { label: "Mentions légales", href: "/mentions-legales" },
+  { label: "Confidentialité", href: "/confidentialite" },
+  { label: "Conditions d'utilisation", href: "/conditions" },
 ] as const;

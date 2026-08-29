@@ -43,7 +43,7 @@ const storyPanels: StoryPanel[] = [
 
 export default function HomePage() {
   return (
-    <main className="flex-1">
+    <>
       <HeroSection />
       <RegionsStrip />
       <ScrollStory panels={storyPanels} />
@@ -54,6 +54,6 @@ export default function HomePage() {
       <HowItWorksSection />
       <TestimonialsSection />
       <CtaSection />
-    </main>
+    </>
   );
 }

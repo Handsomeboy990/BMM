@@ -4,7 +4,7 @@ import { LegalArticle } from "@/components/legal/legal-article";
 
 export const metadata: Metadata = {
   title: "Mentions légales",
-  description: "Mentions légales de la plateforme Bitcoin Blood.",
+  description: "Mentions légales de la plateforme HEMORA.",
 };
 
 export default function MentionsLegalesPage() {
@@ -12,7 +12,7 @@ export default function MentionsLegalesPage() {
     <LegalArticle title="Mentions légales" updatedAt="5 juillet 2026">
       <h2>Éditeur de la plateforme</h2>
       <p>
-        Bitcoin Blood est une plateforme de mise en relation entre donneurs de
+        HEMORA est une plateforme de mise en relation entre donneurs de
         sang et structures de santé. Pour toute demande, un contact est mis à
         disposition via la page de soutien et l'adresse e-mail de l'équipe.
       </p>
@@ -27,7 +27,7 @@ export default function MentionsLegalesPage() {
 
       <h2>Nature du service</h2>
       <p>
-        Bitcoin Blood ne se substitue pas aux structures de santé agréées. La
+        HEMORA ne se substitue pas aux structures de santé agréées. La
         qualification biologique du sang, les tests de groupe sanguin et les
         décisions médicales relèvent exclusivement des centres de transfusion et
         des professionnels de santé compétents. Le groupe sanguin renseigné par

@@ -5,7 +5,7 @@ import { LegalArticle } from "@/components/legal/legal-article";
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
   description:
-    "Comment Bitcoin Blood protège vos données personnelles et de santé.",
+    "Comment HEMORA protège vos données personnelles et de santé.",
 };
 
 export default function ConfidentialitePage() {

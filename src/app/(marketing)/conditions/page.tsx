@@ -4,20 +4,20 @@ import { LegalArticle } from "@/components/legal/legal-article";
 
 export const metadata: Metadata = {
   title: "Conditions d'utilisation",
-  description: "Conditions d'utilisation de la plateforme Bitcoin Blood.",
+  description: "Conditions d'utilisation de la plateforme HEMORA.",
 };
 
 export default function ConditionsPage() {
   return (
     <LegalArticle title="Conditions d'utilisation" updatedAt="5 juillet 2026">
       <p>
-        En utilisant Bitcoin Blood, vous acceptez les conditions ci-dessous.
+        En utilisant HEMORA, vous acceptez les conditions ci-dessous.
         Elles définissent le rôle de chacun et les règles de bon usage.
       </p>
 
       <h2>Objet du service</h2>
       <p>
-        Bitcoin Blood met en relation des donneurs volontaires et des structures
+        HEMORA met en relation des donneurs volontaires et des structures
         de santé, facilite les alertes en cas de besoin et permet de récompenser
         les dons. La plateforme ne réalise aucun acte médical.
       </p>
