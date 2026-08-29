@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import {
   JetBrains_Mono,
   Montserrat,
@@ -106,6 +107,7 @@ export default function RootLayout({
           <ServiceWorker />
           <OfflineIndicator />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
