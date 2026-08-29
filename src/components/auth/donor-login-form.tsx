@@ -27,20 +27,20 @@ export function DonorLoginForm() {
         email: String(form.get("email")),
         password: String(form.get("password")),
       });
-      // Espace donneur : une structure qui se trompe d'espace est redirigée.
-      // Les administrateurs (super_admin) sont dirigés vers leur tableau de bord.
+      // Espace donneur: une structure qui se trompe d'espace est redirigée,
+      // un administrateur part vers son tableau de bord.
       try {
         const me = await authApi.me();
-        if (me.data.role === "org_admin") {
+        if (me.data?.role === "org_admin") {
           setWrongSpace(true);
           return;
         }
-        if (me.data.role === "super_admin") {
+        if (me.data?.role === "super_admin") {
           router.replace("/dashboard");
           return;
         }
       } catch {
-        // Profil indisponible (mode démo) : on poursuit normalement.
+        // Profil indisponible: on poursuit, le garde de route tranchera.
       }
       router.replace("/donneur");
     } catch (err) {

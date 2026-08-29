@@ -28,15 +28,15 @@ export function LoginForm() {
         email: String(form.get("email")),
         password: String(form.get("password")),
       });
-      // Espace structures : un donneur qui se trompe d'espace est redirigé.
+      // Espace structures: un donneur qui se trompe d'espace est redirigé.
       try {
         const me = await authApi.me();
-        if (me.data.role === "donor") {
+        if (me.data?.role === "donor") {
           setWrongSpace(true);
           return;
         }
       } catch {
-        // Profil indisponible (mode démo) : on poursuit normalement.
+        // Profil indisponible: on poursuit, le garde de route tranchera.
       }
       router.replace("/dashboard");
     } catch (err) {

@@ -55,6 +55,8 @@ export async function proxy(request: NextRequest) {
       path === "/api/v1/auth/login" ||
       path === "/api/v1/auth/register" ||
       path === "/api/v1/auth/logout" ||
+      // Sonde de session: elle répond « personne » plutôt que 401.
+      path === "/api/v1/auth/me" ||
       (path === "/api/v1/donors" && request.method === "POST") ||
       (path === "/api/v1/donations" && request.method === "POST") ||
       path.startsWith("/api/v1/verify") ||

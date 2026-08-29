@@ -47,6 +47,7 @@ export const queryKeys = {
   emergency: (id: string) => ["emergencies", "detail", id] as const,
   campaigns: (hospitalId?: string) =>
     ["campaigns", hospitalId ?? "mine"] as const,
+  publicCampaigns: ["campaigns", "public"] as const,
   donors: ["donors", "directory"] as const,
   organizations: ["organizations"] as const,
   orgDocuments: (id: string) => ["org-documents", id] as const,
@@ -164,6 +165,16 @@ export function useCampaigns(hospitalId?: string) {
   return useQuery({
     queryKey: queryKeys.campaigns(hospitalId),
     queryFn: () => campaignsApi.list(hospitalId).then((r) => r.data),
+  });
+}
+
+/** Collectes à venir affichées publiquement. */
+export function usePublicCampaigns() {
+  return useQuery({
+    queryKey: queryKeys.publicCampaigns,
+    queryFn: () => campaignsApi.publicList().then((r) => r.data),
+    staleTime: 5 * 60_000,
+    retry: 1,
   });
 }
 
