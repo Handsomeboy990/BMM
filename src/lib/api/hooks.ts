@@ -461,11 +461,17 @@ export function useDonorOfflineIdentity() {
   });
 }
 
-/** Retrait du solde plateforme vers Mobile Money. */
+/**
+ * Retrait du solde plateforme vers Mobile Money.
+ *
+ * Pas de `meta.success`: la réponse indique si un virement a réellement eu
+ * lieu, et l'écran formule le message en conséquence. Un succès annoncé
+ * globalement afficherait « retrait initié » par-dessus l'avertissement disant
+ * que rien n'est parti.
+ */
 export function useWithdrawBalance() {
   const qc = useQueryClient();
   return useMutation({
-    meta: { success: "Retrait vers Mobile Money initié." },
     mutationFn: (payload: { amountSats: number; momoNumber: string }) =>
       donorsApi.withdraw(payload).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.donorMe }),

@@ -72,6 +72,14 @@ export type AboutVideo = {
   description?: string;
   /** Image affichée avant lecture. */
   poster?: string;
+  /**
+   * Sous-titres WebVTT, ex. `/team/demo.fr.vtt`. Sans eux, la vidéo est
+   * inutilisable pour une personne sourde ou malentendante: le champ est
+   * obligatoire dans le type pour que l'oubli se voie à l'écriture.
+   */
+  captions: string;
+  /** Langue des sous-titres, code BCP 47. */
+  captionsLang?: string;
 };
 
 /**

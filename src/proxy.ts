@@ -8,8 +8,13 @@ import { withDeadline } from "@/lib/deadline";
  * session. Si le fournisseur d'authentification ne répond pas, tout le site
  * attend avec lui. On borne donc l'attente, et on échoue fermé: pas de
  * session vérifiée, pas d'accès aux routes protégées.
+ *
+ * Le seuil est volontairement large. Échouer fermé déconnecte l'utilisateur:
+ * un délai trop court transformerait une simple latence en déconnexion au
+ * milieu d'une saisie. Huit secondes laissent passer un aller-retour lent tout
+ * en évitant l'attente d'une minute d'un hôte injoignable.
  */
-const SESSION_DEADLINE_MS = 3_000;
+const SESSION_DEADLINE_MS = 8_000;
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({

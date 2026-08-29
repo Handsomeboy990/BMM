@@ -53,6 +53,7 @@ export function BalanceCard({
       // dépôt qui n'est jamais parti ferait attendre le donneur pour rien.
       setDone({ simulated: Boolean(result.simulated) });
       setOpen(false);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Le retrait a échoué.");
     }

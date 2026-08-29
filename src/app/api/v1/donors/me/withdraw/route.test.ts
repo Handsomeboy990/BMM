@@ -212,4 +212,43 @@ describe("POST /api/v1/donors/me/withdraw", () => {
       expect.stringContaining("non configurée"),
     );
   });
+
+  it("refuses to claim an intact balance when the restore write fails", async () => {
+    vi.mocked(authService.getCurrentUser).mockResolvedValue({
+      id: "d1",
+      role: "donor",
+      donor: { id: "d1" },
+    } as any);
+    vi.mocked(donorService.getDonorById).mockResolvedValue({
+      id: "d1",
+      balanceSats: 1000,
+    } as any);
+    // Le débit passe, la remise échoue.
+    vi.mocked(donorService.updateDonorBalance)
+      .mockResolvedValueOnce(500)
+      .mockResolvedValueOnce(null);
+    vi.mocked(rewardService.createRewardLog).mockResolvedValue({
+      id: "reward1",
+    } as any);
+    vi.mocked(izichangeService.cashoutToMoMo).mockResolvedValue({
+      transactionId: "simulated_momo_x",
+      simulated: true,
+    });
+    vi.mocked(rewardService.updateRewardStatus).mockResolvedValue({
+      id: "reward1",
+      status: "failed",
+    } as any);
+
+    const req = new Request("http://localhost/api/v1/donors/me/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amountSats: 500, momoNumber: "+229123456" }),
+    });
+
+    const response = await POST(req);
+
+    // Le donneur est encore débité: on ne doit pas répondre « solde intact ».
+    expect(response.status).toBe(500);
+    const json = await response.json();
+    expect(json.error.message).toContain("support");
+  });
 });

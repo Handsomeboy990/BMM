@@ -34,6 +34,13 @@ export function AboutVideoSection() {
                     className="aspect-video w-full"
                   >
                     <source src={video.src} />
+                    <track
+                      kind="captions"
+                      src={video.captions}
+                      srcLang={video.captionsLang ?? "fr"}
+                      label="Français"
+                      default
+                    />
                     Votre navigateur ne sait pas lire cette vidéo. Le fichier
                     reste téléchargeable depuis <a href={video.src}>ce lien</a>.
                   </video>

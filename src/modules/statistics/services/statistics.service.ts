@@ -22,7 +22,7 @@ export type PublicStatistics = {
    * qui est faux quand la donnée est simplement absente.
    */
   availability: BloodAvailability[];
-  /** Villes réellement couvertes, pour le bandeau des régions. */
+  /** Villes où une structure partenaire est installée. */
   cities: string[];
 };
 
@@ -67,10 +67,17 @@ export const statisticsService = {
 
     const [donors, organizations, campaigns, emergencies, stock, activities] =
       await Promise.all([
+        // Seul le compte nous intéresse ici: `head` évite de rapatrier des
+        // milliers de lignes pour en compter le nombre.
         supabase
           .from("donors")
-          .select("city", { count: "exact" })
+          .select("id", { count: "exact", head: true })
           .eq("validated", true),
+        // Les villes sont déduites des structures partenaires, pas des
+        // donneurs: PostgREST plafonne une réponse à 1000 lignes, et la liste
+        // des villes des donneurs aurait été silencieusement tronquée passé ce
+        // seuil. Une ville « couverte » est de toute façon une ville où une
+        // structure peut recevoir un don.
         supabase.from("organizations").select("city", { count: "exact" }),
         supabase
           .from("campaigns")
@@ -114,9 +121,6 @@ export const statisticsService = {
     }
 
     const cities = new Set<string>();
-    for (const row of (donors.data ?? []) as { city: string | null }[]) {
-      if (row.city) cities.add(row.city);
-    }
     for (const row of (organizations.data ?? []) as { city: string | null }[]) {
       if (row.city) cities.add(row.city);
     }
