@@ -64,7 +64,7 @@ export function ResetPasswordForm() {
   return (
     <div className="space-y-8">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-2xl font-bold tracking-tight">
           Nouveau mot de passe
         </h1>
         <p className="text-muted-foreground text-sm">

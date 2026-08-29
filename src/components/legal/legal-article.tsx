@@ -19,7 +19,7 @@ export function LegalArticle({
     <Container className="py-16 sm:py-24">
       <article className="mx-auto max-w-3xl">
         <header className="mb-10 space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
             {title}
           </h1>
           <p className="text-muted-foreground text-sm">

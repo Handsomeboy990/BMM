@@ -236,7 +236,9 @@ function StatCard({
           <p className="text-muted-foreground text-sm">{label}</p>
           <Icon className="text-primary size-5" />
         </div>
-        <p className="text-2xl font-semibold tracking-tight">{value}</p>
+        <p className="font-display text-2xl font-bold tracking-tight">
+          {value}
+        </p>
       </CardContent>
     </Card>
   );

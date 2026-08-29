@@ -85,7 +85,9 @@ export function DonorLoginForm() {
           <Droplet className="size-4" />
           Espace donneur
         </span>
-        <h1 className="text-2xl font-semibold tracking-tight">Se connecter</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">
+          Se connecter
+        </h1>
         <p className="text-muted-foreground text-sm">
           Suivez vos dons et vos récompenses Lightning.
         </p>

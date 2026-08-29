@@ -57,52 +57,6 @@ export async function createDonorIdentity(
   };
 }
 
-export type OfflineAttestation = {
-  payload: {
-    donorId: string;
-    bloodType: string;
-    timestamp: string;
-    issuer: string;
-  };
-  /** SHA-256 (message effectivement signé). */
-  profileHash: string;
-  /** Adresse ayant signé l'attestation (clé de la clinique). */
-  clinicAddress: string;
-  /** Signature BIP-322. */
-  signature: string;
-};
-
-/**
- * Produit une attestation d'identité sanguine signée (BIP-322) côté client -
- * repli de démonstration quand le backend n'est pas joignable (mode démo).
- * Structure identique à celle du service serveur `offlineIdentityService`.
- */
-export async function createOfflineAttestation(
-  donorId: string,
-  bloodType: string,
-): Promise<OfflineAttestation> {
-  const payload = {
-    donorId,
-    bloodType,
-    timestamp: new Date().toISOString(),
-    issuer: "HEMORA Network (Clinic Signature)",
-  };
-  const profileHash = await sha256Hex(JSON.stringify(payload));
-
-  const keyPair = ECPair.makeRandom();
-  const { address } = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-  if (!address) throw new Error("Impossible de générer l'adresse signataire.");
-
-  const signature = Signer.sign(keyPair.toWIF(), address, profileHash);
-
-  return {
-    payload,
-    profileHash,
-    clinicAddress: address,
-    signature: signature.toString(),
-  };
-}
-
 /**
  * Vérifie une signature BIP-322 **entièrement côté navigateur**, sans aucun
  * appel réseau. C'est le cœur de « l'Identité Sanguine Souveraine » : une

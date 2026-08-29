@@ -40,7 +40,7 @@ export default function SupportPage() {
               <HeartHandshake className="size-3.5" />
               Soutien communautaire
             </Badge>
-            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-balance sm:text-5xl">
               Soutenez <span className="text-primary">HEMORA</span>
             </h1>
             <p className="text-muted-foreground max-w-md text-lg text-balance">

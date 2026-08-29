@@ -108,7 +108,7 @@ export function SuperAdminDashboard() {
                   </p>
                   <Icon className="text-primary size-5" />
                 </div>
-                <span className="text-3xl font-semibold tracking-tight">
+                <span className="font-display text-3xl font-bold tracking-tight tabular-nums">
                   {metric.value}
                 </span>
               </CardContent>

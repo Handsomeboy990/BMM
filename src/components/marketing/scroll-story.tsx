@@ -185,7 +185,7 @@ function PanelText({ panel }: { panel: StoryPanel }) {
       <span className="bg-primary/90 w-fit rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
         {panel.eyebrow}
       </span>
-      <h2 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+      <h2 className="font-display text-4xl font-extrabold tracking-tight text-balance sm:text-5xl">
         {panel.title}
       </h2>
       <p className="max-w-md text-lg text-pretty text-white/80">

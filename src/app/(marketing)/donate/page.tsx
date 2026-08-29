@@ -32,7 +32,7 @@ const BENEFITS = [
   {
     icon: MapPin,
     title: "Un réseau panafricain",
-    text: "Rejoignez une communauté de donneurs qui répond aux urgences vitales en moins d'une heure.",
+    text: "Hôpitaux et centres de collecte du réseau vous atteignent directement, sans intermédiaire.",
   },
 ];
 
@@ -47,7 +47,7 @@ export default function DonatePage() {
               <Droplet className="size-3.5" />
               Réseau panafricain du don
             </Badge>
-            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-balance sm:text-5xl">
               Devenez donneur,{" "}
               <span className="text-primary">sauvez des vies</span>
             </h1>
