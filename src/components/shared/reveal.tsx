@@ -24,8 +24,13 @@ type RevealProps = ComponentProps<"div"> & {
 };
 
 /**
- * Révèle son contenu avec une transition directionnelle lorsqu'il entre
- * dans le viewport. Respecte `prefers-reduced-motion`.
+ * Révèle son contenu avec une transition directionnelle lorsqu'il entre dans
+ * le viewport. Respecte `prefers-reduced-motion`.
+ *
+ * L'attribut `data-reveal` sert de point d'accroche au repli sans JavaScript
+ * déclaré dans `globals.css`: sans lui, un navigateur qui n'exécute pas le
+ * script laisserait ce contenu invisible pour toujours, puisque l'état initial
+ * est `opacity-0`.
  */
 export function Reveal({
   as,
@@ -42,6 +47,7 @@ export function Reveal({
   return (
     <Component
       ref={ref}
+      data-reveal=""
       style={{
         transitionDelay: `${delay}ms`,
         transitionTimingFunction: "cubic-bezier(0, 0, 0.35, 1)",

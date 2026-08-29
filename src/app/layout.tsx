@@ -87,6 +87,12 @@ export default function RootLayout({
       className={`${sansFont.variable} ${displayFont.variable} ${monoFont.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
+        {/* Repli sans JavaScript: `Reveal` part de `opacity: 0` et compte sur
+            un IntersectionObserver. Sans script, les pages publiques
+            resteraient blanches. Ce style ne s'applique que dans ce cas. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

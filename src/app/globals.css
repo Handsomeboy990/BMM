@@ -374,6 +374,17 @@
   }
 }
 
+/**
+ * Décalage des ancres sous l'en-tête collant.
+ *
+ * L'en-tête public fait 4 rem et reste au-dessus du contenu: sans cette
+ * marge, un lien vers `#equipe` ou `#reserves` amenait le titre de la section
+ * juste derrière l'en-tête, invisible.
+ */
+:is(section, main, div)[id] {
+  scroll-margin-top: 5rem;
+}
+
 /* Champ téléphone international (react-phone-number-input) accordé au thème. */
 .PhoneInput {
   display: flex;

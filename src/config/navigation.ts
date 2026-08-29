@@ -17,6 +17,7 @@ export const primaryNav = [
   { label: "Réserves", href: `/#${homeSectionIds.reserves}` },
   { label: "Campagnes", href: "/campagnes" },
   { label: "Vérifier une carte", href: "/verify" },
+  { label: "À propos", href: "/a-propos" },
 ] as const;
 
 export const footerNav = [
@@ -43,8 +44,9 @@ export const footerNav = [
   {
     title: "La plateforme",
     links: [
+      { label: "À propos", href: "/a-propos" },
+      { label: "L'équipe", href: "/a-propos#equipe" },
       { label: "Notre impact", href: `/#${homeSectionIds.impact}` },
-      { label: "Pour qui", href: `/#${homeSectionIds.publics}` },
       { label: "Soutenir HEMORA", href: "/soutenir" },
     ],
   },
