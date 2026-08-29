@@ -37,7 +37,7 @@ export function FeaturesSection() {
                   <span className="from-primary/15 to-primary/5 text-primary ring-primary/10 flex size-12 items-center justify-center rounded-xl bg-linear-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                     <feature.icon className="size-5" />
                   </span>
-                  <CardTitle>{feature.title}</CardTitle>
+                  <CardTitle as="h3">{feature.title}</CardTitle>
                   <CardDescription>{feature.description}</CardDescription>
                 </CardHeader>
               </Card>

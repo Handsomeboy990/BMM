@@ -10,14 +10,14 @@ import { failure, handleApiError, success } from "@/lib/api/response";
 
 const purposeLabel: Record<DonationPurpose, string> = {
   campaign: "Campagne de don",
-  development: "Developpement de la plateforme",
+  development: "Développement de la plateforme",
   operations: "Fonctionnement",
   emergency: "Fonds d'urgence",
 };
 
 /**
  * POST /api/v1/donations
- * Genere une facture Lightning (BOLT11) pour un don a la plateforme, avec
+ * Génère une facture Lightning (BOLT11) pour un don à la plateforme, avec
  * l'objectif choisi. Endpoint public: n'importe qui peut soutenir le projet.
  */
 export async function POST(req: Request) {
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     if (!invoice.bolt11) {
       return failure(
         API_ERROR_CODE.INTERNAL_ERROR,
-        "Impossible de generer la facture Lightning pour le moment.",
+        "Impossible de générer la facture Lightning pour le moment.",
         { status: 502 },
       );
     }

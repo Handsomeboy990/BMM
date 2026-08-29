@@ -53,7 +53,7 @@ export function DonationForm() {
       setError(
         err instanceof Error
           ? err.message
-          : "Impossible de generer la facture pour le moment.",
+          : "Impossible de générer la facture pour le moment.",
       );
     }
   }
@@ -68,7 +68,7 @@ export function DonationForm() {
         <CardContent className="space-y-5 pt-0">
           <p className="text-muted-foreground text-sm">
             Scannez la facture Lightning ci-dessous avec votre portefeuille pour
-            envoyer {invoice.amountSats.toLocaleString("fr-FR")} sats a{" "}
+            envoyer {invoice.amountSats.toLocaleString("fr-FR")} sats à{" "}
             {DONATION_PURPOSE_LABELS[invoice.purpose].toLowerCase()}.
           </p>
 
@@ -137,7 +137,7 @@ export function DonationForm() {
                   className={
                     purpose === p
                       ? "border-primary bg-primary/10 text-primary rounded-md border px-3 py-2 text-left text-sm font-medium"
-                      : "hover:bg-accent rounded-md border px-3 py-2 text-left text-sm transition-colors"
+                      : "hover:bg-muted rounded-md border px-3 py-2 text-left text-sm transition-colors"
                   }
                 >
                   {DONATION_PURPOSE_LABELS[p]}
@@ -150,7 +150,7 @@ export function DonationForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Montant (sats)</Label>
+            <Label htmlFor="donation-amount">Montant (sats)</Label>
             <div className="grid grid-cols-4 gap-2">
               {PRESETS.map((preset) => (
                 <button
@@ -160,7 +160,7 @@ export function DonationForm() {
                   className={
                     amount === preset
                       ? "border-primary bg-primary/10 text-primary rounded-md border px-2 py-2 text-sm font-medium"
-                      : "hover:bg-accent rounded-md border px-2 py-2 text-sm transition-colors"
+                      : "hover:bg-muted rounded-md border px-2 py-2 text-sm transition-colors"
                   }
                 >
                   {preset.toLocaleString("fr-FR")}
@@ -168,11 +168,12 @@ export function DonationForm() {
               ))}
             </div>
             <Input
+              id="donation-amount"
               type="number"
               min={100}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              placeholder="Montant personnalise en sats"
+              placeholder="Montant personnalisé en sats"
             />
           </div>
 
@@ -182,7 +183,7 @@ export function DonationForm() {
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Un mot pour l'equipe..."
+              placeholder="Un mot pour l'équipe…"
               rows={2}
               maxLength={280}
             />
@@ -196,8 +197,8 @@ export function DonationForm() {
           >
             <Zap className="size-4" />
             {create.isPending
-              ? "Generation de la facture..."
-              : "Generer la facture Lightning"}
+              ? "Génération de la facture…"
+              : "Générer la facture Lightning"}
           </Button>
         </form>
       </CardContent>

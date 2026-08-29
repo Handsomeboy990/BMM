@@ -26,12 +26,12 @@ export function SiteFooter() {
             className="flex flex-col gap-3"
           >
             <span className="text-sm font-semibold">{group.title}</span>
-            <ul className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-0.5">
               {group.links.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -mx-1 inline-flex min-h-11 items-center rounded-sm px-1 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none sm:min-h-9"
                   >
                     {link.label}
                   </Link>
@@ -54,7 +54,7 @@ export function SiteFooter() {
             <Link
               key={link.href}
               href={link.href}
-              className="hover:text-foreground focus-visible:ring-ring rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="hover:text-foreground focus-visible:ring-ring -mx-1 inline-flex min-h-11 items-center rounded-sm px-1 transition-colors focus-visible:ring-2 focus-visible:outline-none sm:min-h-0"
             >
               {link.label}
             </Link>

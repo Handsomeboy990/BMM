@@ -18,7 +18,11 @@ export default function AuthLayout({
       <main id="contenu" className="relative flex flex-col">
         {/* En-tête mobile + bascule de thème toujours accessible. */}
         <div className="flex items-center justify-between p-5 sm:p-6">
-          <Link href="/" className="flex items-center lg:invisible">
+          <Link
+            href="/"
+            aria-label="HEMORA, accueil"
+            className="flex items-center lg:invisible"
+          >
             <Logo />
           </Link>
           <ThemeToggle />
