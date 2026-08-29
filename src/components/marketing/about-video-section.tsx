@@ -26,7 +26,7 @@ export function AboutVideoSection() {
           {aboutVideos.map((video, index) => (
             <Reveal key={video.src} delay={index * 90} direction="up">
               <figure className="flex h-full flex-col gap-3">
-                <div className="bg-muted overflow-hidden rounded-2xl border shadow-lg">
+                <div className="bg-muted overflow-hidden rounded-md border shadow-lg">
                   <video
                     controls
                     preload="metadata"

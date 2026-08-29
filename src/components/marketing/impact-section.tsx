@@ -74,7 +74,7 @@ export function ImpactSection() {
         <div className="grid grid-cols-2 gap-4">
           {figures.map((figure, index) => (
             <Reveal key={figure.label} delay={index * 80} direction="scale">
-              <div className="bg-card flex h-full flex-col gap-3 rounded-2xl border p-6">
+              <div className="bg-card flex h-full flex-col gap-3 rounded-md border p-6">
                 <figure.icon className="text-primary size-5" />
                 {stats.isPending || stats.isError ? (
                   <Skeleton className="h-9 w-16" />

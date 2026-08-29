@@ -1,4 +1,4 @@
-import { ArrowRight, Droplet, Heart } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
@@ -10,20 +10,7 @@ export function CtaSection() {
     <section className="py-24">
       <Container>
         <Reveal direction="scale">
-          <div className="from-primary to-primary/80 text-primary-foreground shadow-primary/20 relative overflow-hidden rounded-3xl border bg-linear-to-br px-8 py-16 text-center shadow-2xl sm:px-16">
-            <Droplet
-              aria-hidden
-              className="animate-float text-primary-foreground/10 absolute -top-6 -left-6 size-32"
-            />
-            <Droplet
-              aria-hidden
-              className="animate-float text-primary-foreground/10 absolute -right-8 -bottom-10 size-40"
-              style={{ animationDelay: "1.2s" }}
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-white/10 mask-[radial-gradient(50%_80%_at_50%_0%,black,transparent)]"
-            />
+          <div className="bg-primary text-primary-foreground relative overflow-hidden rounded-md px-8 py-16 text-center sm:px-16">
             <div className="relative flex flex-col items-center gap-6">
               <h2 className="font-display max-w-2xl text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
                 Rejoignez le réseau qui transforme la générosité en vies sauvées

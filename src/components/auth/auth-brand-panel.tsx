@@ -29,10 +29,6 @@ export function AuthBrandPanel() {
       {/* Lueur d'accent diffuse + trame d'instrument. */}
       <div
         aria-hidden
-        className="absolute -top-24 -left-24 size-96 rounded-full bg-[var(--color-primary)] opacity-20 blur-[120px]"
-      />
-      <div
-        aria-hidden
         className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)] opacity-[0.5]"
         style={{
           backgroundImage:

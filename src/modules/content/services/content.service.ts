@@ -1,4 +1,12 @@
+import { withDeadline } from "@/lib/deadline";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+/**
+ * Une page légale s'affiche avec le texte livré si la base tarde. Sans cette
+ * borne, le client Supabase réessaie près d'une minute sur un hôte
+ * injoignable et la page entière attend avec lui.
+ */
+const CONTENT_DEADLINE_MS = 2_000;
 
 export type SiteContent = {
   key: string;
@@ -35,15 +43,20 @@ export const contentService = {
   get: async (key: string): Promise<SiteContent | null> => {
     try {
       const supabase = await createSupabaseServerClient();
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("key, title, body, updated_at")
-        .eq("key", key)
-        .maybeSingle();
+      const { data, error } = await withDeadline(
+        supabase
+          .from("site_content")
+          .select("key, title, body, updated_at")
+          .eq("key", key)
+          .maybeSingle(),
+        CONTENT_DEADLINE_MS,
+        `Contenu « ${key} »`,
+      );
 
       if (error || !data) return null;
       return mapContent(data as ContentRow);
     } catch {
+      // Base lente ou injoignable: l'appelant sert le texte livré.
       return null;
     }
   },

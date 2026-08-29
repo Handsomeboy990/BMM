@@ -1,135 +1,154 @@
 "use client";
 
-import { Droplet } from "lucide-react";
-
 import { Container } from "@/components/layout/container";
-import { SectionHeading } from "@/components/marketing/section-heading";
-import { Reveal } from "@/components/shared/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { homeSectionIds } from "@/config/navigation";
 import { usePublicStats } from "@/lib/api/hooks";
 import type { StockStatus } from "@/lib/api/resources";
-import { homeSectionIds } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
-const STATUS_THEME: Record<
+const STATUS: Record<
   StockStatus,
-  { label: string; color: string; dot: string; bar: string }
+  { label: string; bar: string; text: string }
 > = {
   critique: {
     label: "Critique",
-    color: "text-primary",
-    dot: "bg-primary",
     bar: "bg-primary",
+    text: "text-primary",
   },
   faible: {
     label: "Faible",
-    color: "text-amber-500",
-    dot: "bg-amber-500",
     bar: "bg-amber-500",
+    text: "text-amber-600 dark:text-amber-400",
   },
   stable: {
     label: "Stable",
-    color: "text-emerald-500",
-    dot: "bg-emerald-500",
     bar: "bg-emerald-500",
+    text: "text-emerald-600 dark:text-emerald-400",
   },
 };
 
 /**
- * Niveau des réserves déclaré par les structures du réseau. Le pourcentage
- * est relatif au groupe le mieux pourvu: c'est la seule lecture honnête sans
- * objectif national de référence, et la légende le dit.
+ * Le niveau des réserves, présenté comme la fiche de stock qu'il est.
+ *
+ * Huit cartes arrondies identiques donnaient à ces chiffres l'allure d'une
+ * grille de fonctionnalités. Un registre se lit en colonnes: le groupe, la
+ * jauge, les poches, l'état. C'est la forme dans laquelle un responsable de
+ * collecte lit déjà ses stocks.
  */
 export function AvailabilitySection() {
   const stats = usePublicStats();
 
   return (
-    <section id={homeSectionIds.reserves} className="relative border-t py-24">
-      <Container className="flex flex-col gap-14">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <Droplet className="text-primary size-4" />
-            <span className="text-primary text-xs font-semibold tracking-wider uppercase">
-              Niveaux des réserves
-            </span>
+    <section id={homeSectionIds.reserves} className="border-t py-20 sm:py-28">
+      <Container className="flex flex-col gap-10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-xl space-y-3">
+            <p className="text-primary flex items-center gap-3 text-xs font-semibold tracking-[0.18em] uppercase">
+              <span className="bg-primary h-px w-8" aria-hidden="true" />
+              État des réserves
+            </p>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+              Ce qui manque, en ce moment
+            </h2>
           </div>
-          <SectionHeading
-            title="Disponibilité des groupes sanguins"
-            description="Niveaux déclarés par les structures du réseau, rapportés au groupe le mieux pourvu. Un groupe en rouge a besoin de donneurs maintenant."
-          />
+          <p className="text-muted-foreground max-w-sm text-sm text-pretty">
+            Niveaux déclarés par les structures du réseau, rapportés au groupe
+            le mieux pourvu. Un groupe en rouge a besoin de donneurs maintenant.
+          </p>
         </div>
 
         {stats.isPending ? (
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+          <div className="space-y-px">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 rounded-xl" />
+              <Skeleton key={i} className="h-14 w-full rounded-none" />
             ))}
           </div>
         ) : stats.isError ? (
-          <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
+          <p className="text-muted-foreground border-t py-10 text-sm">
             Les niveaux de réserve ne sont pas consultables pour le moment.
           </p>
         ) : stats.data.availability.length === 0 ? (
-          <p className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
-            Aucune structure du réseau n'a encore publié son stock. Les niveaux
-            apparaîtront ici dès la première déclaration.
+          <p className="text-muted-foreground border-t py-10 text-sm">
+            Aucune structure du réseau n&apos;a encore publié son stock. Les
+            niveaux apparaîtront ici dès la première déclaration.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {stats.data.availability.map((item, index) => {
-              const theme = STATUS_THEME[item.status];
-              return (
-                <Reveal key={item.bloodType} delay={index * 40} direction="up">
-                  <div className="border-border/40 bg-card hover:border-border flex flex-col gap-3 rounded-xl border p-5 transition-colors duration-200">
-                    <div className="flex items-baseline justify-between">
-                      <span className="font-display text-2xl font-extrabold tracking-tight">
-                        {item.bloodType}
-                      </span>
-                      <span className="text-muted-foreground text-sm tabular-nums">
-                        {item.level}%
-                      </span>
-                    </div>
-
-                    <div
-                      role="meter"
-                      aria-valuenow={item.level}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`Réserve du groupe ${item.bloodType}: ${theme.label.toLowerCase()}`}
-                      className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+          <table className="w-full max-w-3xl border-collapse text-left">
+            <colgroup>
+              <col className="w-20" />
+              <col />
+              <col className="w-24" />
+              <col className="w-28" />
+            </colgroup>
+            <caption className="sr-only">
+              Niveau des réserves par groupe sanguin
+            </caption>
+            <thead>
+              <tr className="text-muted-foreground border-b text-[0.7rem] tracking-[0.12em] uppercase">
+                <th scope="col" className="py-2 font-semibold">
+                  Groupe
+                </th>
+                <th scope="col" className="py-2 font-semibold">
+                  Niveau
+                </th>
+                <th scope="col" className="py-2 text-right font-semibold">
+                  Poches
+                </th>
+                <th scope="col" className="py-2 pl-6 text-right font-semibold">
+                  État
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.data.availability.map((item) => {
+                const theme = STATUS[item.status];
+                return (
+                  <tr
+                    key={item.bloodType}
+                    className="border-border/70 group border-b"
+                  >
+                    <th
+                      scope="row"
+                      className="font-display w-20 py-4 text-2xl font-extrabold tracking-tight"
                     >
+                      {/* Le signe moins typographique, pas le trait d'union. */}
+                      {item.bloodType.replace("-", "−")}
+                    </th>
+                    <td className="py-4 pr-8">
                       <div
-                        className={cn(
-                          "h-full rounded-full transition-[width] duration-1000 motion-reduce:transition-none",
-                          theme.bar,
-                        )}
-                        style={{ width: `${item.level}%` }}
-                      />
-                    </div>
-
-                    <div className="mt-1 flex items-center justify-between gap-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className={cn("size-1.5 rounded-full", theme.dot)}
-                        />
-                        <span
+                        role="meter"
+                        aria-valuenow={item.level}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Réserve ${item.bloodType}: ${theme.label.toLowerCase()}`}
+                        className="bg-muted h-1.5 w-full overflow-hidden"
+                      >
+                        <div
                           className={cn(
-                            "text-[10px] font-semibold tracking-wider uppercase",
-                            theme.color,
+                            "h-full transition-[width] duration-700 ease-out motion-reduce:transition-none",
+                            theme.bar,
                           )}
-                        >
-                          {theme.label}
-                        </span>
-                      </span>
-                      <span className="text-muted-foreground text-[10px] tabular-nums">
-                        {item.units} poches
-                      </span>
-                    </div>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+                          style={{ width: `${Math.max(item.level, 2)}%` }}
+                        />
+                      </div>
+                    </td>
+                    <td className="text-muted-foreground py-4 text-right text-sm tabular-nums">
+                      {item.units}
+                    </td>
+                    <td
+                      className={cn(
+                        "py-4 pl-6 text-right text-xs font-semibold tracking-wider uppercase",
+                        theme.text,
+                      )}
+                    >
+                      {theme.label}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </Container>
     </section>

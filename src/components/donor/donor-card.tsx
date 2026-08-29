@@ -29,7 +29,7 @@ export function DonorCard({
   return (
     <div
       className={cn(
-        "relative aspect-[1.586/1] w-full max-w-md overflow-hidden rounded-2xl text-white shadow-xl",
+        "relative aspect-[1.586/1] w-full max-w-md overflow-hidden rounded-xl text-white shadow-xl",
         className,
       )}
       style={{

@@ -8,11 +8,14 @@
  * Neutres froids pour la structure, rouge maîtrisé comme couleur d'accent.
  */
 :root {
-  --radius: 0.625rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1.25rem;
+  /* Échelle de rayons: chaque valeur a un emploi, au lieu d'un arrondi
+     unique appliqué partout. Une carte imprimée n'a pas le même angle qu'un
+     jeton de groupe sanguin. */
+  --radius: 0.375rem; /* cartes, panneaux: angle de carton imprimé */
+  --radius-sm: 0.25rem; /* champs, images: presque droit */
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 
   /* Thème Clair - Confiance, Médical et Lumineux */
   --background: oklch(0.99 0.003 256); /* Blanc chaud - #FCFCFC */
@@ -159,28 +162,6 @@
   }
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.06);
-  }
-}
-
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -281,14 +262,6 @@
 }
 
 @layer utilities {
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-pulse-glow {
-    animation: pulse-glow 5s ease-in-out infinite;
-  }
-
   .animate-rise-in {
     animation: rise-in 0.6s var(--ease-reveal) both;
   }
@@ -348,8 +321,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .animate-float,
-    .animate-pulse-glow,
     .animate-rise-in,
     .animate-marquee,
     .animate-word-in,

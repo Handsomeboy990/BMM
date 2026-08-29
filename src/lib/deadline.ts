@@ -14,7 +14,9 @@ export class DeadlineExceededError extends Error {
 }
 
 export function withDeadline<T>(
-  promise: Promise<T>,
+  // `PromiseLike` et non `Promise`: un constructeur de requête Supabase est
+  // un « thenable » qui n'expose ni `catch` ni `finally`.
+  promise: PromiseLike<T>,
   ms: number,
   label = "Opération",
 ): Promise<T> {

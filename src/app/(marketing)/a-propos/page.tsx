@@ -25,10 +25,6 @@ export default function AboutPage() {
     <>
       {/* Mission: le texte de la présentation, sans habillage de slide. */}
       <section className="relative overflow-hidden border-b">
-        <div
-          aria-hidden
-          className="bg-primary/10 pointer-events-none absolute -top-32 left-1/2 -z-10 h-96 w-[42rem] -translate-x-1/2 rounded-full blur-3xl"
-        />
         <Container className="flex flex-col items-center gap-6 py-20 text-center sm:py-28">
           <BrandMark className="animate-rise-in size-14" />
           <Badge variant="primary" className="animate-rise-in">
@@ -75,7 +71,7 @@ export default function AboutPage() {
               width={vision.image.width}
               height={vision.image.height}
               sizes="(min-width: 1024px) 40vw, 90vw"
-              className="h-auto w-full rounded-2xl border shadow-2xl"
+              className="h-auto w-full rounded-md border"
             />
           </Reveal>
         </Container>
@@ -89,30 +85,27 @@ export default function AboutPage() {
             title="Quatre promesses, tenues par du code"
             description="Chaque ligne correspond à une fonctionnalité livrée, vérifiable dans l'application."
           />
-          <ol className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
+          {/* Une liste, pas une séquence: ces quatre promesses n'ont pas
+              d'ordre, les numéroter aurait suggéré des étapes. */}
+          <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {aboutPillars.map((pillar, index) => (
               <Reveal
                 as="li"
                 key={pillar.title}
-                delay={index * 80}
+                delay={index * 70}
                 direction="up"
               >
-                <div className="flex gap-4">
-                  <span className="border-primary/30 text-primary font-display flex size-9 shrink-0 items-center justify-center rounded-full border text-sm font-bold">
-                    {index + 1}
-                  </span>
-                  <div className="space-y-1.5">
-                    <h3 className="font-display text-lg font-bold tracking-tight">
-                      {pillar.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm text-pretty">
-                      {pillar.body}
-                    </p>
-                  </div>
+                <div className="border-border space-y-2 border-t pt-5">
+                  <h3 className="font-display text-lg font-bold tracking-tight">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm text-pretty">
+                    {pillar.body}
+                  </p>
                 </div>
               </Reveal>
             ))}
-          </ol>
+          </ul>
         </Container>
       </section>
 
@@ -134,7 +127,7 @@ export default function AboutPage() {
                 height={team.photo.height}
                 sizes="(min-width: 1024px) 60rem, 95vw"
                 priority
-                className="h-auto w-full max-w-3xl rounded-2xl border bg-white shadow-2xl"
+                className="h-auto w-full max-w-3xl rounded-md border bg-white"
               />
 
               <figcaption className="flex flex-col items-center gap-3 text-center">
