@@ -46,7 +46,10 @@ export function AppTopbar() {
     <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
         {/* Navigation horizontale repliée sur mobile */}
-        <nav className="flex flex-1 items-center gap-1 overflow-x-auto lg:hidden">
+        <nav
+          aria-label="Navigation de l'espace"
+          className="flex flex-1 items-center gap-1 overflow-x-auto lg:hidden"
+        >
           {flatNav.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -56,6 +59,7 @@ export function AppTopbar() {
                 key={item.href}
                 href={item.href}
                 aria-label={item.label}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors",
                   active

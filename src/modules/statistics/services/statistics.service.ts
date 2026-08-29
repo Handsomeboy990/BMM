@@ -128,8 +128,7 @@ export const statisticsService = {
       activeCampaigns: campaigns.count ?? 0,
       activeEmergencies: emergencies.count ?? 0,
       donationsRecorded: activities.count ?? 0,
-      availability:
-        unitsByType.size === 0 ? [] : toAvailability(unitsByType),
+      availability: unitsByType.size === 0 ? [] : toAvailability(unitsByType),
       cities: [...cities].sort((a, b) => a.localeCompare(b, "fr")),
     };
   },

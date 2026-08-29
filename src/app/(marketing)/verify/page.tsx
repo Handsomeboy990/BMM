@@ -48,9 +48,9 @@ export default function VerifyIndexPage() {
                   Deux façons de vérifier
                 </h2>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  <strong className="text-foreground">En ligne:</strong> le
-                  scan ouvre la fiche publique du donneur et confirme que son
-                  profil n'a pas été modifié depuis son enregistrement.
+                  <strong className="text-foreground">En ligne:</strong> le scan
+                  ouvre la fiche publique du donneur et confirme que son profil
+                  n'a pas été modifié depuis son enregistrement.
                 </p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   <strong className="text-foreground">Hors connexion:</strong>{" "}

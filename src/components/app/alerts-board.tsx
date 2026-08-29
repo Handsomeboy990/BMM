@@ -2,9 +2,9 @@
 
 import {
   AlertCircle,
+  Bell,
   Check,
   Clock,
-  Droplet,
   Eye,
   Mail,
   MapPin,
@@ -20,10 +20,13 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Select, SelectItem } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState, ErrorState } from "@/components/ui/states";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import {
   useCreateEmergency,
@@ -61,12 +64,8 @@ export function AlertsBoard() {
   const { user } = useAuth();
   const hospitalId = user?.organizationId ?? undefined;
 
-  const {
-    data: emergencies,
-    isLoading,
-    isError,
-    error,
-  } = useEmergencies(hospitalId);
+  const emergenciesQuery = useEmergencies(hospitalId);
+  const { data: emergencies, isPending, isError, error } = emergenciesQuery;
   const createEmergency = useCreateEmergency();
   const updateStatus = useUpdateEmergencyStatus();
   const deleteEmergency = useDeleteEmergency();
@@ -77,6 +76,13 @@ export function AlertsBoard() {
 
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // La suppression est irréversible: elle passe par une confirmation
+  // explicite plutôt que par un clic isolé sur une icône.
+  const [pendingDelete, setPendingDelete] = useState<{
+    id: string;
+    bloodType: string;
+    city: string;
+  } | null>(null);
   const {
     coords,
     status: geoStatus,
@@ -228,32 +234,37 @@ export function AlertsBoard() {
         </div>
       )}
 
-      {isLoading ? (
-        <p className="text-muted-foreground py-12 text-center text-sm">
-          Chargement des alertes…
-        </p>
+      {isPending ? (
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full rounded-xl" />
+          ))}
+        </div>
       ) : isError ? (
-        <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center gap-2 rounded-lg border px-4 py-8 text-sm">
-          <AlertCircle className="size-4" />
-          {error instanceof Error ? error.message : "Chargement impossible."}
-        </p>
+        <ErrorState
+          error={error}
+          title="Alertes indisponibles"
+          onRetry={() => void emergenciesQuery.refetch()}
+        />
       ) : !emergencies || emergencies.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
-            <Droplet className="text-muted-foreground size-8" />
-            <p className="font-medium">Aucune alerte en cours</p>
-            <p className="text-muted-foreground text-sm">
-              Déclenchez une alerte pour mobiliser les donneurs compatibles.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Bell}
+          title="Aucune alerte en cours"
+          description="Déclenchez une alerte pour mobiliser les donneurs compatibles proches du besoin."
+          action={
+            <Button size="sm" onClick={() => setOpen(true)}>
+              <Plus className="size-4" />
+              Déclencher une alerte
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {pageItems.map((alert) => (
             <Card key={alert.id}>
               <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-base font-semibold">
+                  <span className="bg-primary/10 text-primary font-display flex size-12 shrink-0 items-center justify-center rounded-full text-base font-bold">
                     {alert.bloodType}
                   </span>
                   <div>
@@ -323,7 +334,13 @@ export function AlertsBoard() {
                     variant="ghost"
                     size="icon"
                     aria-label="Supprimer l'alerte"
-                    onClick={() => deleteEmergency.mutate(alert.id)}
+                    onClick={() =>
+                      setPendingDelete({
+                        id: alert.id,
+                        bloodType: alert.bloodType,
+                        city: alert.city,
+                      })
+                    }
                     disabled={deleteEmergency.isPending}
                   >
                     <Trash2 className="size-4" />
@@ -341,6 +358,36 @@ export function AlertsBoard() {
           />
         </div>
       )}
+
+      <Dialog
+        open={!!pendingDelete}
+        onClose={() => setPendingDelete(null)}
+        title="Supprimer cette alerte ?"
+        description={
+          pendingDelete
+            ? `Alerte ${pendingDelete.bloodType} à ${pendingDelete.city}. La suppression est définitive et retire l'alerte du suivi.`
+            : undefined
+        }
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button variant="secondary" onClick={() => setPendingDelete(null)}>
+            Annuler
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={deleteEmergency.isPending}
+            onClick={() => {
+              if (!pendingDelete) return;
+              deleteEmergency.mutate(pendingDelete.id, {
+                onSettled: () => setPendingDelete(null),
+              });
+            }}
+          >
+            <Trash2 className="size-4" />
+            {deleteEmergency.isPending ? "Suppression…" : "Supprimer"}
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }

@@ -74,12 +74,20 @@ export function VerifyEntry() {
               aria-describedby={error ? "donor-id-error" : undefined}
               className="font-mono"
             />
-            <Button type="submit" variant="secondary" aria-label="Ouvrir la carte">
+            <Button
+              type="submit"
+              variant="secondary"
+              aria-label="Ouvrir la carte"
+            >
               <Search className="size-4" />
             </Button>
           </div>
           {error ? (
-            <p id="donor-id-error" role="alert" className="text-destructive text-xs">
+            <p
+              id="donor-id-error"
+              role="alert"
+              className="text-destructive text-xs"
+            >
               {error}
             </p>
           ) : null}
