@@ -93,13 +93,13 @@ Toute nouvelle route doit être documentée dans
 Ces routes sont exemptées du garde de session dans `src/proxy.ts`. Elles ne
 renvoient que des agrégats: aucune donnée nominative n'en sort.
 
-| Méthode | Route                      | Description                                          |
-| ------- | -------------------------- | ---------------------------------------------------- |
-| GET     | `/api/v1/health`           | Sonde de disponibilité                               |
-| GET     | `/api/v1/auth/me`          | Sonde de session: le profil connecté, ou `null`      |
-| GET     | `/api/v1/public/stats`     | Donneurs, structures, villes, réserves par groupe    |
-| GET     | `/api/v1/public/campaigns` | Collectes à venir publiées par les structures        |
-| GET     | `/api/v1/verify/:id`       | Vérification publique d'une carte de donneur         |
+| Méthode | Route                      | Description                                       |
+| ------- | -------------------------- | ------------------------------------------------- |
+| GET     | `/api/v1/health`           | Sonde de disponibilité                            |
+| GET     | `/api/v1/auth/me`          | Sonde de session: le profil connecté, ou `null`   |
+| GET     | `/api/v1/public/stats`     | Donneurs, structures, villes, réserves par groupe |
+| GET     | `/api/v1/public/campaigns` | Collectes à venir publiées par les structures     |
+| GET     | `/api/v1/verify/:id`       | Vérification publique d'une carte de donneur      |
 
 `/api/v1/auth/me` répond `200` avec `data: null` quand personne n'est
 connecté. Un `401` ferait remonter une erreur dans la console de chaque

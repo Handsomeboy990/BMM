@@ -29,12 +29,12 @@ validation Zod, authentification par session Supabase.
 
 ## ✅ Ajoutés lors de la refonte du front
 
-| Méthode | Route                            | Rôle      | Remplace                            |
-| ------- | -------------------------------- | --------- | ----------------------------------- |
-| GET     | `/api/v1/public/stats`           | public    | chiffres de la page d'accueil en dur |
-| GET     | `/api/v1/public/campaigns`       | public    | trois campagnes fictives en dur      |
-| GET     | `/api/v1/donors/me/activities`   | donneur   | historique de dons simulé            |
-| PUT     | `/api/v1/stock`                  | org_admin | `stockService.updateUnits` sans route |
+| Méthode | Route                          | Rôle      | Remplace                              |
+| ------- | ------------------------------ | --------- | ------------------------------------- |
+| GET     | `/api/v1/public/stats`         | public    | chiffres de la page d'accueil en dur  |
+| GET     | `/api/v1/public/campaigns`     | public    | trois campagnes fictives en dur       |
+| GET     | `/api/v1/donors/me/activities` | donneur   | historique de dons simulé             |
+| PUT     | `/api/v1/stock`                | org_admin | `stockService.updateUnits` sans route |
 
 ## 🚧 Intégrations non branchées
 
@@ -42,10 +42,10 @@ Ces services ne déplacent aucun argent. Ils signalent `simulated: true`
 jusqu'à l'interface, qui le dit à l'utilisateur, et refusent de simuler quand
 leurs identifiants sont configurés.
 
-| Service                | Fichier                                            | Effet réel |
-| ---------------------- | -------------------------------------------------- | ---------- |
-| Izichange (Mobile Money) | `src/modules/bitcoin/services/izichange.service.ts` | aucun     |
-| Breez (Lightning)      | `src/modules/bitcoin/services/breez.service.ts`      | aucun sans SDK |
+| Service                  | Fichier                                             | Effet réel     |
+| ------------------------ | --------------------------------------------------- | -------------- |
+| Izichange (Mobile Money) | `src/modules/bitcoin/services/izichange.service.ts` | aucun          |
+| Breez (Lightning)        | `src/modules/bitcoin/services/breez.service.ts`     | aucun sans SDK |
 
 ## ⚙️ À faire côté Supabase (obligatoire pour le runtime)
 
