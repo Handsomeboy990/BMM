@@ -176,9 +176,7 @@ export type VerifyResult = {
 /* --------------------------- Espace donneur ------------------------- */
 
 export type DonorActivityType =
-  | "blood_donation"
-  | "referral"
-  | "awareness_session";
+  "blood_donation" | "referral" | "awareness_session";
 
 export type DonorActivity = {
   id: string;

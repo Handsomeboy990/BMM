@@ -37,16 +37,13 @@ export const BLOOD_TYPES_ORDER = [
  * sans référence. Faute d'objectif national déclaré, on rapporte le stock au
  * plus fort stock observé, ce qui donne une lecture relative honnête.
  */
-function toAvailability(
-  unitsByType: Map<string, number>,
-): BloodAvailability[] {
+function toAvailability(unitsByType: Map<string, number>): BloodAvailability[] {
   const max = Math.max(1, ...unitsByType.values());
 
   return BLOOD_TYPES_ORDER.map((bloodType) => {
     const units = unitsByType.get(bloodType) ?? 0;
     const level = Math.round((units / max) * 100);
-    const status =
-      level < 25 ? "critique" : level < 55 ? "faible" : "stable";
+    const status = level < 25 ? "critique" : level < 55 ? "faible" : "stable";
     return { bloodType, units, level, status };
   });
 }

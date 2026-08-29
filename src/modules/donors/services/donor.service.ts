@@ -7,9 +7,7 @@ import { CreateDonorDTO, DonorRecord } from "../types";
 import type { UpdateDonorDTO } from "../schemas";
 
 export type DonorActivityType =
-  | "blood_donation"
-  | "referral"
-  | "awareness_session";
+  "blood_donation" | "referral" | "awareness_session";
 
 export type DonorActivityRecord = {
   id: string;
@@ -398,9 +396,7 @@ export const donorService = {
    * Sert à l'espace donneur (« mes dons ») et à la fiche vue par une
    * structure. La description est libre: c'est la structure qui la renseigne.
    */
-  listActivities: async (
-    donorId: string,
-  ): Promise<DonorActivityRecord[]> => {
+  listActivities: async (donorId: string): Promise<DonorActivityRecord[]> => {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from("donor_activities")

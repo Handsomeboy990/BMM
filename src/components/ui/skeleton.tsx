@@ -45,12 +45,7 @@ export function SkeletonCards({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "grid gap-4 sm:grid-cols-2 lg:grid-cols-3",
-        className,
-      )}
-    >
+    <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", className)}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="bg-card space-y-3 rounded-xl border p-6">
           <Skeleton className="h-4 w-24" />

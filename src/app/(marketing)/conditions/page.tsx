@@ -11,14 +11,14 @@ export default function ConditionsPage() {
   return (
     <LegalArticle title="Conditions d'utilisation" updatedAt="5 juillet 2026">
       <p>
-        En utilisant HEMORA, vous acceptez les conditions ci-dessous.
-        Elles définissent le rôle de chacun et les règles de bon usage.
+        En utilisant HEMORA, vous acceptez les conditions ci-dessous. Elles
+        définissent le rôle de chacun et les règles de bon usage.
       </p>
 
       <h2>Objet du service</h2>
       <p>
-        HEMORA met en relation des donneurs volontaires et des structures
-        de santé, facilite les alertes en cas de besoin et permet de récompenser
+        HEMORA met en relation des donneurs volontaires et des structures de
+        santé, facilite les alertes en cas de besoin et permet de récompenser
         les dons. La plateforme ne réalise aucun acte médical.
       </p>
 

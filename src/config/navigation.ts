@@ -34,7 +34,10 @@ export const footerNav = [
     links: [
       { label: "Créer un compte", href: "/register" },
       { label: "Se connecter", href: "/login" },
-      { label: "Comment ça marche", href: `/#${homeSectionIds.fonctionnement}` },
+      {
+        label: "Comment ça marche",
+        href: `/#${homeSectionIds.fonctionnement}`,
+      },
     ],
   },
   {

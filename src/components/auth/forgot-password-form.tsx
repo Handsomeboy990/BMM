@@ -6,7 +6,6 @@ import { useState } from "react";
 
 import { AuthField } from "@/components/auth/auth-field";
 import { Button } from "@/components/ui/button";
-import { AUTH_BYPASS } from "@/lib/dev/demo";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function ForgotPasswordForm() {
@@ -21,16 +20,11 @@ export function ForgotPasswordForm() {
     const email = String(new FormData(event.currentTarget).get("email"));
 
     try {
-      if (!AUTH_BYPASS) {
-        const supabase = createSupabaseBrowserClient();
-        const { error: err } = await supabase.auth.resetPasswordForEmail(
-          email,
-          {
-            redirectTo: `${window.location.origin}/reset-password`,
-          },
-        );
-        if (err) throw err;
-      }
+      const supabase = createSupabaseBrowserClient();
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (err) throw err;
       setSent(true);
     } catch (err) {
       setError(

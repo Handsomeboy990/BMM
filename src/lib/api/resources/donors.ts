@@ -1,11 +1,6 @@
 import { httpClient } from "@/lib/api/http-client";
 
-import type {
-  BloodType,
-  DonorActivity,
-  DonorRecord,
-  RewardLog,
-} from "./types";
+import type { BloodType, DonorActivity, DonorRecord, RewardLog } from "./types";
 
 /** Champs qu'un donneur peut mettre à jour depuis son espace. */
 export type UpdateDonorPayload = Partial<{
@@ -78,8 +73,7 @@ export const donorsApi = {
   me: () => httpClient.get<DonorRecord>("/donors/me"),
 
   /** Historique du donneur connecté: dons, parrainages, sensibilisations. */
-  myActivities: () =>
-    httpClient.get<DonorActivity[]>("/donors/me/activities"),
+  myActivities: () => httpClient.get<DonorActivity[]>("/donors/me/activities"),
 
   /** Met à jour le profil du donneur. */
   update: (id: string, payload: UpdateDonorPayload) =>

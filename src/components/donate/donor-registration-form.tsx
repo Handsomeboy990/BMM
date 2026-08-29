@@ -433,8 +433,8 @@ export function DonorRegistrationForm({
                 className="accent-primary mt-0.5 size-4 shrink-0 rounded"
               />
               <span>
-                J'autorise HEMORA à traiter mes données de santé pour
-                être alerté en cas de besoin compatible, conformément à la
+                J'autorise HEMORA à traiter mes données de santé pour être
+                alerté en cas de besoin compatible, conformément à la
                 réglementation sur la protection des données.
               </span>
             </label>

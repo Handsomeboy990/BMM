@@ -9,7 +9,6 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRechargeOrg } from "@/lib/api/hooks";
-import { useDemoBalanceDelta } from "@/lib/org-balance";
 import { useAuth } from "@/providers/auth-provider";
 
 const PRESETS = [10_000, 50_000, 100_000, 500_000];
@@ -19,15 +18,13 @@ const PRESETS = [10_000, 50_000, 100_000, 500_000];
  * rechargement. Les récompenses versées aux donneurs y sont débitées.
  */
 export function FundingAccountCard() {
-  const { user, isDemo } = useAuth();
-  const delta = useDemoBalanceDelta();
+  const { user } = useAuth();
   const recharge = useRechargeOrg();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(50_000);
   const [done, setDone] = useState(false);
 
-  const base = user?.organization?.balanceSats ?? 0;
-  const balance = Math.max(0, base + (isDemo ? delta : 0));
+  const balance = Math.max(0, user?.organization?.balanceSats ?? 0);
 
   async function onRecharge() {
     await recharge.mutateAsync(amount).catch(() => {});
@@ -45,7 +42,7 @@ export function FundingAccountCard() {
       <CardContent className="space-y-3 pt-0">
         <div className="from-primary/10 flex items-center justify-between rounded-xl bg-linear-to-br to-transparent p-5">
           <div>
-            <p className="text-3xl font-bold tracking-tight">
+            <p className="font-display text-3xl font-bold tracking-tight">
               {balance.toLocaleString("fr-FR")}{" "}
               <span className="text-base font-medium">sats</span>
             </p>
@@ -85,7 +82,7 @@ export function FundingAccountCard() {
                   className={
                     amount === preset
                       ? "border-primary bg-primary/10 text-primary rounded-md border px-2 py-2 text-xs font-medium"
-                      : "hover:bg-accent rounded-md border px-2 py-2 text-xs transition-colors"
+                      : "hover:bg-muted rounded-md border px-2 py-2 text-xs transition-colors"
                   }
                 >
                   {preset.toLocaleString("fr-FR")}

@@ -1,3 +1,4 @@
+import { AudiencesSection } from "@/components/marketing/audiences-section";
 import { AvailabilitySection } from "@/components/marketing/availability-section";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { FeaturesSection } from "@/components/marketing/features-section";
@@ -10,7 +11,6 @@ import {
   type StoryPanel,
 } from "@/components/marketing/scroll-story";
 import { SecuritySection } from "@/components/marketing/security-section";
-import { TestimonialsSection } from "@/components/marketing/testimonials-section";
 
 const storyPanels: StoryPanel[] = [
   {
@@ -37,7 +37,7 @@ const storyPanels: StoryPanel[] = [
     eyebrow: "La communauté",
     title: "Une Afrique qui répond présente",
     description:
-      "Des milliers de volontaires, à travers le continent, mobilisés d'un seul geste pour sauver des vies.",
+      "Un réseau de volontaires qui grandit ville après ville, mobilisable d'un seul geste quand un besoin survient.",
   },
 ];
 
@@ -48,11 +48,11 @@ export default function HomePage() {
       <RegionsStrip />
       <ScrollStory panels={storyPanels} />
       <FeaturesSection />
-      <SecuritySection />
-      <ImpactSection />
-      <AvailabilitySection />
       <HowItWorksSection />
-      <TestimonialsSection />
+      <AvailabilitySection />
+      <AudiencesSection />
+      <ImpactSection />
+      <SecuritySection />
       <CtaSection />
     </>
   );

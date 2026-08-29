@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Montserrat, Plus_Jakarta_Sans } from "next/font/google";
+import {
+  JetBrains_Mono,
+  Montserrat,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { ServiceWorker } from "@/components/pwa/service-worker";

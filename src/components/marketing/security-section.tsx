@@ -27,8 +27,8 @@ export function SecuritySection() {
           />
           <Reveal delay={120} direction="up">
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Chez HEMORA, votre carte de donneur et l'historique de vos
-              dons sont enregistrés une fois pour toutes. Une fois créés, ils ne
+              Chez HEMORA, votre carte de donneur et l'historique de vos dons
+              sont enregistrés une fois pour toutes. Une fois créés, ils ne
               peuvent plus être modifiés ni falsifiés.
             </p>
           </Reveal>

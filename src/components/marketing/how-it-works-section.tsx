@@ -1,4 +1,5 @@
 import { Container } from "@/components/layout/container";
+import { homeSectionIds } from "@/config/navigation";
 import { steps } from "@/components/marketing/content";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { RevealImage } from "@/components/marketing/reveal-image";
@@ -6,7 +7,10 @@ import { Reveal } from "@/components/shared/reveal";
 
 export function HowItWorksSection() {
   return (
-    <section id="fonctionnement" className="bg-secondary/5 border-y py-24">
+    <section
+      id={homeSectionIds.fonctionnement}
+      className="bg-secondary/[0.04] border-y py-24 dark:bg-black/20"
+    >
       <Container className="grid items-center gap-12 lg:grid-cols-12">
         <div className="flex flex-col gap-8 lg:col-span-7">
           <SectionHeading

@@ -2,12 +2,12 @@ import { ArrowRight, BellRing, Droplet, HeartPulse } from "lucide-react";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
+import { LiveStats } from "@/components/marketing/live-stats";
 import { RevealImage } from "@/components/marketing/reveal-image";
-import { StatCounter } from "@/components/marketing/stat-counter";
 import { GridPattern } from "@/components/shared/grid-pattern";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { landingStats } from "@/lib/mock/landing";
+import { homeSectionIds } from "@/config/navigation";
 
 function FloatingCard({
   className,
@@ -54,7 +54,7 @@ export function HeroSection() {
           </Badge>
 
           <h1
-            className="animate-rise-in text-4xl font-semibold tracking-tight text-balance sm:text-5xl"
+            className="animate-rise-in font-display text-4xl font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
             style={{ animationDelay: "80ms" }}
           >
             Votre sang sauve des vies,{" "}
@@ -83,7 +83,9 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="#fonctionnement">Découvrir le fonctionnement</Link>
+              <Link href={`#${homeSectionIds.fonctionnement}`}>
+                Découvrir le fonctionnement
+              </Link>
             </Button>
           </div>
         </div>
@@ -118,16 +120,7 @@ export function HeroSection() {
         </div>
       </Container>
 
-      <Container className="grid grid-cols-2 gap-8 border-t py-10 lg:grid-cols-4">
-        {landingStats.map((stat) => (
-          <StatCounter
-            key={stat.label}
-            value={stat.value}
-            suffix={stat.suffix}
-            label={stat.label}
-          />
-        ))}
-      </Container>
+      <LiveStats />
     </section>
   );
 }

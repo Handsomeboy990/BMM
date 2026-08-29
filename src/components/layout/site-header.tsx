@@ -16,6 +16,7 @@ import { useAuth } from "@/providers/auth-provider";
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState<string | null>(null);
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
   const spaceHref = user?.role === "donor" ? "/donneur" : "/dashboard";
@@ -28,8 +29,20 @@ export function SiteHeader() {
   }, []);
 
   // Une navigation ferme le panneau: sans cela il resterait ouvert par-dessus
-  // la nouvelle page sur mobile.
-  useEffect(() => setMenuOpen(false), [pathname]);
+  // la nouvelle page sur mobile. Ajustement pendant le rendu plutôt que dans
+  // un effet, pour éviter un second rendu inutile.
+  if (menuOpen && menuPath !== null && menuPath !== pathname) {
+    setMenuOpen(false);
+    setMenuPath(null);
+  }
+
+  function toggleMenu() {
+    setMenuOpen((open) => {
+      const next = !open;
+      setMenuPath(next ? pathname : null);
+      return next;
+    });
+  }
 
   // Panneau ouvert: on bloque le défilement de la page derrière.
   useEffect(() => {
@@ -67,7 +80,11 @@ export function SiteHeader() {
       </a>
 
       <Container className="flex h-16 items-center justify-between gap-4">
-        <Link href="/" aria-label="HEMORA, accueil" className="flex items-center">
+        <Link
+          href="/"
+          aria-label="HEMORA, accueil"
+          className="flex items-center"
+        >
           <Logo />
         </Link>
 
@@ -118,7 +135,7 @@ export function SiteHeader() {
             aria-expanded={menuOpen}
             aria-controls="menu-mobile"
             aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={toggleMenu}
           >
             {menuOpen ? <X /> : <Menu />}
           </Button>

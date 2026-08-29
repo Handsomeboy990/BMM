@@ -1,4 +1,5 @@
 import { Container } from "@/components/layout/container";
+import { homeSectionIds } from "@/config/navigation";
 import { RevealImage } from "@/components/marketing/reveal-image";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/shared/reveal";
@@ -11,7 +12,10 @@ const impactPoints = [
 
 export function ImpactSection() {
   return (
-    <section className="bg-secondary/30 border-y py-24">
+    <section
+      id={homeSectionIds.impact}
+      className="bg-secondary/[0.04] border-y py-24 dark:bg-black/20"
+    >
       <Container className="grid items-center gap-14 lg:grid-cols-2">
         <div className="flex flex-col gap-8">
           <SectionHeading

@@ -12,7 +12,7 @@ import {
 
 export function FeaturesSection() {
   return (
-    <section id="donneurs" className="relative py-24">
+    <section className="relative py-24">
       <Container className="flex flex-col gap-14">
         <div className="flex flex-col gap-6">
           <SectionHeading

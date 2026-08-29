@@ -30,7 +30,7 @@ export function OfflineIdentityCard({
   async function onGenerate() {
     setError(null);
     try {
-      const result = await generate.mutateAsync({ id: donorId, bloodType });
+      const result = await generate.mutateAsync({ id: donorId });
       setIdentity(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Génération impossible.");

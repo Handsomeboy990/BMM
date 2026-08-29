@@ -20,7 +20,11 @@ export function SiteFooter() {
         </div>
 
         {footerNav.map((group) => (
-          <nav key={group.title} aria-label={group.title} className="flex flex-col gap-3">
+          <nav
+            key={group.title}
+            aria-label={group.title}
+            className="flex flex-col gap-3"
+          >
             <span className="text-sm font-semibold">{group.title}</span>
             <ul className="flex flex-col gap-2.5">
               {group.links.map((link) => (

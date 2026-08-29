@@ -12,8 +12,8 @@ export default function MentionsLegalesPage() {
     <LegalArticle title="Mentions légales" updatedAt="5 juillet 2026">
       <h2>Éditeur de la plateforme</h2>
       <p>
-        HEMORA est une plateforme de mise en relation entre donneurs de
-        sang et structures de santé. Pour toute demande, un contact est mis à
+        HEMORA est une plateforme de mise en relation entre donneurs de sang et
+        structures de santé. Pour toute demande, un contact est mis à
         disposition via la page de soutien et l'adresse e-mail de l'équipe.
       </p>
 
