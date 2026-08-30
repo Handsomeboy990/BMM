@@ -7,18 +7,23 @@ import "react-phone-number-input/style.css";
 import { cn } from "@/lib/utils";
 
 /**
- * Normalise un numéro au format E.164, seul accepté par le composant.
+ * Retire les séparateurs de lecture d'un numéro.
  *
- * Les numéros enregistrés portent souvent leurs espaces de lecture
+ * Les numéros enregistrés portent souvent leurs espaces
  * (« +229 01 97 12 34 56 »). Passés tels quels, la bibliothèque refusait la
- * valeur initiale, écrivait une erreur dans la console et laissait le champ
- * vide: le donneur croyait devoir ressaisir son numéro.
+ * valeur, écrivait une erreur dans la console et laissait le champ vide: le
+ * donneur croyait devoir ressaisir son numéro.
+ *
+ * La validité complète n'est délibérément pas exigée: pendant la frappe, le
+ * numéro est incomplet (« +2290 ») et doit passer tel quel, sinon le champ se
+ * viderait à chaque touche. Seul ce qui ne ressemble pas du tout à un numéro
+ * international est écarté.
  */
 function toE164(value: string | undefined): string | undefined {
   if (!value) return undefined;
 
   const compact = value.replace(/[\s.\-()]/g, "");
-  return /^\+[1-9]\d{6,14}$/.test(compact) ? compact : undefined;
+  return /^\+\d*$/.test(compact) ? compact : undefined;
 }
 
 /**

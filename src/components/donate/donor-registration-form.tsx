@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +41,9 @@ import {
 } from "@/lib/reward-preference";
 
 type Success = { donor: DonorRecord; wif: string };
+
+/** Valeur portée par « Je ne le connais pas encore ». */
+const UNKNOWN_BLOOD_TYPE = "inconnu";
 
 /** Télécharge la clé privée en fichier local. Aucune transmission réseau. */
 function downloadKey({ donor, wif }: Success) {
@@ -108,28 +111,89 @@ export function DonorRegistrationForm({
     omit: ["password"],
   });
 
+  /**
+   * Le groupe sanguin, le téléphone et les champs Mobile Money ne sont pas de
+   * simples `<input>`: écrire dans le DOM ne les restaure pas, React réécrit
+   * la valeur au rendu suivant. Ils sont donc tenus en état ici, ce qui les
+   * rend restaurables et enregistrables comme les autres.
+   */
+  // Radix réserve la chaîne vide: un article de liste ne peut pas la porter.
+  // « Je ne le connais pas encore » a donc une valeur propre, traduite en
+  // « non renseigné » à l'envoi.
+  const [bloodType, setBloodType] = useState(UNKNOWN_BLOOD_TYPE);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [momoOperator, setMomoOperator] = useState<string>("mtn");
+  const [momoPhone, setMomoPhone] = useState("");
+
+  /**
+   * Tant que le brouillon n'est pas réinjecté, on n'enregistre rien.
+   *
+   * Le champ téléphone émet un changement en se montant. Sans ce garde, cet
+   * événement écrivait un brouillon construit sur l'état initial, vide, et
+   * effaçait le groupe sanguin mémorisé juste avant de pouvoir le restaurer.
+   */
+  const hydrated = useRef(false);
+
   // Réinjection du brouillon une fois le formulaire monté.
   useEffect(() => {
-    if (!draft || !formRef.current) return;
-    for (const [name, value] of Object.entries(draft)) {
-      const field = formRef.current.elements.namedItem(name);
-      if (field instanceof HTMLInputElement && field.type !== "password") {
-        field.value = value;
+    if (!restored) return;
+    if (!draft) {
+      hydrated.current = true;
+      return;
+    }
+
+    if (formRef.current) {
+      for (const [name, value] of Object.entries(draft)) {
+        const field = formRef.current.elements.namedItem(name);
+        // Les champs contrôlés sont repris par l'état, juste après.
+        if (
+          field instanceof HTMLInputElement &&
+          field.type !== "password" &&
+          field.type !== "hidden"
+        ) {
+          field.value = value;
+        }
       }
     }
-  }, [draft]);
 
-  /** Mémorise la saisie à chaque frappe, sans le mot de passe. */
-  function onFormInput() {
-    const form = formRef.current;
-    if (!form) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (draft.bloodType) setBloodType(draft.bloodType);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (draft.phoneNumber) setPhoneNumber(draft.phoneNumber);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (draft.momoOperator) setMomoOperator(draft.momoOperator);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (draft.momoPhone) setMomoPhone(draft.momoPhone);
 
-    const values: Record<string, string> = {};
-    for (const [name, value] of new FormData(form).entries()) {
-      if (typeof value === "string") values[name] = value;
-    }
-    saveDraft(values);
-  }
+    hydrated.current = true;
+  }, [draft, restored]);
+
+  /**
+   * Mémorise la saisie. `FormData` couvre les champs natifs; les valeurs
+   * contrôlées sont ajoutées explicitement, car un changement de liste
+   * déroulante ne déclenche pas d'événement `input` sur le formulaire.
+   */
+  const persist = useCallback(
+    (overrides: Record<string, string> = {}) => {
+      const form = formRef.current;
+      if (!form || !hydrated.current) return;
+
+      const values: Record<string, string> = {};
+      for (const [name, value] of new FormData(form).entries()) {
+        if (typeof value === "string") values[name] = value;
+      }
+
+      saveDraft({
+        ...values,
+        bloodType,
+        phoneNumber,
+        momoOperator,
+        momoPhone,
+        ...overrides,
+      });
+    },
+    [saveDraft, bloodType, phoneNumber, momoOperator, momoPhone],
+  );
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -148,8 +212,8 @@ export function DonorRegistrationForm({
       firstName: String(form.get("firstName")),
       lastName: String(form.get("lastName")),
       email: String(form.get("email")),
-      phoneNumber: String(form.get("phoneNumber")),
-      bloodType: String(form.get("bloodType")),
+      phoneNumber,
+      bloodType: bloodType === UNKNOWN_BLOOD_TYPE ? "" : bloodType,
       city: String(form.get("city")),
       age: Number(form.get("age")),
       latitude: coords?.latitude ?? 0,
@@ -188,9 +252,8 @@ export function DonorRegistrationForm({
         rewardMode === "mobile-money"
           ? {
               mode: "mobile-money",
-              operator:
-                (form.get("momoOperator") as MobileMoneyOperator) || undefined,
-              phone: String(form.get("momoPhone") || profile.phoneNumber),
+              operator: (momoOperator as MobileMoneyOperator) || undefined,
+              phone: momoPhone || profile.phoneNumber,
             }
           : { mode: "lightning" },
       );
@@ -308,7 +371,7 @@ export function DonorRegistrationForm({
           ref={formRef}
           className="space-y-5"
           onSubmit={onSubmit}
-          onInput={onFormInput}
+          onInput={() => persist()}
         >
           {restored && draft ? (
             <p
@@ -364,8 +427,18 @@ export function DonorRegistrationForm({
               />
             </Field>
             <Field label="Groupe sanguin (optionnel)" htmlFor="bloodType">
-              <Select id="bloodType" name="bloodType" defaultValue="">
-                <SelectItem value="">Je ne le connais pas encore</SelectItem>
+              <Select
+                id="bloodType"
+                name="bloodType"
+                value={bloodType}
+                onValueChange={(v) => {
+                  setBloodType(v);
+                  persist({ bloodType: v });
+                }}
+              >
+                <SelectItem value={UNKNOWN_BLOOD_TYPE}>
+                  Je ne le connais pas encore
+                </SelectItem>
                 {BLOOD_TYPES.map((g) => (
                   <SelectItem key={g} value={g}>
                     {g}
@@ -389,7 +462,15 @@ export function DonorRegistrationForm({
               />
             </Field>
             <Field label="Téléphone" htmlFor="phoneNumber">
-              <PhoneField id="phoneNumber" name="phoneNumber" />
+              <PhoneField
+                id="phoneNumber"
+                name="phoneNumber"
+                value={phoneNumber}
+                onChange={(v) => {
+                  setPhoneNumber(v);
+                  persist({ phoneNumber: v });
+                }}
+              />
             </Field>
             <Field label="Ville" htmlFor="city">
               <Input id="city" name="city" required placeholder="Cotonou" />
@@ -444,7 +525,11 @@ export function DonorRegistrationForm({
                     <Select
                       id="momoOperator"
                       name="momoOperator"
-                      defaultValue="mtn"
+                      value={momoOperator}
+                      onValueChange={(v) => {
+                        setMomoOperator(v);
+                        persist({ momoOperator: v });
+                      }}
                     >
                       {MOBILE_MONEY_OPERATORS.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
@@ -454,7 +539,15 @@ export function DonorRegistrationForm({
                     </Select>
                   </Field>
                   <Field label="Numéro Mobile Money" htmlFor="momoPhone">
-                    <PhoneField id="momoPhone" name="momoPhone" />
+                    <PhoneField
+                      id="momoPhone"
+                      name="momoPhone"
+                      value={momoPhone}
+                      onChange={(v) => {
+                        setMomoPhone(v);
+                        persist({ momoPhone: v });
+                      }}
+                    />
                   </Field>
                   <p className="text-muted-foreground flex items-center gap-2 text-xs sm:col-span-2">
                     <ShieldCheck className="size-3.5 shrink-0" />

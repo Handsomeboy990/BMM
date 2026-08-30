@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 function toE164(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const compact = value.replace(/[\s.\-()]/g, "");
-  return /^\+[1-9]\d{6,14}$/.test(compact) ? compact : undefined;
+  return /^\+\d*$/.test(compact) ? compact : undefined;
 }
 
 describe("normalisation du numéro de téléphone", () => {
@@ -25,6 +25,12 @@ describe("normalisation du numéro de téléphone", () => {
 
   it("refuse un numéro sans indicatif international", () => {
     expect(toE164("0197123456")).toBeUndefined();
+  });
+
+  it("laisse passer un numéro en cours de frappe", () => {
+    // Exiger un numéro complet viderait le champ à chaque touche.
+    expect(toE164("+2290")).toBe("+2290");
+    expect(toE164("+")).toBe("+");
   });
 
   it("refuse une saisie qui n'est pas un numéro", () => {
