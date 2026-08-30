@@ -12,7 +12,9 @@ export default function LoginPage() {
       <AuthTabs />
 
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">Bon retour</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">
+          Bon retour
+        </h1>
         <p className="text-muted-foreground text-sm">
           Connectez votre structure pour piloter urgences et campagnes.
         </p>

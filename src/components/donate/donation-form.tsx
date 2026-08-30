@@ -3,6 +3,7 @@
 import { AlertCircle, Bitcoin, Heart, Wallet, Zap } from "lucide-react";
 import { useState } from "react";
 
+import { SimulatedInvoiceNotice } from "@/components/donate/simulated-invoice-notice";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +54,7 @@ export function DonationForm() {
       setError(
         err instanceof Error
           ? err.message
-          : "Impossible de generer la facture pour le moment.",
+          : "Impossible de générer la facture pour le moment.",
       );
     }
   }
@@ -68,18 +69,11 @@ export function DonationForm() {
         <CardContent className="space-y-5 pt-0">
           <p className="text-muted-foreground text-sm">
             Scannez la facture Lightning ci-dessous avec votre portefeuille pour
-            envoyer {invoice.amountSats.toLocaleString("fr-FR")} sats a{" "}
+            envoyer {invoice.amountSats.toLocaleString("fr-FR")} sats à{" "}
             {DONATION_PURPOSE_LABELS[invoice.purpose].toLowerCase()}.
           </p>
 
-          {/* Avertissement de facture simulee, masque a la demande.
-          {invoice.simulated ? (
-            <p className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
-              <AlertCircle className="mt-0.5 size-4 shrink-0" />
-              Facture de demonstration (SDK Breez en mode simulation cote
-              serveur). Configurez le noeud Breez pour des factures reelles.
-            </p>
-          ) : null} */}
+          {invoice.simulated ? <SimulatedInvoiceNotice /> : null}
 
           <div className="flex justify-center">
             <QrBadge
@@ -92,12 +86,14 @@ export function DonationForm() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild className="flex-1">
-              <a href={`lightning:${invoice.bolt11}`}>
-                <Wallet className="size-4" />
-                Ouvrir dans le portefeuille
-              </a>
-            </Button>
+            {invoice.simulated ? null : (
+              <Button asChild className="flex-1">
+                <a href={`lightning:${invoice.bolt11}`}>
+                  <Wallet className="size-4" />
+                  Ouvrir dans le portefeuille
+                </a>
+              </Button>
+            )}
             <Button
               variant="outline"
               className="flex-1"
@@ -114,7 +110,7 @@ export function DonationForm() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle>Soutenir Bitcoin Blood</CardTitle>
+        <CardTitle>Soutenir HEMORA</CardTitle>
         <Bitcoin className="size-5 text-amber-500" />
       </CardHeader>
       <CardContent>
@@ -137,7 +133,7 @@ export function DonationForm() {
                   className={
                     purpose === p
                       ? "border-primary bg-primary/10 text-primary rounded-md border px-3 py-2 text-left text-sm font-medium"
-                      : "hover:bg-accent rounded-md border px-3 py-2 text-left text-sm transition-colors"
+                      : "hover:bg-muted rounded-md border px-3 py-2 text-left text-sm transition-colors"
                   }
                 >
                   {DONATION_PURPOSE_LABELS[p]}
@@ -150,7 +146,7 @@ export function DonationForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Montant (sats)</Label>
+            <Label htmlFor="donation-amount">Montant (sats)</Label>
             <div className="grid grid-cols-4 gap-2">
               {PRESETS.map((preset) => (
                 <button
@@ -160,7 +156,7 @@ export function DonationForm() {
                   className={
                     amount === preset
                       ? "border-primary bg-primary/10 text-primary rounded-md border px-2 py-2 text-sm font-medium"
-                      : "hover:bg-accent rounded-md border px-2 py-2 text-sm transition-colors"
+                      : "hover:bg-muted rounded-md border px-2 py-2 text-sm transition-colors"
                   }
                 >
                   {preset.toLocaleString("fr-FR")}
@@ -168,11 +164,12 @@ export function DonationForm() {
               ))}
             </div>
             <Input
+              id="donation-amount"
               type="number"
               min={100}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
-              placeholder="Montant personnalise en sats"
+              placeholder="Montant personnalisé en sats"
             />
           </div>
 
@@ -182,7 +179,7 @@ export function DonationForm() {
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Un mot pour l'equipe..."
+              placeholder="Un mot pour l'équipe…"
               rows={2}
               maxLength={280}
             />
@@ -196,8 +193,8 @@ export function DonationForm() {
           >
             <Zap className="size-4" />
             {create.isPending
-              ? "Generation de la facture..."
-              : "Generer la facture Lightning"}
+              ? "Génération de la facture…"
+              : "Générer la facture Lightning"}
           </Button>
         </form>
       </CardContent>

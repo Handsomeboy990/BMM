@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { PhoneField } from "@/components/ui/phone-field";
 import { QrScanner } from "@/components/ui/qr-scanner";
 import { useRewardDonor, useVerifyDonor } from "@/lib/api/hooks";
-import { type RewardMode, loadRewardPreference } from "@/lib/reward-preference";
+import { type RewardMode } from "@/lib/reward-preference";
 import { cn } from "@/lib/utils";
 
 type PayoutMode = RewardMode | "points" | "credit";
@@ -50,11 +50,10 @@ export function RewardConsole() {
     setDonorId(id);
   }
 
-  // Canal de versement : choix explicite de l'utilisateur, sinon préférence
-  // exprimée par le donneur à l'inscription (même navigateur), sinon Lightning.
-  const preference = donorId ? loadRewardPreference(donorId) : null;
-  const payoutMode: PayoutMode =
-    payoutModeOverride ?? preference?.mode ?? "lightning";
+  // Canal de versement choisi par l'opérateur. La préférence enregistrée par
+  // le donneur vit dans le navigateur du donneur: la lire ici ne renvoyait
+  // jamais rien, et donnait l'illusion d'un choix repris automatiquement.
+  const payoutMode: PayoutMode = payoutModeOverride ?? "lightning";
   const setPayoutMode = setPayoutModeOverride;
 
   // Versement Lightning (BOLT11) via Breez côté serveur.
@@ -340,11 +339,7 @@ export function RewardConsole() {
                   >
                     <div className="space-y-2">
                       <Label htmlFor="momoPhone">Numéro Mobile Money</Label>
-                      <PhoneField
-                        id="momoPhone"
-                        name="momoPhone"
-                        defaultValue={preference?.phone ?? ""}
-                      />
+                      <PhoneField id="momoPhone" name="momoPhone" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="momoSats">Montant (sats)</Label>

@@ -68,7 +68,24 @@ export const adminNav: AppNavGroup[] = [
   },
 ];
 
-/** Renvoie le menu adapté au rôle : l'admin voit tout, plus l'administration. */
+/**
+ * Menu adapté au rôle.
+ *
+ * Le super-administrateur ne voit pas « Réseau & stock » ni « Récompenses »:
+ * ces deux écrans sont rattachés à une structure, et l'administration n'en a
+ * pas. Les lui proposer menait à des pages nécessairement vides.
+ */
+const ORG_ONLY_HREFS = new Set(["/reseau", "/cards"]);
+
 export function navForRole(role: AppRole | undefined): AppNavGroup[] {
-  return role === "super_admin" ? [...appNav, ...adminNav] : appNav;
+  if (role !== "super_admin") return appNav;
+
+  const networkWide = appNav
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !ORG_ONLY_HREFS.has(item.href)),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  return [...networkWide, ...adminNav];
 }

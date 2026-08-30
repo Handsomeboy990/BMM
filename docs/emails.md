@@ -24,7 +24,7 @@ EMAILJS_TEMPLATE_ID=...   # le gabarit universel ci-dessous
 2. Onglet **Settings** :
    - **To Email** : `{{to_email}}`
    - **Subject** : `{{subject}}`
-   - From name/email : au choix (ex. « Bitcoin Blood »).
+   - From name/email : au choix (ex. « HEMORA »).
 3. Onglet **Content** → bascule en mode **code / HTML** et mets **exactement** :
 
    ```
@@ -37,7 +37,7 @@ EMAILJS_TEMPLATE_ID=...   # le gabarit universel ci-dessous
 4. **Save**, puis copie le **Template ID** dans `EMAILJS_TEMPLATE_ID`.
 
 C'est tout. Le sujet et le corps (bienvenue, récompense…) sont produits par le
-code, mis en forme aux couleurs Bitcoin Blood.
+code, mis en forme aux couleurs HEMORA.
 
 ### Emails déclenchés
 

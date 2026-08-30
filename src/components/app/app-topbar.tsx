@@ -7,12 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { appNav } from "@/config/app-navigation";
+import { navForRole } from "@/config/app-navigation";
 import { useLogout } from "@/lib/api/hooks";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
-
-const flatNav = appNav.flatMap((group) => group.items);
 
 function initialsOf(name: string): string {
   return (
@@ -21,20 +19,18 @@ function initialsOf(name: string): string {
       .filter(Boolean)
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase())
-      .join("") || "BB"
+      .join("") || "HE"
   );
 }
-
-const demoRoles = [
-  { value: "org_admin", label: "Structure" },
-  { value: "super_admin", label: "Super-admin" },
-] as const;
 
 export function AppTopbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isDemo, setDemoRole } = useAuth();
+  const { user } = useAuth();
   const logout = useLogout();
+  // Le menu compact doit refléter le rôle: un super-admin y perdait sinon
+  // l'accès aux organisations et aux demandes de cartes.
+  const flatNav = navForRole(user?.role).flatMap((group) => group.items);
 
   const orgName =
     user?.role === "super_admin"
@@ -50,7 +46,10 @@ export function AppTopbar() {
     <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
         {/* Navigation horizontale repliée sur mobile */}
-        <nav className="flex flex-1 items-center gap-1 overflow-x-auto lg:hidden">
+        <nav
+          aria-label="Navigation de l'espace"
+          className="flex flex-1 items-center gap-1 overflow-x-auto lg:hidden"
+        >
           {flatNav.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -60,11 +59,12 @@ export function AppTopbar() {
                 key={item.href}
                 href={item.href}
                 aria-label={item.label}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors",
                   active
                     ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-accent",
+                    : "text-muted-foreground hover:bg-muted",
                 )}
               >
                 <Icon className="size-4" />
@@ -74,27 +74,6 @@ export function AppTopbar() {
         </nav>
 
         <div className="hidden flex-1 lg:block" />
-
-        {/* Bascule de rôle - visible uniquement en mode démo */}
-        {isDemo && setDemoRole ? (
-          <div className="bg-muted/60 hidden items-center gap-0.5 rounded-lg p-0.5 md:flex">
-            {demoRoles.map((r) => (
-              <button
-                key={r.value}
-                type="button"
-                onClick={() => setDemoRole(r.value)}
-                className={cn(
-                  "cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                  user?.role === r.value
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
 
         <div className="flex items-center gap-2">
           {user?.role !== "super_admin" ? (

@@ -7,7 +7,6 @@ import { useState } from "react";
 
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
-import { AUTH_BYPASS } from "@/lib/dev/demo";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function ResetPasswordForm() {
@@ -30,11 +29,9 @@ export function ResetPasswordForm() {
 
     setBusy(true);
     try {
-      if (!AUTH_BYPASS) {
-        const supabase = createSupabaseBrowserClient();
-        const { error: err } = await supabase.auth.updateUser({ password });
-        if (err) throw err;
-      }
+      const supabase = createSupabaseBrowserClient();
+      const { error: err } = await supabase.auth.updateUser({ password });
+      if (err) throw err;
       setDone(true);
       setTimeout(() => router.replace("/login"), 1500);
     } catch (err) {
@@ -67,7 +64,7 @@ export function ResetPasswordForm() {
   return (
     <div className="space-y-8">
       <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-2xl font-bold tracking-tight">
           Nouveau mot de passe
         </h1>
         <p className="text-muted-foreground text-sm">

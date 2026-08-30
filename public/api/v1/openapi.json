@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Bitcoin Blood API",
+    "title": "HEMORA API",
     "description": "Plateforme de gestion de donneurs de sang avec authentification d'organisation, recherche intelligente (Blood Emergency AI), horodatage sur la blockchain Bitcoin (OpenTimestamps) et récompenses via Lightning Network.",
     "version": "1.0.0"
   },

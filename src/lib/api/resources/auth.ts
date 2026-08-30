@@ -30,6 +30,6 @@ export const authApi = {
   /** Ferme la session courante. */
   logout: () => httpClient.post<{ success: boolean }>("/auth/logout"),
 
-  /** Profil de l'organisation connectée (ou 401 si non authentifiée). */
-  me: () => httpClient.get<UserProfile>("/auth/me"),
+  /** Sonde de session: le profil connecté, ou `null` si personne ne l'est. */
+  me: () => httpClient.get<UserProfile | null>("/auth/me"),
 };

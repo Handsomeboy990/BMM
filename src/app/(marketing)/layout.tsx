@@ -12,7 +12,9 @@ export default function MarketingLayout({
   return (
     <>
       <SiteHeader />
-      {children}
+      <main id="contenu" className="flex-1">
+        {children}
+      </main>
       <SiteFooter />
     </>
   );

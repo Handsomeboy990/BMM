@@ -1,60 +1,90 @@
+/**
+ * Passerelle Mobile Money (Izichange / Flash).
+ *
+ * ATTENTION: l'appel réel au partenaire n'est pas implémenté. Ce module ne
+ * déplace aucun argent. Il produit une transaction fictive, explicitement
+ * marquée `simulated`, que les routes propagent jusqu'à l'interface pour que
+ * personne ne croie à un versement.
+ *
+ * Deux garde-fous:
+ *
+ * 1. `simulated` remonte jusqu'à l'écran. Un retrait simulé est annoncé comme
+ *    tel, et le solde n'est pas débité: rien n'est parti.
+ * 2. Si les identifiants du partenaire sont configurés, le service refuse de
+ *    simuler et lève. Une clé présente laisse croire que les virements
+ *    partent vraiment; échouer bruyamment vaut mieux qu'un faux succès.
+ *
+ * Pour brancher le partenaire: implémenter l'appel REST ici, renvoyer
+ * `simulated: false` et l'identifiant de transaction retourné par l'API.
+ */
+
+export type MoMoCashout = {
+  transactionId: string;
+  /** Vrai tant que le partenaire n'est pas branché: aucun argent n'a bougé. */
+  simulated: boolean;
+};
+
+function partnerConfigured(): boolean {
+  return Boolean(
+    process.env.IZICHANGE_API_KEY && process.env.IZICHANGE_API_URL,
+  );
+}
+
+function refuseSilentSimulation(operation: string): never {
+  throw new Error(
+    `${operation}: les identifiants Izichange sont configurés mais l'appel au partenaire n'est pas implémenté. ` +
+      "Refus de simuler un mouvement d'argent avec une configuration de production.",
+  );
+}
+
 export const izichangeService = {
   /**
-   * Simule un cashout (retrait) de satoshis vers un numéro Mobile Money via l'API Izichange/Flash.
-   * Dans un environnement de production, cela appellerait l'API REST du partenaire avec les clés d'authentification.
+   * Dépôt de satoshis convertis vers un numéro Mobile Money.
+   * Ne déplace aucun fonds tant que le partenaire n'est pas branché.
    */
   cashoutToMoMo: async (
     momoNumber: string,
     satsAmount: number,
-  ): Promise<string> => {
-    console.warn(`[Izichange Mock] Initiation du dépôt Mobile Money...`);
-    console.warn(
-      `[Izichange Mock] Numéro : ${momoNumber} | Montant : ${satsAmount} sats`,
-    );
-
-    // Simulation d'un délai réseau pour l'appel API (1 à 2 secondes)
-    const delay = Math.floor(Math.random() * 1000) + 1000;
-    await new Promise((resolve) => setTimeout(resolve, delay));
-
-    // Simulation d'une erreur réseau ou de validation (5% de chance)
-    if (Math.random() < 0.05) {
-      console.error(
-        "[Izichange Mock] Échec du paiement. Le numéro est potentiellement invalide ou le service indisponible.",
-      );
-      throw new Error("Izichange_API_Error: Unable to process MoMo cashout");
+  ): Promise<MoMoCashout> => {
+    if (partnerConfigured()) {
+      refuseSilentSimulation("Retrait Mobile Money");
     }
 
-    // Génération d'un faux identifiant de transaction (payment hash)
-    const transactionId = `izichange_momo_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-
     console.warn(
-      `[Izichange Mock] Dépôt MoMo réussi ! Transaction ID: ${transactionId}`,
+      `[Izichange non configuré] Retrait NON EXÉCUTÉ: ${satsAmount} sats vers ${momoNumber}.`,
     );
-    return transactionId;
+
+    return {
+      transactionId: `simulated_momo_${Date.now().toString(36)}`,
+      simulated: true,
+    };
   },
 
   /**
-   * Simule l'initiation d'un paiement Izichange Pay pour une carte physique.
-   * Retourne une URL de checkout simulée.
+   * Paiement d'une carte physique. Même règle: aucun encaissement réel.
    */
   initiateCardPayment: async (
     orderId: string,
     amountXof: number,
-  ): Promise<{ checkoutUrl: string; paymentReference: string }> => {
+  ): Promise<{
+    checkoutUrl: string | null;
+    paymentReference: string;
+    simulated: boolean;
+  }> => {
+    if (partnerConfigured()) {
+      refuseSilentSimulation("Paiement de carte physique");
+    }
+
     console.warn(
-      `[Izichange Pay] Initiation du paiement pour la commande ${orderId}...`,
+      `[Izichange non configuré] Paiement NON EXÉCUTÉ: commande ${orderId}, ${amountXof} XOF.`,
     );
-    console.warn(`[Izichange Pay] Montant : ${amountXof} XOF`);
-
-    // Simulation d'un délai réseau
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const paymentReference = `izi_pay_${Math.random().toString(36).substring(2, 12)}`;
-    const checkoutUrl = `https://checkout.izichange.com/pay/${paymentReference}?orderId=${orderId}&amount=${amountXof}`;
 
     return {
-      checkoutUrl,
-      paymentReference,
+      // Pas d'URL de paiement: envoyer l'utilisateur vers une page de
+      // paiement inexistante lui ferait croire à un encaissement réel.
+      checkoutUrl: null,
+      paymentReference: `simulated_pay_${Date.now().toString(36)}`,
+      simulated: true,
     };
   },
 };

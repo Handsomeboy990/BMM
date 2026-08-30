@@ -55,3 +55,8 @@ analyse_strategique.md
 
 # Document de travail interne (non versionné)
 GUIDE_PLATEFORME.md
+
+# Sources de la marque et de l'équipe (photos, présentation): fichiers lourds
+# et images de personnes. Les visuels réellement publiés vivent dans
+# public/team/. Voir docs/assets-marque.md.
+docs/team/

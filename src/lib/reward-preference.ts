@@ -1,13 +1,12 @@
 /**
- * Préférence de récompense du donneur - « la Récompense Invisible ».
+ * Préférence de récompense du donneur: portefeuille Lightning, ou dépôt
+ * Mobile Money converti à la volée via Izichange.
  *
- * Le donneur choisit comment recevoir ses satoshis : soit sur son propre
- * portefeuille Lightning, soit - sans jamais toucher à la crypto - sur son
- * compte Mobile Money, la conversion étant routée à la volée via Izichange.
- *
- * Tant que la persistance backend n'expose pas ces colonnes, la préférence
- * vit côté client (localStorage) : elle est collectée à l'inscription puis
- * ré-affichée dans l'espace donneur et proposée par défaut au versement.
+ * Cette préférence est stockée dans le navigateur du donneur, et n'est donc
+ * lisible que là: dans son espace personnel. Une structure qui verse une
+ * récompense choisit le canal explicitement, elle ne peut pas deviner ce
+ * choix depuis sa propre machine. Une colonne en base la rendrait partagée;
+ * en attendant, ne l'utilisez pas ailleurs que dans l'espace donneur.
  */
 
 export type RewardMode = "lightning" | "mobile-money";

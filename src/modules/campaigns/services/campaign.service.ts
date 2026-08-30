@@ -21,6 +21,19 @@ function haversineDistance(
   return R * c;
 }
 
+/** Campagne telle qu'elle est publiée sur la vitrine. */
+export type PublicCampaign = {
+  id: string;
+  title: string;
+  organizer: string;
+  city: string;
+  targetBloodType: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  radiusKm: number;
+  registered: number;
+};
+
 export const campaignService = {
   /**
    * Trouve les donneurs ciblés pour une campagne
@@ -248,6 +261,56 @@ export const campaignService = {
       responsesCount: c.responses_count,
       status: c.status,
       createdAt: new Date(c.created_at),
+    }));
+  },
+
+  /**
+   * Campagnes publiables sur la vitrine: actives, avec une période renseignée
+   * et non terminées. Le nom de la structure organisatrice est joint, parce
+   * qu'une collecte sans organisateur identifiable n'inspire pas confiance.
+   *
+   * Aucune donnée nominative de donneur n'est exposée.
+   */
+  getPublicCampaigns: async (): Promise<PublicCampaign[]> => {
+    const supabase = await createSupabaseServerClient();
+    const nowIso = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("campaigns")
+      .select("*, organizations(name, city)")
+      .eq("status", "active")
+      .not("start_date", "is", null)
+      .or(`end_date.is.null,end_date.gte.${nowIso}`)
+      .order("start_date", { ascending: true })
+      .limit(50);
+
+    if (error) {
+      throw new Error(`Campagnes publiques indisponibles: ${error.message}`);
+    }
+
+    type Row = {
+      id: string;
+      title: string;
+      type: "targeted" | "general";
+      target_blood_type: string | null;
+      city: string;
+      radius_km: number;
+      start_date: string;
+      end_date: string | null;
+      responses_count: number;
+      organizations: { name: string; city: string } | null;
+    };
+
+    return (data as unknown as Row[]).map((c) => ({
+      id: c.id,
+      title: c.title,
+      organizer: c.organizations?.name ?? "Structure partenaire",
+      city: c.city,
+      targetBloodType: c.target_blood_type,
+      startsAt: c.start_date,
+      endsAt: c.end_date,
+      radiusKm: c.radius_km,
+      registered: c.responses_count,
     }));
   },
 };

@@ -5,16 +5,16 @@ export type DonationPurpose =
 
 export const DONATION_PURPOSE_LABELS: Record<DonationPurpose, string> = {
   campaign: "Campagne de don",
-  development: "Developpement de la plateforme",
+  development: "Développement de la plateforme",
   operations: "Fonctionnement",
   emergency: "Fonds d'urgence",
 };
 
 export const DONATION_PURPOSE_HINTS: Record<DonationPurpose, string> = {
   campaign: "Financer les campagnes et alertes de don de sang.",
-  development: "Soutenir le developpement et les evolutions du produit.",
-  operations: "Couvrir les couts d'hebergement et de fonctionnement.",
-  emergency: "Alimenter le fonds reserve aux urgences vitales.",
+  development: "Soutenir le développement et les évolutions du produit.",
+  operations: "Couvrir les coûts d'hébergement et de fonctionnement.",
+  emergency: "Alimenter le fonds réservé aux urgences vitales.",
 };
 
 export type CreateDonationPayload = {
@@ -48,11 +48,11 @@ export type DonationsHistory = {
 };
 
 export const donationsApi = {
-  /** Genere une facture Lightning pour un don a la plateforme. */
+  /** Génère une facture Lightning pour un don à la plateforme. */
   create: (payload: CreateDonationPayload) =>
     httpClient.post<DonationInvoice>("/donations", payload),
 
-  /** Historique des dons + total collecte (super-admin). */
+  /** Historique des dons et total collecté (super-admin). */
   history: () => httpClient.get<DonationsHistory>("/donations"),
 
   /** Retire les fonds vers une facture Lightning externe (super-admin). */

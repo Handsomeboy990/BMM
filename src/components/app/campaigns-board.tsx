@@ -18,6 +18,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectItem } from "@/components/ui/select";
+import { SkeletonCards } from "@/components/ui/skeleton";
+import { EmptyState, ErrorState } from "@/components/ui/states";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useCampaigns, useCreateCampaign } from "@/lib/api/hooks";
 import {
@@ -35,12 +37,8 @@ const dateFmt = new Intl.DateTimeFormat("fr-FR", {
 
 export function CampaignsBoard() {
   const { user } = useAuth();
-  const {
-    data: campaigns,
-    isLoading,
-    isError,
-    error,
-  } = useCampaigns(user?.organizationId ?? undefined);
+  const campaignsQuery = useCampaigns(user?.organizationId ?? undefined);
+  const { data: campaigns, isPending, isError, error } = campaignsQuery;
   const createCampaign = useCreateCampaign();
 
   const [open, setOpen] = useState(false);
@@ -243,25 +241,26 @@ export function CampaignsBoard() {
         </div>
       )}
 
-      {isLoading ? (
-        <p className="text-muted-foreground py-12 text-center text-sm">
-          Chargement des campagnes…
-        </p>
+      {isPending ? (
+        <SkeletonCards count={3} className="xl:grid-cols-3" />
       ) : isError ? (
-        <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center gap-2 rounded-lg border px-4 py-8 text-sm">
-          <AlertCircle className="size-4" />
-          {error instanceof Error ? error.message : "Chargement impossible."}
-        </p>
+        <ErrorState
+          error={error}
+          title="Campagnes indisponibles"
+          onRetry={() => void campaignsQuery.refetch()}
+        />
       ) : !campaigns || campaigns.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
-            <CalendarHeart className="text-muted-foreground size-8" />
-            <p className="font-medium">Aucune campagne</p>
-            <p className="text-muted-foreground text-sm">
-              Lancez votre première campagne de collecte.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={CalendarHeart}
+          title="Aucune campagne"
+          description="Une campagne prévient par email les donneurs d'une zone, sur la période que vous choisissez."
+          action={
+            <Button size="sm" onClick={() => setOpen(true)}>
+              <Plus className="size-4" />
+              Créer une campagne
+            </Button>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {campaigns.map((campaign) => (

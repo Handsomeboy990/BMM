@@ -1,4 +1,12 @@
-import { BellRing, HeartPulse, ShieldCheck, Smartphone } from "lucide-react";
+import {
+  ArrowLeftRight,
+  BellRing,
+  Building2,
+  Droplet,
+  HeartPulse,
+  ShieldCheck,
+  Smartphone,
+} from "lucide-react";
 
 export const features = [
   {
@@ -47,5 +55,49 @@ export const steps = [
     title: "Recevez votre récompense",
     description:
       "Dès votre don confirmé, vous recevez une récompense, sur votre Mobile Money ou en Bitcoin.",
+  },
+] as const;
+
+/**
+ * Ce que chaque public trouve sur la plateforme. Ces promesses décrivent des
+ * fonctionnalités réellement livrées: chaque point correspond à un écran ou à
+ * un endpoint existant.
+ */
+export const audiences = [
+  {
+    icon: Droplet,
+    eyebrow: "Donneurs",
+    title: "Donner, prouver, être reconnu",
+    points: [
+      "Une carte de donneur vérifiable, avec un QR code scannable en centre de collecte.",
+      "Une alerte seulement quand votre groupe est utile près de chez vous.",
+      "Une récompense versée sur Mobile Money ou en Bitcoin après validation du don.",
+    ],
+    href: "/donate",
+    cta: "Devenir donneur",
+  },
+  {
+    icon: Building2,
+    eyebrow: "Hôpitaux et centres de collecte",
+    title: "Trouver le bon donneur, tout de suite",
+    points: [
+      "Recherche de donneurs compatibles par groupe et par distance.",
+      "Alertes d'urgence et campagnes de collecte ciblées, en quelques clics.",
+      "Suivi du stock par composant et par groupe sanguin.",
+    ],
+    href: "/register",
+    cta: "Inscrire ma structure",
+  },
+  {
+    icon: ArrowLeftRight,
+    eyebrow: "Réseau",
+    title: "S'entraider entre structures",
+    points: [
+      "Demandes de transfert publiées auprès des centres voisins.",
+      "Réponse en un geste quand une structure peut fournir.",
+      "Historique des échanges, du besoin à la réception.",
+    ],
+    href: "/login",
+    cta: "Accéder au réseau",
   },
 ] as const;

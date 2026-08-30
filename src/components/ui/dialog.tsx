@@ -55,7 +55,7 @@ export function Dialog({
       />
       <div
         className={cn(
-          "bg-card animate-rise-in relative z-10 my-8 w-full max-w-lg rounded-xl border shadow-2xl",
+          "bg-card animate-rise-in relative z-10 my-8 w-full max-w-lg rounded-xl border",
           className,
         )}
       >

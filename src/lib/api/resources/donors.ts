@@ -1,6 +1,6 @@
 import { httpClient } from "@/lib/api/http-client";
 
-import type { BloodType, DonorRecord, RewardLog } from "./types";
+import type { BloodType, DonorActivity, DonorRecord, RewardLog } from "./types";
 
 /** Champs qu'un donneur peut mettre à jour depuis son espace. */
 export type UpdateDonorPayload = Partial<{
@@ -46,14 +46,18 @@ export type CardOrderResult = {
   message: string;
   status: string;
   orderId: string;
-  /** Présent uniquement pour une commande payante (redirection Izichange). */
-  checkoutUrl?: string;
+  /** Redirection de paiement, `null` tant que la passerelle n'est pas branchée. */
+  checkoutUrl?: string | null;
+  /** Vrai quand aucun encaissement réel n'a eu lieu. */
+  simulated?: boolean;
 };
 
 export type WithdrawResult = {
   message: string;
   balanceSats: number;
-  reward: RewardLog;
+  reward: RewardLog | null;
+  /** Vrai quand aucun virement n'a eu lieu: le solde est resté intact. */
+  simulated?: boolean;
 };
 
 export const donorsApi = {
@@ -69,8 +73,14 @@ export const donorsApi = {
       `/donors/${id}/validate`,
     ),
 
+  /** Fiche d'un donneur (structures et administration). */
+  get: (id: string) => httpClient.get<DonorRecord>(`/donors/${id}`),
+
   /** Profil du donneur connecté. */
   me: () => httpClient.get<DonorRecord>("/donors/me"),
+
+  /** Historique du donneur connecté: dons, parrainages, sensibilisations. */
+  myActivities: () => httpClient.get<DonorActivity[]>("/donors/me/activities"),
 
   /** Met à jour le profil du donneur. */
   update: (id: string, payload: UpdateDonorPayload) =>

@@ -43,7 +43,7 @@ export function RevealImage({
       ref={ref}
       style={{ aspectRatio: ratio }}
       className={cn(
-        "bg-muted relative overflow-hidden rounded-2xl border shadow-lg",
+        "bg-muted relative overflow-hidden rounded-md border shadow-lg",
         className,
       )}
     >

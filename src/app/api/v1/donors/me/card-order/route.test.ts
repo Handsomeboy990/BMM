@@ -111,6 +111,7 @@ describe("Card Order Endpoints", () => {
       vi.mocked(izichangeService.initiateCardPayment).mockResolvedValue({
         checkoutUrl: "http://checkout.url",
         paymentReference: "ref123",
+        simulated: false,
       });
 
       const req = new Request("http://localhost/api/v1/donors/me/card-order", {

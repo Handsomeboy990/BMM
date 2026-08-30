@@ -172,3 +172,36 @@ export type VerifyResult = {
     details: { height: number; timestamp: number } | null;
   };
 };
+
+/* --------------------------- Espace donneur ------------------------- */
+
+export type DonorActivityType =
+  "blood_donation" | "referral" | "awareness_session";
+
+export type DonorActivity = {
+  id: string;
+  activityType: DonorActivityType;
+  description: string | null;
+  createdAt: string;
+};
+
+/* ------------------------- Chiffres publics ------------------------- */
+
+export type BloodAvailability = {
+  bloodType: string;
+  units: number;
+  /** Niveau relatif de la réserve, entre 0 et 100. */
+  level: number;
+  status: StockStatus;
+};
+
+export type PublicStatistics = {
+  donorsRegistered: number;
+  organizations: number;
+  citiesCovered: number;
+  activeCampaigns: number;
+  activeEmergencies: number;
+  donationsRecorded: number;
+  availability: BloodAvailability[];
+  cities: string[];
+};
