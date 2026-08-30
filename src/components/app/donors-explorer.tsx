@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  AlertCircle,
   BadgeCheck,
   Check,
   Eye,
@@ -24,6 +23,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Pagination, usePagination } from "@/components/ui/pagination";
 import { Select, SelectItem } from "@/components/ui/select";
+import { SkeletonCards } from "@/components/ui/skeleton";
+import { EmptyState, ErrorState } from "@/components/ui/states";
 import {
   useAddDonorActivity,
   useDonors,
@@ -36,7 +37,8 @@ function initialsOf(first: string, last: string) {
 }
 
 export function DonorsExplorer() {
-  const { data: donors, isLoading, isError, error } = useDonors();
+  const donorsQuery = useDonors();
+  const { data: donors, isPending, isError, error } = donorsQuery;
   const validateDonor = useValidateDonor();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("tous");
@@ -104,25 +106,28 @@ export function DonorsExplorer() {
         </CardContent>
       </Card>
 
-      {isLoading ? (
-        <p className="text-muted-foreground py-12 text-center text-sm">
-          Chargement de l'annuaire…
-        </p>
+      {isPending ? (
+        <SkeletonCards count={6} className="xl:grid-cols-3" />
       ) : isError ? (
-        <p className="border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center gap-2 rounded-lg border px-4 py-8 text-sm">
-          <AlertCircle className="size-4" />
-          {error instanceof Error ? error.message : "Chargement impossible."}
-        </p>
+        <ErrorState
+          error={error}
+          title="Annuaire indisponible"
+          onRetry={() => void donorsQuery.refetch()}
+        />
       ) : results.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
-            <Users className="text-muted-foreground size-8" />
-            <p className="font-medium">Aucun donneur validé</p>
-            <p className="text-muted-foreground text-sm">
-              Les donneurs apparaissent ici après validation d'un premier don.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Users}
+          title={
+            donors && donors.length > 0
+              ? "Aucun donneur ne correspond à ce filtre"
+              : "Aucun donneur validé"
+          }
+          description={
+            donors && donors.length > 0
+              ? "Élargissez la recherche ou changez de groupe sanguin."
+              : "Les donneurs apparaissent ici après la validation d'un premier don par une structure."
+          }
+        />
       ) : (
         <>
           <p className="text-muted-foreground text-sm">

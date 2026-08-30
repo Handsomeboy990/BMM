@@ -1,8 +1,8 @@
 # Endpoints backend — état d'implémentation
 
-Le frontend est entièrement câblé (chaque hook a une branche réelle activée
-quand `NEXT_PUBLIC_AUTH_BYPASS=false`). Ce document suit ce qui est fait et ce
-qui reste.
+Le frontend appelle l'API et rien d'autre: les branches de démonstration et le
+drapeau `NEXT_PUBLIC_AUTH_BYPASS` ont été supprimés. Ce document suit ce qui
+est fait et ce qui reste.
 
 Conventions : préfixe `/api/v1`, enveloppe `{ data, meta }` / `{ error }`,
 validation Zod, authentification par session Supabase.
@@ -27,6 +27,26 @@ validation Zod, authentification par session Supabase.
 | PATCH   | `/api/v1/donors/:id`               | donneur (soi) | ✅                             |
 | GET     | `/api/v1/donors/:id/rewards`       | donneur/org   | ✅                             |
 
+## ✅ Ajoutés lors de la refonte du front
+
+| Méthode | Route                          | Rôle      | Remplace                              |
+| ------- | ------------------------------ | --------- | ------------------------------------- |
+| GET     | `/api/v1/public/stats`         | public    | chiffres de la page d'accueil en dur  |
+| GET     | `/api/v1/public/campaigns`     | public    | trois campagnes fictives en dur       |
+| GET     | `/api/v1/donors/me/activities` | donneur   | historique de dons simulé             |
+| PUT     | `/api/v1/stock`                | org_admin | `stockService.updateUnits` sans route |
+
+## 🚧 Intégrations non branchées
+
+Ces services ne déplacent aucun argent. Ils signalent `simulated: true`
+jusqu'à l'interface, qui le dit à l'utilisateur, et refusent de simuler quand
+leurs identifiants sont configurés.
+
+| Service                  | Fichier                                             | Effet réel     |
+| ------------------------ | --------------------------------------------------- | -------------- |
+| Izichange (Mobile Money) | `src/modules/bitcoin/services/izichange.service.ts` | aucun          |
+| Breez (Lightning)        | `src/modules/bitcoin/services/breez.service.ts`     | aucun sans SDK |
+
 ## ⚙️ À faire côté Supabase (obligatoire pour le runtime)
 
 1. **Exécuter `supabase_scripts/network.sql`** dans le SQL Editor : crée les
@@ -45,12 +65,18 @@ validation Zod, authentification par session Supabase.
 
 ## Champs `donors` optionnels (confort produit)
 
-Pour l'espace donneur enrichi : `phenotype`, `rarity`, `cmv_negative`,
-`preferred_donation`, éligibilité (`eligible_at` / `deferred_reason`).
-Non requis par les endpoints actuels.
+L'espace donneur affichait un phénotype, une rareté, un statut CMV, un type
+de don préféré et une date d'éligibilité que la base n'a jamais contenus. Ces
+champs ont été retirés de l'interface: l'éligibilité est désormais déduite
+des activités réelles (`src/lib/donor/history.ts`).
 
-## Basculer démo → réel
+Pour les réintroduire, il faut d'abord les colonnes: `phenotype`, `rarity`,
+`cmv_negative`, `preferred_donation`, `eligible_at`, `deferred_reason`. Tant
+qu'elles n'existent pas, ne pas les afficher.
 
-`NEXT_PUBLIC_AUTH_BYPASS=false` puis relancer. Les écrans structures
-(dashboard, alertes, campagnes, annuaire, recherche, récompenses, réseau,
-console super-admin) appellent alors les vrais endpoints.
+## Préférence de récompense
+
+`src/lib/reward-preference.ts` vit dans le `localStorage` du navigateur du
+donneur. Elle n'est donc lisible que dans son espace personnel: une structure
+ne peut pas la lire depuis sa propre machine. Une colonne en base la rendrait
+partagée.

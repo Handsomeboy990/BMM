@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     if (!result) {
       return failure(
         API_ERROR_CODE.INTERNAL_ERROR,
-        "Le retrait a echoue. Verifiez la facture et le solde du noeud.",
+        "Le retrait a échoué. Vérifiez la facture et le solde du nœud.",
         { status: 502 },
       );
     }

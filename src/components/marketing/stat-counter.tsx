@@ -15,7 +15,7 @@ export function StatCounter({ value, suffix = "", label }: StatCounterProps) {
     <div className="flex flex-col gap-1">
       <span
         ref={ref}
-        className="text-primary text-3xl font-semibold tabular-nums sm:text-4xl"
+        className="text-primary font-display text-3xl font-extrabold tabular-nums sm:text-4xl"
       >
         {animated.toLocaleString("fr-FR")}
         {suffix}

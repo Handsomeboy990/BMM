@@ -63,7 +63,7 @@ src/
 │   ├── donors/                   # Profils donneurs et persistance
 │   ├── emergencies/              # Déclaration et résolution des urgences de sang
 │   └── matching/                 # Intelligence de matching Blood Emergency AI
-└── middleware.ts                 # Intercepteur global pour la session JWT de Supabase Auth
+└── proxy.ts                      # Intercepteur global pour la session JWT de Supabase Auth
 ```
 
 ---

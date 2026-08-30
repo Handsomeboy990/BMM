@@ -1,6 +1,6 @@
-# Bitcoin Blood
+# HEMORA
 
-Plateforme panafricaine de gestion des donneurs de sang. Bitcoin Blood relie
+Plateforme panafricaine de gestion des donneurs de sang. HEMORA relie
 les donneurs volontaires aux besoins urgents des structures de santé, organise
 les campagnes de don et garantit l'intégrité des données grâce à Bitcoin.
 
@@ -23,7 +23,7 @@ pour rester en production et évoluer au-delà de l'événement.
 
 ## Fonctionnalités
 
-Bitcoin Blood vise à fournir une plateforme complète pour:
+HEMORA vise à fournir une plateforme complète pour:
 
 - enregistrer des donneurs de sang volontaires;
 - retrouver rapidement des donneurs compatibles;
@@ -67,7 +67,7 @@ Bitcoin Blood vise à fournir une plateforme complète pour:
 
 ```bash
 git clone <url-du-depot>
-cd bitcoin-blood
+cd hemora
 npm install
 cp .env.example .env
 ```
@@ -85,7 +85,7 @@ npm run dev
 npm run db:push
 ```
 
-L'application est disponible sur http://localhost:3000.
+L'application est disponible sur http://localhost:3000
 
 ## Scripts disponibles
 

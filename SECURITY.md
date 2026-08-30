@@ -1,6 +1,6 @@
 # Politique de sécurité
 
-Bitcoin Blood traite des données de santé sensibles. La sécurité est une
+HEMORA traite des données de santé sensibles. La sécurité est une
 exigence de premier ordre, prise en compte dès la conception.
 
 ## Signaler une vulnérabilité

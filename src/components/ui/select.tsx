@@ -1,17 +1,22 @@
 "use client";
 
-import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
-import type { ComponentProps } from "react";
+import { ChevronDown } from "lucide-react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 /**
- * Select premium basé sur Radix: déclencheur stylé, menu flottant animé,
- * navigation clavier et coche sur l'option active. API proche du natif -
- * `value` / `onValueChange`, et `name` pour la soumission de formulaire.
+ * Liste déroulante, bâtie sur le `<select>` du navigateur.
+ *
+ * Une version fondée sur Radix a été retirée: son contenu n'est monté qu'une
+ * fois la liste ouverte, si bien qu'un champ contrôlé restait sur son texte
+ * d'invite et que le composant émettait un changement à vide au montage.
+ * Concrètement, un formulaire restauré perdait le groupe sanguin déjà choisi.
+ *
+ * Le champ natif règle cela et apporte le reste: sélecteur du système sur
+ * téléphone, navigation au clavier sans code, fonctionnement sans JavaScript,
+ * et restauration triviale par le navigateur lui-même.
  */
-
 type SelectProps = {
   value?: string;
   defaultValue?: string;
@@ -19,11 +24,12 @@ type SelectProps = {
   name?: string;
   required?: boolean;
   disabled?: boolean;
+  /** Option affichée tant que rien n'est choisi. */
   placeholder?: string;
   className?: string;
   id?: string;
   "aria-label"?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export function Select({
@@ -33,78 +39,45 @@ export function Select({
   name,
   required,
   disabled,
-  placeholder = "Sélectionner…",
+  placeholder,
   className,
   id,
   children,
   ...props
 }: SelectProps) {
   return (
-    <SelectPrimitive.Root
-      value={value}
-      defaultValue={defaultValue}
-      onValueChange={onValueChange}
-      name={name}
-      required={required}
-      disabled={disabled}
-    >
-      <SelectPrimitive.Trigger
+    <div className={cn("relative", className)}>
+      <select
         id={id}
+        name={name}
+        required={required}
+        disabled={disabled}
         aria-label={props["aria-label"]}
+        value={value}
+        defaultValue={defaultValue}
+        onChange={(event) => onValueChange?.(event.target.value)}
         className={cn(
-          "border-input bg-background flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm shadow-sm transition-colors",
-          "data-[placeholder]:text-muted-foreground",
-          "hover:border-ring/60 focus:ring-ring focus:ring-offset-background focus:ring-2 focus:ring-offset-2 focus:outline-none",
+          "border-input bg-background h-10 w-full cursor-pointer appearance-none rounded-md border py-2 pr-9 pl-3 text-sm shadow-sm transition-colors",
+          "hover:border-ring/60 focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
           "disabled:cursor-not-allowed disabled:opacity-50",
-          className,
         )}
       >
-        <SelectPrimitive.Value placeholder={placeholder} />
-        <SelectPrimitive.Icon asChild>
-          <ChevronDown className="text-muted-foreground size-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180" />
-        </SelectPrimitive.Icon>
-      </SelectPrimitive.Trigger>
+        {placeholder ? (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        ) : null}
+        {children}
+      </select>
 
-      <SelectPrimitive.Portal>
-        <SelectPrimitive.Content
-          position="popper"
-          sideOffset={6}
-          className={cn(
-            "bg-popover text-popover-foreground relative z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-lg border shadow-lg",
-            "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
-            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-          )}
-        >
-          <SelectPrimitive.Viewport className="p-1">
-            {children}
-          </SelectPrimitive.Viewport>
-        </SelectPrimitive.Content>
-      </SelectPrimitive.Portal>
-    </SelectPrimitive.Root>
+      <ChevronDown
+        aria-hidden="true"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+      />
+    </div>
   );
 }
 
-export function SelectItem({
-  className,
-  children,
-  ...props
-}: ComponentProps<typeof SelectPrimitive.Item>) {
-  return (
-    <SelectPrimitive.Item
-      className={cn(
-        "relative flex cursor-pointer items-center rounded-md py-2 pr-8 pl-3 text-sm transition-colors outline-none select-none",
-        "focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        className,
-      )}
-      {...props}
-    >
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-      <span className="absolute right-2 flex size-4 items-center justify-center">
-        <SelectPrimitive.ItemIndicator>
-          <Check className="text-primary size-4" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
-    </SelectPrimitive.Item>
-  );
+export function SelectItem({ children, ...props }: ComponentProps<"option">) {
+  return <option {...props}>{children}</option>;
 }

@@ -12,11 +12,11 @@ import {
 
 export function FeaturesSection() {
   return (
-    <section id="donneurs" className="relative py-24">
+    <section className="relative py-24">
       <Container className="flex flex-col gap-14">
         <div className="flex flex-col gap-6">
           <SectionHeading
-            eyebrow="Pourquoi Bitcoin Blood"
+            eyebrow="Pourquoi HEMORA"
             title="La solidarité, rendue simple et fiable."
             description="Un réseau qui relie donneurs et hôpitaux, récompense les gestes qui sauvent et protège vos données."
           />
@@ -37,7 +37,7 @@ export function FeaturesSection() {
                   <span className="from-primary/15 to-primary/5 text-primary ring-primary/10 flex size-12 items-center justify-center rounded-xl bg-linear-to-br ring-1 transition-transform duration-300 group-hover:scale-110">
                     <feature.icon className="size-5" />
                   </span>
-                  <CardTitle>{feature.title}</CardTitle>
+                  <CardTitle as="h3">{feature.title}</CardTitle>
                   <CardDescription>{feature.description}</CardDescription>
                 </CardHeader>
               </Card>

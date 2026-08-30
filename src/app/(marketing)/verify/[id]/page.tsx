@@ -3,14 +3,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { Container } from "@/components/layout/container";
+import { QrBadge } from "@/components/donor/qr-badge";
 import { OfflineVerifyTool } from "@/components/verify/offline-verify-tool";
 import { VerifyPanel } from "@/components/verify/verify-panel";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { publicUrl } from "@/lib/url";
 
 export const metadata: Metadata = {
-  title: "Carte de donneur souveraine",
-  description: "Vérifiez l'intégrité d'un profil donneur ancré sur Bitcoin.",
+  title: "Vérifier une carte de donneur",
+  description:
+    "Vérifiez qu'une carte de donneur est authentique et n'a pas été modifiée.",
 };
 
 export default async function VerifyPage({
@@ -28,8 +31,8 @@ export default async function VerifyPage({
             <ShieldCheck className="size-3.5" />
             Carte vérifiée
           </Badge>
-          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-            Votre carte de donneur
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+            Carte de donneur
           </h1>
           <p className="text-muted-foreground text-sm">
             Vérifiez en un instant que cette carte est authentique et n'a pas
@@ -65,19 +68,16 @@ export default async function VerifyPage({
 
           <Card className="overflow-hidden">
             <CardContent className="space-y-6 p-6">
-              <div className="bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed p-4">
-                <div className="relative size-48 rounded-lg bg-white p-2 shadow-inner">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(id)}`}
-                    alt="Code QR du donneur"
-                    className="size-full object-contain"
-                  />
-                </div>
-                <p className="text-muted-foreground mt-3 max-w-full truncate font-mono text-xs">
-                  ID: {id}
-                </p>
-              </div>
+              {/* QR rendu localement: envoyer l'identifiant du donneur à un
+                  générateur tiers le ferait fuiter et rendrait la page
+                  inutilisable hors connexion. */}
+              <QrBadge
+                value={publicUrl(`/verify/${id}`)}
+                label="Carte de ce donneur"
+                caption={id}
+                size={192}
+                className="bg-muted/30 border-dashed"
+              />
 
               <div className="space-y-4 text-sm">
                 <div className="space-y-1">

@@ -1,6 +1,6 @@
 # Guide de contribution
 
-Merci de contribuer à Bitcoin Blood. Ce document décrit le processus à suivre
+Merci de contribuer à HEMORA. Ce document décrit le processus à suivre
 pour garder une base de code propre, cohérente et maintenable dans la durée.
 
 ## Principes

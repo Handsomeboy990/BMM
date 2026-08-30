@@ -111,7 +111,7 @@ export function MatchingExplorer() {
               "flex h-10 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
               useAi
                 ? "border-primary/30 bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent",
+                : "text-muted-foreground hover:bg-muted",
             )}
             aria-pressed={useAi}
           >

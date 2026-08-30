@@ -19,7 +19,7 @@ export default function CampagnesPage() {
           <CalendarHeart className="size-3.5" />
           Collectes à venir
         </Badge>
-        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
           Les prochaines campagnes de don
         </h1>
         <p className="text-muted-foreground">

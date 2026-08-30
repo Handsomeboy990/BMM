@@ -1,5 +1,5 @@
 {
-  "name": "bitcoin-blood",
+  "name": "hemora",
   "version": "0.1.0",
   "private": true,
   "description": "Plateforme panafricaine de gestion des donneurs de sang.",
@@ -43,6 +43,7 @@
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.109.0",
     "@tanstack/react-query": "^5.101.2",
+    "@vercel/analytics": "^2.0.1",
     "bip322-js": "^3.0.0",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^7.0.1",

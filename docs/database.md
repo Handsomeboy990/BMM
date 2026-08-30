@@ -1,6 +1,6 @@
 # Base de données
 
-Bitcoin Blood utilise PostgreSQL, hébergé par Supabase, avec Drizzle ORM pour la
+HEMORA utilise PostgreSQL, hébergé par Supabase, avec Drizzle ORM pour la
 modélisation, les requêtes et les migrations.
 
 ## Connexion

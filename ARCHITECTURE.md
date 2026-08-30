@@ -1,6 +1,6 @@
 # Architecture
 
-Ce document présente les principes d'architecture de Bitcoin Blood. Il décrit
+Ce document présente les principes d'architecture de HEMORA. Il décrit
 les choix structurants et les raisons qui les motivent. La documentation
 technique approfondie se trouve dans [docs/architecture.md](./docs/architecture.md).
 
@@ -13,7 +13,7 @@ technique approfondie se trouve dans [docs/architecture.md](./docs/architecture.
 
 ## Vue d'ensemble
 
-Bitcoin Blood est une application Next.js (App Router) full-stack. Le rendu et
+HEMORA est une application Next.js (App Router) full-stack. Le rendu et
 l'API cohabitent dans le même projet. La logique est organisée par domaine
 métier plutôt que par type technique.
 

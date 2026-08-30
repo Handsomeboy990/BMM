@@ -26,7 +26,7 @@ export async function createSupabaseServerClient() {
             }
           } catch {
             // Appelé depuis un Server Component: la mutation des cookies
-            // est ignorée, le middleware se charge du rafraîchissement.
+            // est ignorée, le proxy se charge du rafraîchissement.
           }
         },
       },

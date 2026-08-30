@@ -1,4 +1,4 @@
-# Architecture & Flux — Bitcoin Blood (Backend)
+# Architecture & Flux — HEMORA (Backend)
 
 > **Audience** : Développeurs frontend, agents IA, nouveaux contributeurs.
 > Ce document est la **source de vérité** du backend. Il décrit l'architecture générale, les flux de données, les modules, tous les endpoints disponibles avec leurs paramètres et comportements.
@@ -24,7 +24,7 @@
 ```
 ┌──────────────┬─────────────────────┬────────────────┬──────────────────┐
 │   DONNEUR    │   HÔPITAL / ONG     │  SUPER ADMIN   │  PUBLIC (Scan)   │
-│  (Citoyen)   │ (Structure de santé)│ (Bitcoin Blood)│  QR Code carte   │
+│  (Citoyen)   │ (Structure de santé)│ (HEMORA)       │  QR Code carte   │
 ├──────────────┼─────────────────────┼────────────────┼──────────────────┤
 │ S'inscrit    │ Crée urgences       │ Gère les orgas │ Vérifie une      │
 │ Donne son    │ Lance campagnes     │ Supervise tout │ carte donneur    │
@@ -70,7 +70,7 @@ src/
 │   ├── env.ts                ← Validation des variables d'env (Zod)
 │   └── supabase/server.ts    ← Clients Supabase (session + admin)
 │
-└── middleware.ts             ← Protection des routes (auth Supabase JWT)
+└── proxy.ts                  ← Protection des routes (auth Supabase JWT)
 ```
 
 ### Convention de réponse API
@@ -93,7 +93,7 @@ Les codes d'erreur sont **stables** : `bad_request`, `unauthorized`, `forbidden`
 
 ### Protection des routes
 
-Le middleware `src/middleware.ts` protège **toutes** les routes `/api/v1/*` via le JWT Supabase, à l'exception des routes publiques :
+Le proxy `src/proxy.ts` protège **toutes** les routes `/api/v1/*` via le JWT Supabase, à l'exception des routes publiques :
 
 | Route                    | Accès                          |
 | ------------------------ | ------------------------------ |
@@ -104,7 +104,7 @@ Le middleware `src/middleware.ts` protège **toutes** les routes `/api/v1/*` via
 
 ### Double protection anti-IDOR
 
-En plus du middleware, chaque contrôleur **réinjecte** l'identifiant de l'organisation depuis la session serveur. Un hôpital ne peut jamais agir au nom d'un autre :
+En plus du proxy, chaque contrôleur **réinjecte** l'identifiant de l'organisation depuis la session serveur. Un hôpital ne peut jamais agir au nom d'un autre :
 
 ```typescript
 // Sécurité : on ne lit PAS le hospitalId depuis le body du client
@@ -597,7 +597,7 @@ POST /api/v1/donors                              [Public]
      │
      │  7. Retourne l'UUID du donneur
      ▼
-Le frontend génère la Carte Bitcoin Blood (QR Code → UUID)
+Le frontend génère la Carte HEMORA (QR Code → UUID)
 ```
 
 ### Flux 2 — Urgence sanguine + Blood Emergency AI

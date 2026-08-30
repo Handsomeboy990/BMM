@@ -25,4 +25,20 @@ export const campaignsApi = {
 
   create: (payload: CreateCampaignPayload) =>
     httpClient.post<CampaignRecord>("/campaigns", payload),
+
+  /** Collectes à venir, publiées sur la vitrine. Aucune session requise. */
+  publicList: () => httpClient.get<PublicCampaign[]>("/public/campaigns"),
+};
+
+/** Campagne telle qu'elle est publiée sur la vitrine. */
+export type PublicCampaign = {
+  id: string;
+  title: string;
+  organizer: string;
+  city: string;
+  targetBloodType: string | null;
+  startsAt: string;
+  endsAt: string | null;
+  radiusKm: number;
+  registered: number;
 };

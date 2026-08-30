@@ -1,4 +1,4 @@
-# Bitcoin Blood — Documentation Backend
+# HEMORA — Documentation Backend
 
 > Explication du fonctionnement du backend, des outils utilisés et des flux de données, sans détails techniques superflus.
 
@@ -69,7 +69,7 @@ Le citoyen remplit le formulaire
    Le profil est sauvegardé dans Supabase
            │
            ▼
-   Le donneur reçoit sa Carte Bitcoin Blood
+    Le donneur reçoit sa Carte HEMORA
    (un QR Code contenant son identifiant unique)
 ```
 

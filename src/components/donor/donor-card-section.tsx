@@ -15,8 +15,9 @@ import { DonorCard } from "@/components/donor/donor-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMyCardRequest, useSubmitCardRequest } from "@/lib/api/hooks";
-import { fileToPhotoDataUrl } from "@/lib/card-request";
+import { fileToPhotoDataUrl } from "@/lib/photo";
 import { publicUrl } from "@/lib/url";
 
 type Donor = {
@@ -28,8 +29,9 @@ type Donor = {
 };
 
 export function DonorCardSection({ donor }: { donor: Donor }) {
-  const request = useMyCardRequest(donor.id);
-  const submit = useSubmitCardRequest(donor.id);
+  const requestQuery = useMyCardRequest();
+  const request = requestQuery.data ?? null;
+  const submit = useSubmitCardRequest();
   const inputRef = useRef<HTMLInputElement>(null);
   const [photoDraft, setPhotoDraft] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,8 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
 
   const name = `${donor.firstName} ${donor.lastName}`;
   const photo = request?.photo ?? photoDraft;
-  const status = request?.status ?? "none";
+  const status: "none" | "requested" | "approved" | "rejected" =
+    request?.status ?? "none";
   const verifyUrl = publicUrl(`/verify/${donor.id}`);
 
   async function onPhoto(event: React.ChangeEvent<HTMLInputElement>) {
@@ -63,15 +66,24 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
     }
     setError(null);
     try {
-      await submit.mutateAsync({
-        format,
-        photo: currentPhoto,
-        donorName: name,
-        bloodType: donor.bloodType,
-      });
+      await submit.mutateAsync({ format, photo: currentPhoto });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Demande impossible.");
     }
+  }
+
+  if (requestQuery.isPending) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Ma carte de donneur</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-0">
+          <Skeleton className="mx-auto h-52 w-full max-w-sm rounded-xl" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -173,8 +185,6 @@ export function DonorCardSection({ donor }: { donor: Donor }) {
                     ? submit.mutate({
                         format: request.format,
                         photo: request.photo,
-                        donorName: name,
-                        bloodType: donor.bloodType,
                       })
                     : undefined
                 }

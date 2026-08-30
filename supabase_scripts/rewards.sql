@@ -1,5 +1,5 @@
 -- =========================================================================
--- Bitcoin Blood — Script de Création de la Table des Récompenses (reward_logs)
+-- HEMORA — Script de Création de la Table des Récompenses (reward_logs)
 -- À exécuter dans l'éditeur SQL de votre Dashboard Supabase
 -- =========================================================================
 

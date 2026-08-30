@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/shared/logo";
 import { Badge } from "@/components/ui/badge";
 import { navForRole } from "@/config/app-navigation";
+import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -21,7 +22,10 @@ export function AppSidebar() {
         <Logo />
       </Link>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-6">
+      <nav
+        aria-label="Navigation de l'espace"
+        className="flex-1 space-y-6 overflow-y-auto px-3 py-6"
+      >
         {nav.map((group) => (
           <div key={group.title}>
             <p className="text-muted-foreground px-3 pb-2 text-xs font-medium tracking-wider uppercase">
@@ -38,11 +42,12 @@ export function AppSidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                        "focus-visible:ring-ring flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none",
                         active
                           ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
                       )}
                     >
                       <Icon className="size-4 shrink-0" />
@@ -69,7 +74,9 @@ export function AppSidebar() {
           <Heart className="size-4" />
           Soutenir la plateforme
         </Link>
-        <p className="text-muted-foreground text-xs">Time's Care 2026</p>
+        <p className="text-muted-foreground text-xs">
+          {siteConfig.name} · {new Date().getFullYear()}
+        </p>
       </div>
     </aside>
   );

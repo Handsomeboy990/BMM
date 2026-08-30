@@ -39,6 +39,45 @@ vi.mock("@/modules/auth", () => {
   };
 });
 
+// Le versement débite le compte de la structure puis envoie un email. Sans ces
+// doubles, le test ouvrait une vraie connexion Supabase et une vraie requête
+// EmailJS, et n'échouait que sur le délai d'attente.
+vi.mock("@/modules/organizations/services/organization.service", () => {
+  return {
+    organizationService: {
+      adjustBalance: vi.fn().mockResolvedValue(0),
+    },
+  };
+});
+
+vi.mock("@/modules/notifications", () => {
+  return {
+    emailService: {
+      sendDonorReward: vi.fn().mockResolvedValue({ sent: true }),
+      sendDonorWelcome: vi.fn().mockResolvedValue({ sent: true }),
+    },
+  };
+});
+
+vi.mock("@/modules/donations/services/points.service", () => {
+  return {
+    pointsService: {
+      awardPoints: vi.fn(),
+      redeemPoints: vi.fn(),
+      getDonorPointsBalance: vi.fn(),
+    },
+  };
+});
+
+vi.mock("@/modules/bitcoin/services/izichange.service", () => {
+  return {
+    izichangeService: {
+      cashoutToMoMo: vi.fn(),
+      initiateCardPayment: vi.fn(),
+    },
+  };
+});
+
 const VALID_UUID = "d3b07384-d113-4632-a5e2-123456789abc";
 
 describe("GET /api/v1/verify/[id]", () => {

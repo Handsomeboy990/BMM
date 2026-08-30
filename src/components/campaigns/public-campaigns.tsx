@@ -2,21 +2,23 @@
 
 import {
   CalendarClock,
+  CalendarHeart,
   Check,
   Droplet,
   HandHeart,
   Loader2,
   MapPin,
-  Target,
   UserCheck,
   UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
+import Link from "next/link";
 import { Suspense, useState } from "react";
 
 import { CampaignCountdown } from "@/components/campaigns/campaign-countdown";
 import { DonorRegistrationForm } from "@/components/donate/donor-registration-form";
+import { SimulatedInvoiceNotice } from "@/components/donate/simulated-invoice-notice";
 import { QrBadge } from "@/components/donor/qr-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,12 +26,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateDonation } from "@/lib/api/hooks";
-import type { DonationInvoice } from "@/lib/api/resources";
-import {
-  upcomingCampaigns,
-  type UpcomingCampaign,
-} from "@/lib/campaigns/upcoming";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState, ErrorState } from "@/components/ui/states";
+import { useCreateDonation, usePublicCampaigns } from "@/lib/api/hooks";
+import type { DonationInvoice, PublicCampaign } from "@/lib/api/resources";
 
 const dateFmt = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
@@ -40,36 +40,69 @@ const dateFmt = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export function PublicCampaigns() {
-  const [supportOf, setSupportOf] = useState<UpcomingCampaign | null>(null);
-  const [registerFor, setRegisterFor] = useState<UpcomingCampaign | null>(null);
+  const campaigns = usePublicCampaigns();
+  const [supportOf, setSupportOf] = useState<PublicCampaign | null>(null);
+  const [registerFor, setRegisterFor] = useState<PublicCampaign | null>(null);
+
+  if (campaigns.isPending) {
+    return (
+      <div className="space-y-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Skeleton key={i} className="h-64 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (campaigns.isError) {
+    return (
+      <ErrorState
+        error={campaigns.error}
+        title="Campagnes indisponibles"
+        onRetry={() => void campaigns.refetch()}
+      />
+    );
+  }
+
+  if (campaigns.data.length === 0) {
+    return (
+      <EmptyState
+        icon={CalendarHeart}
+        title="Aucune collecte annoncée"
+        description="Aucune structure du réseau n'a de collecte programmée pour le moment. Inscrivez-vous comme donneur pour être prévenu dès qu'une collecte s'ouvre près de chez vous."
+        action={
+          <Button asChild size="sm">
+            <Link href="/donate">
+              <UserPlus className="size-4" />
+              Devenir donneur
+            </Link>
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {upcomingCampaigns.map((campaign) => (
+      {campaigns.data.map((campaign) => (
         <Card key={campaign.id} className="overflow-hidden">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-[1.4fr_1fr]">
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="primary">À venir</Badge>
-                  {campaign.bloodTypes.map((b) => (
-                    <Badge key={b} variant="neutral">
-                      <Droplet className="size-3" />
-                      {b}
-                    </Badge>
-                  ))}
+                  <Badge variant="neutral">
+                    <Droplet className="size-3" />
+                    {campaign.targetBloodType ?? "Tous groupes"}
+                  </Badge>
                 </div>
-                <h2 className="text-xl font-semibold tracking-tight">
+                <h2 className="font-display text-xl font-bold tracking-tight">
                   {campaign.title}
                 </h2>
                 <p className="text-muted-foreground text-sm">
                   Organisée par {campaign.organizer}
                 </p>
               </div>
-
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {campaign.description}
-              </p>
 
               <div className="text-muted-foreground grid gap-2 text-sm sm:grid-cols-2">
                 <span className="flex items-center gap-2">
@@ -78,16 +111,19 @@ export function PublicCampaigns() {
                 </span>
                 <span className="flex items-center gap-2">
                   <MapPin className="size-4 shrink-0" />
-                  {campaign.address}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Target className="size-4 shrink-0" />
-                  Objectif : {campaign.goalDonors} donneurs
+                  {campaign.city} · rayon {campaign.radiusKm} km
                 </span>
                 <span className="flex items-center gap-2">
                   <Users className="size-4 shrink-0" />
-                  {campaign.registered} inscrits
+                  {campaign.registered} réponse
+                  {campaign.registered > 1 ? "s" : ""}
                 </span>
+                {campaign.endsAt ? (
+                  <span className="flex items-center gap-2">
+                    <CalendarHeart className="size-4 shrink-0" />
+                    Jusqu'au {dateFmt.format(new Date(campaign.endsAt))}
+                  </span>
+                ) : null}
               </div>
             </div>
 
@@ -99,7 +135,7 @@ export function PublicCampaigns() {
               <div className="flex flex-col gap-2">
                 <Button onClick={() => setRegisterFor(campaign)}>
                   <UserPlus className="size-4" />
-                  S'inscrire à la collecte
+                  S&apos;inscrire à la collecte
                 </Button>
                 <Button
                   variant="outline"
@@ -117,7 +153,7 @@ export function PublicCampaigns() {
       <Dialog
         open={!!supportOf}
         onClose={() => setSupportOf(null)}
-        title={supportOf ? `Soutenir : ${supportOf.title}` : ""}
+        title={supportOf ? `Soutenir: ${supportOf.title}` : ""}
         description="Votre don finance directement cette collecte."
       >
         {supportOf ? <CampaignSupport campaign={supportOf} /> : null}
@@ -126,7 +162,7 @@ export function PublicCampaigns() {
       <Dialog
         open={!!registerFor}
         onClose={() => setRegisterFor(null)}
-        title={registerFor ? `S'inscrire : ${registerFor.title}` : ""}
+        title={registerFor ? `S'inscrire: ${registerFor.title}` : ""}
         description="Rejoignez cette collecte, que vous soyez déjà donneur ou non."
         className="max-w-xl"
       >
@@ -145,7 +181,7 @@ function CampaignRegister({
   campaign,
   onClose,
 }: {
-  campaign: UpcomingCampaign;
+  campaign: PublicCampaign;
   onClose: () => void;
 }) {
   const [step, setStep] = useState<"choice" | "existing" | "new">("choice");
@@ -162,20 +198,20 @@ function CampaignRegister({
           <button
             type="button"
             onClick={() => setStep("existing")}
-            className="hover:border-primary/40 hover:bg-muted/40 flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all"
+            className="hover:border-primary/40 hover:bg-muted/40 focus-visible:ring-ring flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <span className="flex items-center gap-2 font-medium">
               <UserCheck className="text-primary size-4" />
               Je suis déjà donneur
             </span>
             <span className="text-muted-foreground text-xs">
-              Recevez les détails de la collecte par email.
+              Notez la date et présentez-vous avec votre carte.
             </span>
           </button>
           <button
             type="button"
             onClick={() => setStep("new")}
-            className="hover:border-primary/40 hover:bg-muted/40 flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all"
+            className="hover:border-primary/40 hover:bg-muted/40 focus-visible:ring-ring flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <span className="flex items-center gap-2 font-medium">
               <UserPlus className="text-primary size-4" />
@@ -197,16 +233,25 @@ function CampaignRegister({
           <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
             <Check className="size-6" />
           </div>
-          <p className="text-sm">
-            Merci ! Nous vous enverrons par email les détails de la collecte «{" "}
-            {campaign.title} ».
-          </p>
+          <div className="space-y-2 text-sm">
+            <p className="font-medium">
+              Rendez-vous le {dateFmt.format(new Date(campaign.startsAt))} à{" "}
+              {campaign.city}.
+            </p>
+            {/* On ne promet pas un email: aucun envoi n'est déclenché ici.
+                La confirmation se limite à ce que la plateforme fait vraiment. */}
+            <p className="text-muted-foreground">
+              Présentez-vous avec votre carte de donneur. {campaign.organizer}{" "}
+              vous accueillera sur place.
+            </p>
+          </div>
           <Button className="w-full" onClick={onClose}>
             Fermer
           </Button>
         </div>
       );
     }
+
     return (
       <form
         className="space-y-4"
@@ -225,6 +270,10 @@ function CampaignRegister({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="vous@exemple.bj"
           />
+          <p className="text-muted-foreground text-xs">
+            Il sert uniquement à retrouver votre profil de donneur le jour de la
+            collecte.
+          </p>
         </div>
         <div className="flex justify-between gap-2">
           <Button
@@ -234,7 +283,7 @@ function CampaignRegister({
           >
             Retour
           </Button>
-          <Button type="submit">M'inscrire à la collecte</Button>
+          <Button type="submit">Confirmer ma venue</Button>
         </div>
       </form>
     );
@@ -264,27 +313,39 @@ function truncateMiddle(value: string, head = 14, tail = 10) {
   return `${value.slice(0, head)}...${value.slice(-tail)}`;
 }
 
-function CampaignSupport({ campaign }: { campaign: UpcomingCampaign }) {
+function CampaignSupport({ campaign }: { campaign: PublicCampaign }) {
   const create = useCreateDonation();
   const [amount, setAmount] = useState(21_000);
   const [invoice, setInvoice] = useState<DonationInvoice | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function onSupport() {
-    const result = await create.mutateAsync({
-      amountSats: amount,
-      purpose: "campaign",
-      message: `Soutien à la campagne : ${campaign.title} (${campaign.city})`,
-    });
-    setInvoice(result);
+    setError(null);
+    try {
+      setInvoice(
+        await create.mutateAsync({
+          amountSats: amount,
+          purpose: "campaign",
+          message: `Soutien à la campagne: ${campaign.title} (${campaign.city})`,
+        }),
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "La facture n'a pas pu être générée.",
+      );
+    }
   }
 
   if (invoice) {
     return (
       <div className="space-y-4 text-center">
         <p className="text-muted-foreground text-sm">
-          Merci ! Scannez pour envoyer{" "}
+          Merci. Scannez pour envoyer{" "}
           {invoice.amountSats.toLocaleString("fr-FR")} sats à la collecte.
         </p>
+        {invoice.simulated ? <SimulatedInvoiceNotice /> : null}
         <div className="flex justify-center">
           <QrBadge
             value={invoice.bolt11}
@@ -308,17 +369,25 @@ function CampaignSupport({ campaign }: { campaign: UpcomingCampaign }) {
           <button
             key={preset}
             type="button"
+            aria-pressed={amount === preset}
             onClick={() => setAmount(preset)}
             className={
               amount === preset
                 ? "border-primary bg-primary/10 text-primary rounded-md border px-2 py-2 text-sm font-medium"
-                : "hover:bg-accent rounded-md border px-2 py-2 text-sm transition-colors"
+                : "hover:bg-muted rounded-md border px-2 py-2 text-sm transition-colors"
             }
           >
             {preset.toLocaleString("fr-FR")}
           </button>
         ))}
       </div>
+
+      {error ? (
+        <p role="alert" className="text-destructive text-sm">
+          {error}
+        </p>
+      ) : null}
+
       <Button
         className="w-full"
         onClick={onSupport}

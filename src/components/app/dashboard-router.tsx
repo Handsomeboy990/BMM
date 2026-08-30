@@ -5,7 +5,7 @@ import Link from "next/link";
 import { DashboardOverview } from "@/components/app/dashboard-overview";
 import { OrganizationOnboarding } from "@/components/app/organization-onboarding";
 import { PageHeader } from "@/components/app/page-header";
-import { SuperAdminDashboard } from "@/components/app/super-admin-dashboard";
+import { AdminConsole } from "@/components/admin/admin-console";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -32,10 +32,10 @@ export function DashboardRouter() {
     return (
       <>
         <PageHeader
-          title="Console super-admin"
-          description="Pilotage de l'ensemble du réseau : organisations, donneurs et urgences."
+          title="Administration de la plateforme"
+          description="Files d'attente, réseau et textes du site, au même endroit."
         />
-        <SuperAdminDashboard />
+        <AdminConsole />
       </>
     );
   }

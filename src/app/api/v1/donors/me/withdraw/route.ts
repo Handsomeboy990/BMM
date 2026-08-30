@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Débit du solde (temporaire)
+    // 4. Débit du solde (rendu si le versement échoue en 6)
     const updatedBalance = await donorService.updateDonorBalance(
       donorId,
       -amountSats,
@@ -72,26 +72,74 @@ export async function POST(req: Request) {
 
     try {
       // 6. Exécution du cashout MoMo
-      const paymentHash = await izichangeService.cashoutToMoMo(
+      const cashout = await izichangeService.cashoutToMoMo(
         momoNumber,
         amountSats,
       );
+
+      // 6b. Rien n'est parti tant que la passerelle est simulée: on rend le
+      // solde plutôt que de laisser un donneur croire à un virement.
+      if (cashout.simulated) {
+        const restoredBalance = await donorService.updateDonorBalance(
+          donorId,
+          amountSats,
+        );
+        await rewardService.updateRewardStatus(
+          rewardLog.id,
+          "failed",
+          undefined,
+          "Passerelle Mobile Money non configurée: aucun virement effectué.",
+        );
+
+        // La remise du solde peut elle-même échouer. Annoncer « votre solde
+        // est intact » sans l'avoir vérifié laisserait le donneur débité d'un
+        // montant qui n'est jamais parti.
+        if (restoredBalance === null) {
+          console.error(
+            `Solde non restauré après un retrait simulé (donneur ${donorId}, ${amountSats} sats).`,
+          );
+          return failure(
+            API_ERROR_CODE.INTERNAL_ERROR,
+            "Le retrait n'a pas abouti et votre solde n'a pas pu être rétabli automatiquement. Contactez le support en précisant l'heure de l'opération.",
+            { status: 500 },
+          );
+        }
+
+        return success({
+          message:
+            "Passerelle Mobile Money non configurée: aucun virement n'a été effectué et votre solde est intact.",
+          balanceSats: restoredBalance,
+          reward: null,
+          simulated: true,
+        });
+      }
 
       // 7. Enregistrement du succès
       const finalLog = await rewardService.updateRewardStatus(
         rewardLog.id,
         "completed",
-        paymentHash,
+        cashout.transactionId,
       );
 
       return success({
-        message: "Retrait MoMo exécuté avec succès.",
+        message: "Retrait Mobile Money exécuté avec succès.",
         balanceSats: updatedBalance,
         reward: finalLog,
+        simulated: false,
       });
     } catch (paymentError) {
-      // En cas d'erreur de paiement, on recrédite le solde du donneur
-      await donorService.updateDonorBalance(donorId, amountSats);
+      // En cas d'erreur de paiement, on recrédite le solde du donneur. Si la
+      // remise échoue, on le journalise: le donneur reste débité et seule une
+      // intervention manuelle peut le corriger.
+      const restored = await donorService.updateDonorBalance(
+        donorId,
+        amountSats,
+      );
+      if (restored === null) {
+        console.error(
+          `Solde non restauré après un échec de retrait (donneur ${donorId}, ${amountSats} sats).`,
+        );
+      }
 
       const errorMsg =
         paymentError instanceof Error

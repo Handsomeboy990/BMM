@@ -119,7 +119,7 @@ export function EmergencyDetail({ id }: { id: string }) {
       <Card className="overflow-hidden">
         <div className="from-primary/15 flex flex-col gap-4 bg-gradient-to-br to-transparent p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <span className="bg-primary/10 text-primary flex size-16 items-center justify-center rounded-2xl text-xl font-bold">
+            <span className="bg-primary/10 text-primary flex size-16 items-center justify-center rounded-md text-xl font-bold">
               {emergency.bloodType}
             </span>
             <div className="space-y-1">
