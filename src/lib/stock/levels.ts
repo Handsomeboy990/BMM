@@ -14,6 +14,9 @@ export const STOCK_THRESHOLDS = {
 } as const;
 
 export function stockStatusOf(units: number): StockStatus {
+  // NaN et ±Infinity ne sont pas des quantités valides: un stock dont la
+  // valeur ne peut pas être comparée ne doit jamais sembler sain.
+  if (!Number.isFinite(units) || Number.isNaN(units)) return "critique";
   if (units < STOCK_THRESHOLDS.critical) return "critique";
   if (units < STOCK_THRESHOLDS.low) return "faible";
   return "stable";

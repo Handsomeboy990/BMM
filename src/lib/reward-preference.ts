@@ -41,6 +41,12 @@ export type RewardPreference = {
 
 const KEY_PREFIX = "bmm.reward-preference.";
 
+/** Valeurs autorisées pour `RewardMode` — liste exhaustive. */
+const VALID_REWARD_MODES: readonly RewardMode[] = [
+  "lightning",
+  "mobile-money",
+] as const;
+
 function keyFor(donorId: string): string {
   return `${KEY_PREFIX}${donorId}`;
 }
@@ -51,6 +57,9 @@ export function saveRewardPreference(
   preference: RewardPreference,
 ): void {
   if (typeof window === "undefined") return;
+  // R-5: un donorId vide produirait une clé générique "bmm.reward-preference."
+  // qui ne correspond à aucun donneur identifiable — on refuse silencieusement.
+  if (!donorId || !donorId.trim()) return;
   try {
     window.localStorage.setItem(keyFor(donorId), JSON.stringify(preference));
   } catch {
@@ -65,7 +74,11 @@ export function loadRewardPreference(donorId: string): RewardPreference | null {
     const raw = window.localStorage.getItem(keyFor(donorId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as RewardPreference;
-    return parsed.mode ? parsed : null;
+    // R-1: vérifier que `mode` est une valeur de l'union RewardMode, pas juste
+    // une chaîne truthy quelconque (ex: "bitcoin-on-chain" venu d'une ancienne
+    // version ou d'une API tierce).
+    if (!VALID_REWARD_MODES.includes(parsed.mode)) return null;
+    return parsed;
   } catch {
     return null;
   }

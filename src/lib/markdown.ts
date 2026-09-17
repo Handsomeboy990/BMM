@@ -51,8 +51,12 @@ export function renderInline(raw: string): string {
   );
 
   // Gras avant italique: sinon `**x**` serait mangé par la règle italique.
-  out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  out = out.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
+  // M-7: `(?:[^*]|\*(?!\*))+` autorise les `*` simples à l'intérieur du gras
+  // (ex: `**gras *et* italique**`) sans attraper le marqueur fermant `**`.
+  out = out.replace(/\*\*((?:[^*]|\*(?!\*))+)\*\*/g, "<strong>$1</strong>");
+  // Look-behind et look-ahead négatifs pour n'attraper que les `*` simples,
+  // pas ceux adjacents à un autre `*` (partie d'un marqueur gras).
+  out = out.replace(/(?<!\*)\*(?!\*)([^*]+)\*(?!\*)/g, "<em>$1</em>");
 
   return out;
 }
