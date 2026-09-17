@@ -126,12 +126,15 @@ export const transferService = {
         status: "acceptée",
       })
       .eq("id", id)
+      .eq("status", "ouverte")
       .select()
       .single();
 
     if (error || !data) {
       console.error("Error responding to transfer:", error);
-      throw new Error("Erreur lors de la réponse à la demande de transfert");
+      throw new Error(
+        "Cette demande de transfert n'est plus disponible (déjà acceptée, terminée ou annulée)",
+      );
     }
     return mapTransfer(data as TransferRow);
   },

@@ -101,8 +101,8 @@ export const matchingService = {
     const scoredResults: AIMatchingResult[] = candidates.map((d) => {
       const distance = haversineDistance(lat, lon, d.latitude, d.longitude);
 
-      // A. Score de distance (100 points max, -5 points par km de distance)
-      const distanceScore = Math.max(0, 100 - distance * 5);
+      // A. Score de distance (50 points max, -2.5 points par km de distance)
+      const distanceScore = Math.max(0, 50 - distance * 2.5);
 
       // B. Préservation des groupes sanguins rares (Poids de compatibilité parfaite)
       // Si le receveur est A+ et le donneur est A+, on préfère utiliser le A+ (+30 pts)
@@ -110,9 +110,9 @@ export const matchingService = {
       const isExactMatch = d.bloodType === requestedType;
       const bloodRarityWeight = isExactMatch ? 30 : 0;
 
-      // C. Bonus d'historique (+10 points par don validé, max 40 points)
+      // C. Bonus d'historique (+5 points par don validé, max 20 points)
       const historyCount = donationCounts[d.id] || 0;
-      const historyBonus = Math.min(40, historyCount * 10);
+      const historyBonus = Math.min(20, historyCount * 5);
 
       // D. Score d'urgence global
       const rawScore = distanceScore + bloodRarityWeight + historyBonus;
