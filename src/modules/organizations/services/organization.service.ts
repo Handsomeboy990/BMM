@@ -117,9 +117,31 @@ export const organizationService = {
 
   /**
    * Ajuste le solde de la structure. `amount` positif recharge, négatif débite.
-   * Le solde ne descend jamais sous zéro. Renvoie le nouveau solde, ou null.
+   * Le solde ne descend jamais sous zéro. Renvoie le nouveau solde, ou null
+   * si l'organisation n'existe pas. Toute autre situation anormale (montant
+   * invalide, solde insuffisant, conflit de concurrence, erreur DB) lève une
+   * erreur explicite plutôt que de renvoyer null, pour ne jamais confondre
+   * « organisation introuvable » avec un échec opérationnel.
    */
   adjustBalance: async (id: string, amount: number): Promise<number | null> => {
+    // `balance_sats` est une colonne INTEGER (satoshis) : on borne les
+    // montants acceptés à la plage signée 32 bits pour éviter qu'un montant
+    // hors limites échoue de façon opaque côté base de données.
+    const PG_INT32_MAX = 2147483647;
+
+    if (typeof id !== "string" || id.trim().length === 0) {
+      throw new Error("Identifiant d'organisation invalide");
+    }
+    if (!Number.isFinite(amount)) {
+      throw new Error("Montant invalide pour l'ajustement du solde");
+    }
+    if (!Number.isInteger(amount)) {
+      throw new Error("Le montant doit être un nombre entier de satoshis");
+    }
+    if (Math.abs(amount) > PG_INT32_MAX) {
+      throw new Error("Montant hors limites autorisées");
+    }
+
     const supabase =
       createSupabaseAdminClient() ?? (await createSupabaseServerClient());
     const { data: org } = await supabase
@@ -128,16 +150,37 @@ export const organizationService = {
       .eq("id", id)
       .maybeSingle();
     if (!org) return null;
-    const next = Math.max(0, (org.balance_sats ?? 0) + amount);
+
+    if (org.balance_sats === null || org.balance_sats === undefined) {
+      console.warn(
+        `Organisation ${id} : balance_sats est null/undefined en base, traité comme 0`,
+      );
+    }
+    const current = org.balance_sats ?? 0;
+
+    if (amount < 0 && current + amount < 0) {
+      throw new Error("Solde insuffisant pour effectuer ce débit");
+    }
+    const next = Math.max(0, current + amount);
+    if (next > PG_INT32_MAX) {
+      throw new Error("Solde maximum autorisé dépassé");
+    }
+
+    // Verrou optimiste : n'applique la mise à jour que si le solde n'a pas
+    // changé depuis la lecture, pour limiter la fenêtre de course sur deux
+    // débits concurrents.
     const { data: updated, error } = await supabase
       .from("organizations")
       .update({ balance_sats: next })
       .eq("id", id)
+      .eq("balance_sats", current)
       .select("balance_sats")
       .single();
     if (error || !updated) {
       console.error("Error adjusting organization balance:", error);
-      return null;
+      throw new Error(
+        "Impossible de mettre à jour le solde (conflit de concurrence ou erreur base de données), veuillez réessayer",
+      );
     }
     return updated.balance_sats;
   },

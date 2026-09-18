@@ -38,6 +38,9 @@ export function summarizeDonations(
     .filter((a) => a.activityType === "blood_donation")
     .map((a) => new Date(a.createdAt))
     .filter((d) => !Number.isNaN(d.getTime()))
+    // H-3: un don enregistré dans le futur ne peut pas servir de référence
+    // pour calculer la prochaine éligibilité: on l'écarte.
+    .filter((d) => d.getTime() <= now.getTime())
     .sort((a, b) => b.getTime() - a.getTime());
 
   const lastDonationAt = donations[0] ?? null;
@@ -74,5 +77,7 @@ const ACTIVITY_LABEL: Record<DonorActivity["activityType"], string> = {
 };
 
 export function activityLabel(type: DonorActivity["activityType"]): string {
-  return ACTIVITY_LABEL[type];
+  // H-1: si l'API introduit un nouveau type non encore listé ici, renvoyer
+  // la valeur brute plutôt que undefined (qui crasherait en template).
+  return ACTIVITY_LABEL[type] ?? type;
 }
